@@ -1,0 +1,47 @@
+// lib/screens/shares.dart
+import 'package:flutter/material.dart';
+import '../services/api_service.dart';
+
+class SharesScreen extends StatefulWidget {
+  const SharesScreen({super.key});
+
+  @override
+  State<SharesScreen> createState() => _SharesScreenState();
+}
+
+class _SharesScreenState extends State<SharesScreen> {
+  final api = ApiService(baseUrl: 'http://localhost:8000');
+  List shares = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchShares();
+  }
+
+  Future<void> fetchShares() async {
+    try {
+      final res = await api.callRpc('shares', 'list', {});
+      if (res is List) shares = res;
+      setState(() {});
+    } catch (e, st) {
+      debugPrint('ACL error: $e\n$st'); // or use logger}
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(title: Text('Shares')),
+        body: ListView.builder(
+          itemCount: shares.length,
+          itemBuilder: (_, i) {
+            final s = shares[i];
+            final name = (s is Map && s.containsKey('dataset'))
+                ? s['dataset']
+                : s.toString();
+            return ListTile(title: Text(name));
+          },
+        ));
+  }
+}

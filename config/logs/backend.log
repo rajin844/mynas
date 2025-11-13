@@ -1,0 +1,161 @@
+2025-11-12 22:06:00,430 [INFO] Initializing MyNAS backend system...
+2025-11-12 22:06:00,430 [INFO] Auto-registering RPC handlers...
+2025-11-12 22:06:00,430 [WARNING] Module acl has no register_rpc()
+2025-11-12 22:06:00,431 [WARNING] Module backup has no register_rpc()
+2025-11-12 22:06:00,431 [WARNING] Module monitoring has no register_rpc()
+2025-11-12 22:06:00,432 [ERROR] Failed to import RPC handler 'samba': No module named 'backend.ws_server'
+2025-11-12 22:06:00,432 [WARNING] Module shares has no register_rpc()
+2025-11-12 22:06:00,437 [INFO] RPC registered: storage (5 methods)
+2025-11-12 22:06:00,441 [INFO] Loaded RPC module: storage
+2025-11-12 22:06:00,441 [INFO] RPC handlers registered successfully.
+2025-11-12 22:06:00,441 [INFO] WebSocket manager registered.
+2025-11-12 22:06:38,426 [INFO] Initializing MyNAS backend system...
+2025-11-12 22:06:38,426 [INFO] Auto-registering RPC handlers...
+2025-11-12 22:06:38,426 [WARNING] Module acl has no register_rpc()
+2025-11-12 22:06:38,427 [WARNING] Module backup has no register_rpc()
+2025-11-12 22:06:38,427 [WARNING] Module monitoring has no register_rpc()
+2025-11-12 22:06:38,428 [ERROR] Failed to import RPC handler 'samba': No module named 'backend.ws_server'
+2025-11-12 22:06:38,428 [WARNING] Module shares has no register_rpc()
+2025-11-12 22:06:38,433 [INFO] RPC registered: storage (5 methods)
+2025-11-12 22:06:38,433 [INFO] Loaded RPC module: storage
+2025-11-12 22:06:38,433 [INFO] RPC handlers registered successfully.
+2025-11-12 22:06:38,433 [INFO] WebSocket manager registered.
+2025-11-12 22:06:38,434 [INFO] Monitoring loop started (interval=5s).
+2025-11-12 22:06:38,435 [INFO] MyNAS backend initialized successfully.
+2025-11-12 22:06:38,567 [ERROR] Server crash: No module named 'app'
+2025-11-12 22:06:38,567 [INFO] Backend terminated.
+2025-11-12 22:06:52,357 [INFO] Initializing MyNAS backend system...
+2025-11-12 22:06:52,357 [INFO] Auto-registering RPC handlers...
+2025-11-12 22:06:52,358 [WARNING] Module acl has no register_rpc()
+2025-11-12 22:06:52,358 [WARNING] Module backup has no register_rpc()
+2025-11-12 22:06:52,358 [WARNING] Module monitoring has no register_rpc()
+2025-11-12 22:06:52,359 [ERROR] Failed to import RPC handler 'samba': No module named 'backend.ws_server'
+2025-11-12 22:06:52,359 [WARNING] Module shares has no register_rpc()
+2025-11-12 22:06:52,364 [INFO] RPC registered: storage (5 methods)
+2025-11-12 22:06:52,365 [INFO] Loaded RPC module: storage
+2025-11-12 22:06:52,365 [INFO] RPC handlers registered successfully.
+2025-11-12 22:06:52,365 [INFO] WebSocket manager registered.
+2025-11-12 22:06:52,367 [INFO] Monitoring loop started (interval=5s).
+2025-11-12 22:06:52,367 [INFO] MyNAS backend initialized successfully.
+2025-11-12 22:06:52,499 [ERROR] Server crash: No module named 'app'
+2025-11-12 22:06:52,499 [INFO] Backend terminated.
+2025-11-12 22:08:55,994 [INFO] Initializing MyNAS backend system...
+2025-11-12 22:08:55,995 [INFO] Auto-registering RPC handlers...
+2025-11-12 22:08:55,996 [WARNING] Module acl has no register_rpc()
+2025-11-12 22:08:55,997 [WARNING] Module backup has no register_rpc()
+2025-11-12 22:08:55,997 [WARNING] Module monitoring has no register_rpc()
+2025-11-12 22:08:55,998 [ERROR] Failed to import RPC handler 'samba': No module named 'backend.ws_server'
+2025-11-12 22:08:55,999 [WARNING] Module shares has no register_rpc()
+2025-11-12 22:08:56,005 [INFO] RPC registered: storage (5 methods)
+2025-11-12 22:08:56,006 [INFO] Loaded RPC module: storage
+2025-11-12 22:08:56,006 [INFO] RPC handlers registered successfully.
+2025-11-12 22:08:56,007 [INFO] WebSocket manager registered.
+2025-11-12 22:08:56,163 [ERROR] Server crash: No module named 'app'
+2025-11-12 22:08:56,163 [INFO] Backend terminated.
+2025-11-12 22:10:34,546 [INFO] Initializing MyNAS backend system...
+2025-11-12 22:10:34,547 [INFO] Auto-registering RPC handlers...
+2025-11-12 22:10:34,547 [WARNING] Module acl has no register_rpc()
+2025-11-12 22:10:34,548 [WARNING] Module backup has no register_rpc()
+2025-11-12 22:10:34,548 [WARNING] Module monitoring has no register_rpc()
+2025-11-12 22:10:34,549 [ERROR] Failed to import RPC handler 'samba': No module named 'backend.ws_server'
+2025-11-12 22:10:34,550 [WARNING] Module shares has no register_rpc()
+2025-11-12 22:10:34,556 [INFO] RPC registered: storage (5 methods)
+2025-11-12 22:10:34,556 [INFO] Loaded RPC module: storage
+2025-11-12 22:10:34,557 [INFO] RPC handlers registered successfully.
+2025-11-12 22:10:34,557 [INFO] WebSocket manager registered.
+2025-11-12 22:10:34,696 [ERROR] Server crash: No module named 'app'
+2025-11-12 22:10:34,696 [INFO] Backend terminated.
+2025-11-12 22:13:01,417 [INFO] Initializing MyNAS backend system...
+2025-11-12 22:13:01,417 [INFO] Auto-registering RPC handlers...
+2025-11-12 22:13:01,418 [WARNING] Module acl has no register_rpc()
+2025-11-12 22:13:01,418 [WARNING] Module backup has no register_rpc()
+2025-11-12 22:13:01,418 [WARNING] Module monitoring has no register_rpc()
+2025-11-12 22:13:01,419 [ERROR] Failed to import RPC handler 'samba': No module named 'backend.ws_server'
+2025-11-12 22:13:01,420 [WARNING] Module shares has no register_rpc()
+2025-11-12 22:13:01,424 [INFO] RPC registered: storage (5 methods)
+2025-11-12 22:13:01,425 [INFO] Loaded RPC module: storage
+2025-11-12 22:13:01,425 [INFO] RPC handlers registered successfully.
+2025-11-12 22:13:01,425 [INFO] WebSocket manager registered.
+2025-11-12 22:13:01,554 [INFO] === Starting MyNAS backend services ===
+2025-11-12 22:13:01,646 [INFO] ✅ Detected ZFS pools: {'config_pools': [{'name': 'tank', 'devices': ['sdb']}], 'zpool_list': [{'name': 'main', 'health': 'ONLINE'}], 'importable_pools': []}
+2025-11-12 22:13:01,646 [INFO] Loaded 0 shares from config.
+2025-11-12 22:13:01,646 [INFO] ✅ Shares loaded successfully.
+2025-11-12 22:13:01,647 [INFO] Auto-registering RPC handlers...
+2025-11-12 22:13:01,647 [WARNING] Module acl has no register_rpc()
+2025-11-12 22:13:01,647 [WARNING] Module backup has no register_rpc()
+2025-11-12 22:13:01,647 [WARNING] Module monitoring has no register_rpc()
+2025-11-12 22:13:01,648 [ERROR] Failed to import RPC handler 'samba': No module named 'backend.ws_server'
+2025-11-12 22:13:01,648 [WARNING] Module shares has no register_rpc()
+2025-11-12 22:13:01,649 [INFO] RPC registered: storage (5 methods)
+2025-11-12 22:13:01,649 [INFO] Loaded RPC module: storage
+2025-11-12 22:13:01,649 [INFO] ✅ RPC handlers registered
+2025-11-12 22:13:01,649 [INFO] ✅ WebSocket manager configured
+2025-11-12 22:13:01,649 [INFO] === Backend startup complete ===
+2025-11-12 22:18:18,816 [INFO] === Starting MyNAS backend services ===
+2025-11-12 22:18:18,910 [INFO] ✅ Detected ZFS pools: {'config_pools': [{'name': 'tank', 'devices': ['sdb']}], 'zpool_list': [{'name': 'main', 'health': 'ONLINE'}], 'importable_pools': []}
+2025-11-12 22:18:18,910 [INFO] Loaded 0 shares from config.
+2025-11-12 22:18:18,911 [INFO] ✅ Shares loaded successfully.
+2025-11-12 22:18:18,911 [INFO] Auto-registering RPC handlers...
+2025-11-12 22:18:18,912 [WARNING] Module acl has no register_rpc()
+2025-11-12 22:18:18,913 [WARNING] Module backup has no register_rpc()
+2025-11-12 22:18:18,913 [WARNING] Module monitoring has no register_rpc()
+2025-11-12 22:18:18,915 [ERROR] Failed to import RPC handler 'samba': No module named 'backend.ws_server'
+2025-11-12 22:18:18,916 [WARNING] Module shares has no register_rpc()
+2025-11-12 22:18:18,925 [INFO] RPC registered: storage (5 methods)
+2025-11-12 22:18:18,925 [INFO] Loaded RPC module: storage
+2025-11-12 22:18:18,926 [INFO] ✅ RPC handlers registered
+2025-11-12 22:18:18,926 [INFO] ✅ WebSocket manager configured
+2025-11-12 22:18:18,926 [INFO] === Backend startup complete ===
+2025-11-12 22:19:05,568 [INFO] === Starting MyNAS backend services ===
+2025-11-12 22:19:05,660 [INFO] ✅ Detected ZFS pools: {'config_pools': [{'name': 'tank', 'devices': ['sdb']}], 'zpool_list': [{'name': 'main', 'health': 'ONLINE'}], 'importable_pools': []}
+2025-11-12 22:19:05,660 [INFO] Loaded 0 shares from config.
+2025-11-12 22:19:05,661 [INFO] ✅ Shares loaded successfully.
+2025-11-12 22:19:05,661 [INFO] Auto-registering RPC handlers...
+2025-11-12 22:19:05,661 [WARNING] Module acl has no register_rpc()
+2025-11-12 22:19:05,661 [WARNING] Module backup has no register_rpc()
+2025-11-12 22:19:05,662 [WARNING] Module monitoring has no register_rpc()
+2025-11-12 22:19:05,662 [ERROR] Failed to import RPC handler 'samba': No module named 'backend.ws_server'
+2025-11-12 22:19:05,662 [WARNING] Module shares has no register_rpc()
+2025-11-12 22:19:05,667 [INFO] RPC registered: storage (5 methods)
+2025-11-12 22:19:05,667 [INFO] Loaded RPC module: storage
+2025-11-12 22:19:05,667 [INFO] ✅ RPC handlers registered
+2025-11-12 22:19:05,668 [INFO] ✅ WebSocket manager configured
+2025-11-12 22:19:05,668 [INFO] === Backend startup complete ===
+2025-11-12 22:19:22,790 [INFO] === Starting MyNAS backend services ===
+2025-11-12 22:19:22,883 [INFO] ✅ Detected ZFS pools: {'config_pools': [{'name': 'tank', 'devices': ['sdb']}], 'zpool_list': [{'name': 'main', 'health': 'ONLINE'}], 'importable_pools': []}
+2025-11-12 22:19:22,884 [INFO] Loaded 0 shares from config.
+2025-11-12 22:19:22,884 [INFO] ✅ Shares loaded successfully.
+2025-11-12 22:19:22,884 [INFO] Auto-registering RPC handlers...
+2025-11-12 22:19:22,885 [WARNING] Module acl has no register_rpc()
+2025-11-12 22:19:22,885 [WARNING] Module backup has no register_rpc()
+2025-11-12 22:19:22,886 [WARNING] Module monitoring has no register_rpc()
+2025-11-12 22:19:22,887 [ERROR] Failed to import RPC handler 'samba': No module named 'backend.ws_server'
+2025-11-12 22:19:22,889 [WARNING] Module shares has no register_rpc()
+2025-11-12 22:19:22,896 [INFO] RPC registered: storage (5 methods)
+2025-11-12 22:19:22,896 [INFO] Loaded RPC module: storage
+2025-11-12 22:19:22,897 [INFO] ✅ RPC handlers registered
+2025-11-12 22:19:22,897 [INFO] ✅ WebSocket manager configured
+2025-11-12 22:19:22,897 [INFO] === Backend startup complete ===
+2025-11-12 22:19:22,900 [INFO] 🛑 MyNAS Backend Shutting down...
+2025-11-12 22:19:43,673 [INFO] === Starting MyNAS backend services ===
+2025-11-12 22:19:43,767 [INFO] ✅ Detected ZFS pools: {'config_pools': [{'name': 'tank', 'devices': ['sdb']}], 'zpool_list': [{'name': 'main', 'health': 'ONLINE'}], 'importable_pools': []}
+2025-11-12 22:19:43,767 [INFO] Loaded 0 shares from config.
+2025-11-12 22:19:43,767 [INFO] ✅ Shares loaded successfully.
+2025-11-12 22:19:43,767 [INFO] Auto-registering RPC handlers...
+2025-11-12 22:19:43,768 [WARNING] Module acl has no register_rpc()
+2025-11-12 22:19:43,768 [WARNING] Module backup has no register_rpc()
+2025-11-12 22:19:43,769 [WARNING] Module monitoring has no register_rpc()
+2025-11-12 22:19:43,771 [ERROR] Failed to import RPC handler 'samba': No module named 'backend.ws_server'
+2025-11-12 22:19:43,771 [WARNING] Module shares has no register_rpc()
+2025-11-12 22:19:43,778 [INFO] RPC registered: storage (5 methods)
+2025-11-12 22:19:43,778 [INFO] Loaded RPC module: storage
+2025-11-12 22:19:43,778 [INFO] ✅ RPC handlers registered
+2025-11-12 22:19:43,778 [INFO] ✅ WebSocket manager configured
+2025-11-12 22:19:43,779 [INFO] === Backend startup complete ===
+2025-11-12 22:26:41,958 [INFO] Configuration saved successfully.
+2025-11-12 22:26:42,437 [INFO] Configuration saved successfully.
+2025-11-12 22:26:42,636 [INFO] Configuration saved successfully.
+2025-11-12 22:26:42,931 [INFO] Configuration saved successfully.
+2025-11-12 22:26:43,141 [INFO] Configuration saved successfully.
+2025-11-12 22:26:43,400 [INFO] Configuration saved successfully.
+2025-11-12 22:26:43,610 [INFO] Configuration saved successfully.

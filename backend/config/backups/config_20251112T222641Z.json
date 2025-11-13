@@ -1,0 +1,18 @@
+{
+  "system": {
+    "hostname": "mynas",
+    "version": "1.0.0",
+    "timezone": "UTC"
+  },
+  "users": [
+    { "username": "admin", "role": "admin" }
+  ],
+  "storage": {
+    "pools": [{ "name": "tank", "devices": ["sdb"] }],
+    "datasets": []
+  },
+  "shares": [],
+  "acl": [],
+  "network": { "interfaces": [], "dns": [] },
+  "backups": []
+}

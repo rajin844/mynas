@@ -1,0 +1,88 @@
+import 'package:flutter/material.dart';
+import '../services/api_service.dart';
+
+class NetworkScreen extends StatefulWidget {
+  const NetworkScreen({super.key});
+
+  @override
+  State<NetworkScreen> createState() => _NetworkScreenState();
+}
+
+class _NetworkScreenState extends State<NetworkScreen> {
+  final ApiService apiService = ApiService(baseUrl: "http://localhost:8000");
+  List<Map<String, dynamic>> interfaces = [];
+  bool loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    loadInterfaces();
+  }
+
+  Future<void> loadInterfaces() async {
+    try {
+      var res = await apiService.callRpc("NETWORK", "listInterfaces", {});
+      if (res is List) {
+        interfaces = res.map((e) => Map<String, dynamic>.from(e)).toList();
+      } else if (res is Map) {
+        interfaces = [Map<String, dynamic>.from(res)];
+      }
+    } catch (e) {
+      debugPrint("Error loading interfaces: $e");
+    }
+
+    setState(() => loading = false);
+  }
+
+  Future<void> updateInterface(String name, String ip) async {
+    try {
+      await apiService.callRpc("NETWORK", "updateInterface", {
+        "name": name,
+        "ip": ip,
+      });
+      if (!mounted) return;
+      Navigator.of(context).pop();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Interface updated successfully")),
+      );
+      loadInterfaces();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: $e")),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Network Interfaces")),
+      body: loading
+          ? const Center(child: CircularProgressIndicator())
+          : RefreshIndicator(
+              onRefresh: loadInterfaces,
+              child: ListView.builder(
+                itemCount: interfaces.length,
+                itemBuilder: (context, index) {
+                  final iface = interfaces[index];
+                  final TextEditingController ipController =
+                      TextEditingController(text: iface["ip"] ?? "");
+                  return Card(
+                    margin: const EdgeInsets.all(8),
+                    child: ListTile(
+                      title: Text(iface["name"] ?? "Unknown Interface"),
+                      subtitle: Text("IP: ${iface["ip"] ?? "N/A"}"),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.save),
+                        onPressed: () =>
+                            updateInterface(iface["name"], ipController.text),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+    );
+  }
+}

@@ -1,0 +1,22 @@
+name: frontend_flutter
+description: MyNAS Flutter frontend (placeholder)
+version: 0.1.0
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  http: ^1.5.0
+  web_socket_channel: ^3.0.3
+  provider: ^6.0.0
+  fluttertoast: ^9.0.0
+  flutter_lints: ^6.0.0
+  
+
+dependency_overrides:
+  characters: ^1.4.1
+  material_color_utilities: ^0.13.0
+  meta: ^1.17.0
+
