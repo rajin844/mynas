@@ -1,4 +1,3 @@
-// lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -24,6 +23,7 @@ import 'pages/monitoring_page.dart';
 import 'pages/settings_page.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyNASApp());
 }
 
@@ -33,13 +33,13 @@ class MyNASApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final api = ApiService();
-    final ws = WebSocketService();
-    ws.connect(); // start websocket connection
+    final ws = WebSocketService(apiBasePort: 6789);
+    ws.connect(); // start websocket in background
 
     return MultiProvider(
       providers: [
         Provider<ApiService>.value(value: api),
-        Provider<WebSocketService>.value(value: ws),
+        ChangeNotifierProvider<WebSocketService>.value(value: ws),
         ChangeNotifierProvider(create: (_) => ZfsProvider(api: api)),
         ChangeNotifierProvider(create: (_) => SharesProvider(api: api)),
         ChangeNotifierProvider(create: (_) => MonitoringProvider(api: api)),

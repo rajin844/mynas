@@ -21,7 +21,9 @@ import asyncio
 import logging
 import uvicorn
 from pathlib import Path
-
+import subprocess
+import threading
+import os
 # --- Import app core ---
 from backend.app.main import app, ws_manager
 #from backend.app.plugin_manager import load_all as load_plugins
@@ -44,6 +46,49 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger("mynas.run_backend")
+
+def get_flutter_path():
+    """
+    Detect correct Flutter path for both:
+    - VS Code workspace (/mynas)
+    - Ubuntu real path (/root/mynas)
+    """
+    # Folder if running inside VS Code / Dev-Container
+    vscode_path = Path("/mynas/frontend_flutter")
+
+    # Folder if running normally on Ubuntu
+    ubuntu_path = Path("/root/mynas/frontend_flutter")
+
+    # Auto-detect based on existence
+    if vscode_path.exists() and (vscode_path / "pubspec.yaml").exists():
+        return vscode_path
+
+    if ubuntu_path.exists() and (ubuntu_path / "pubspec.yaml").exists():
+        return ubuntu_path
+
+    return None
+
+def run_flutter():
+    flutter_project = get_flutter_path()
+
+    if flutter_project is None:
+        print("❌ Flutter project not found at /mynas or /root/mynas")
+        return
+
+    print("🔵 Flutter project found:", flutter_project)
+
+    os.chdir(str(flutter_project))
+
+    cmd = [
+        "flutter", "run",
+        "-d", "web-server"
+    ]
+
+    try:
+        subprocess.run(cmd)
+    except KeyboardInterrupt:
+        print("\n🛑 Flutter stopped by user.")
+
 
 
 async def initialize_system():
@@ -88,6 +133,11 @@ def main():
     print(f"→ Host: {args.host}:{args.port}")
     print(f"→ Log:  {LOG_FILE}")
     print("=" * 60)
+
+     # Launch Flutter in a parallel thread
+    flutter_thread = threading.Thread(target=run_flutter, daemon=True)
+    flutter_thread.start()
+
 
     # Run initialization before starting FastAPI
     loop = asyncio.new_event_loop()

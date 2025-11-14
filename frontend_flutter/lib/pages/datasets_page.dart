@@ -1,11 +1,9 @@
-// lib/pages/datasets_page.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/zfs_provider.dart';
 
 class DatasetsPage extends StatefulWidget {
   const DatasetsPage({super.key});
-
   @override
   State<DatasetsPage> createState() => _DatasetsPageState();
 }
@@ -16,7 +14,11 @@ class _DatasetsPageState extends State<DatasetsPage> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => context.read<ZfsProvider>().loadPools());
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<ZfsProvider>().loadPools();
+    });
   }
 
   @override
@@ -28,45 +30,40 @@ class _DatasetsPageState extends State<DatasetsPage> {
       appBar: AppBar(title: const Text('Datasets')),
       body: Padding(
         padding: const EdgeInsets.all(12),
-        child: Column(
-          children: [
-            DropdownButtonFormField<String>(
-              initialValue: _selectedPool,
-              items: pools
-                  .map<DropdownMenuItem<String>>((p) => DropdownMenuItem(
-                      value: p['name'], child: Text(p['name'])))
-                  .toList(),
-              hint: const Text('Select pool'),
-              onChanged: (v) async {
-                setState(() => _selectedPool = v);
-                if (v != null) {
-                  await context.read<ZfsProvider>().loadDatasets(v);
-                }
-              },
-            ),
-            const SizedBox(height: 12),
-            ElevatedButton(
+        child: Column(children: [
+          DropdownButtonFormField<String>(
+            initialValue: _selectedPool,
+            items: pools
+                .map<DropdownMenuItem<String>>((p) =>
+                    DropdownMenuItem(value: p['name'], child: Text(p['name'])))
+                .toList(),
+            hint: const Text('Select pool'),
+            onChanged: (v) async {
+              setState(() => _selectedPool = v);
+              if (v != null) {
+                await context.read<ZfsProvider>().loadDatasets(v);
+              }
+            },
+          ),
+          const SizedBox(height: 12),
+          ElevatedButton(
               onPressed: _selectedPool == null
                   ? null
                   : () => _showCreateDatasetDialog(context, _selectedPool!),
-              child: const Text('Create Dataset'),
-            ),
-            const SizedBox(height: 12),
-            Expanded(
+              child: const Text('Create Dataset')),
+          const SizedBox(height: 12),
+          Expanded(
               child: ListView(
-                children: (_selectedPool == null
-                        ? []
-                        : (zfs.datasets[_selectedPool] ?? []))
-                    .map((d) => Card(
-                            child: ListTile(
-                          title: Text(d['name']),
-                          subtitle: Text('mount: ${d['mountpoint']}'),
-                        )))
-                    .toList(),
-              ),
-            ),
-          ],
-        ),
+                  children: (_selectedPool == null
+                          ? []
+                          : (zfs.datasets[_selectedPool] ?? []))
+                      .map((d) => Card(
+                          child: ListTile(
+                              title: Text(d['name'] ?? ''),
+                              subtitle:
+                                  Text('mount: ${d['mountpoint'] ?? ''}'))))
+                      .toList()))
+        ]),
       ),
     );
   }
@@ -77,7 +74,7 @@ class _DatasetsPageState extends State<DatasetsPage> {
 
     showDialog(
         context: ctx,
-        builder: (context) {
+        builder: (_) {
           return AlertDialog(
             title: const Text('Create Dataset'),
             content: Column(mainAxisSize: MainAxisSize.min, children: [
@@ -91,7 +88,7 @@ class _DatasetsPageState extends State<DatasetsPage> {
             ]),
             actions: [
               TextButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () => Navigator.pop(ctx),
                   child: const Text('Cancel')),
               ElevatedButton(
                   onPressed: () async {
@@ -104,13 +101,15 @@ class _DatasetsPageState extends State<DatasetsPage> {
                       await context
                           .read<ZfsProvider>()
                           .createDataset(pool, name, mountpoint: mount);
-                      ScaffoldMessenger.of(context).showSnackBar(
+                      if (!context.mounted) return;
+                      Navigator.pop(ctx);
+                      ScaffoldMessenger.of(ctx).showSnackBar(
                           const SnackBar(content: Text('Dataset created')));
                     } catch (e) {
-                      ScaffoldMessenger.of(context)
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(ctx)
                           .showSnackBar(SnackBar(content: Text('Error: $e')));
                     }
-                    Navigator.pop(context);
                   },
                   child: const Text('Create'))
             ],

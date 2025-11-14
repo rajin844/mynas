@@ -12,9 +12,9 @@ class MonitoringProvider extends ChangeNotifier {
 
   Future<void> refresh() async {
     final res = await api.getMetrics();
-    cpu = (res['cpu'] as num).toDouble();
-    ram = (res['memory'] as num).toDouble();
-    disk = (res['disk'] as num).toDouble();
+    cpu = (res['cpu'] as num?)?.toDouble() ?? 0;
+    ram = (res['memory'] as num?)?.toDouble() ?? 0;
+    disk = (res['disk'] as num?)?.toDouble() ?? 0;
     notifyListeners();
   }
 

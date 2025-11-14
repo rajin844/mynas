@@ -13,24 +13,23 @@ class ZfsProvider extends ChangeNotifier {
       pools = await api.listPools();
       notifyListeners();
     } catch (e) {
-      // rethrow or handle
       rethrow;
     }
   }
 
   Future<void> loadDatasets(String pool) async {
-    final ds = await api.listDatasets(pool);
-    datasets[pool] = List.from(ds);
-    notifyListeners();
+    try {
+      final ds = await api.listDatasets(pool);
+      datasets[pool] = List.from(ds);
+      notifyListeners();
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<void> createDataset(String pool, String name,
       {String? mountpoint}) async {
-    await api.createDataset(
-      pool,
-      name,
-      mountpoint: mountpoint,
-    );
+    await api.createDataset(pool, name, mountpoint: mountpoint);
     await loadDatasets(pool);
   }
 }

@@ -2,30 +2,64 @@
   "system": {
     "hostname": "mynas",
     "version": "1.0.0",
-    "timezone": "UTC"
+    "timezone": "Asia/Kolkata"
   },
   "users": [
     {
       "username": "admin",
-      "role": "admin"
+      "role": "admin",
+      "password": "admin"
     }
   ],
   "storage": {
     "pools": [
       {
-        "name": "tank",
+        "name": "main",
+        "type": "zfs",
         "devices": [
-          "sdb"
+          "/dev/sdb"
         ]
       }
     ],
-    "datasets": []
+    "datasets": [
+      {
+        "pool": "main",
+        "name": "allos",
+        "mountpoint": "/main/allos"
+      }
+    ]
   },
-  "shares": [],
+  "shares": {
+    "samba": [
+      {
+        "name": "Public",
+        "path": "/mnt/data/os",
+        "guest_ok": true
+      }
+    ],
+    "nfs": [
+      {
+        "name": "Backup",
+        "path": "/mnt/data/nfsdata",
+        "network": "192.168.1.0/24"
+      }
+    ]
+  },
   "acl": [],
   "network": {
-    "interfaces": [],
-    "dns": []
+    "interfaces": [
+      {
+        "name": "eth0",
+        "ip": "192.168.1.2",
+        "dhcp": false
+      }
+    ]
   },
-  "backups": []
+  "backups": [
+    {
+      "name": "daily_backup",
+      "schedule": "02:00",
+      "target": "/mnt/data/backups"
+    }
+  ]
 }

@@ -10,10 +10,10 @@
   },
   "storage": {
     "pools": [
-      { "name": "tank", "type": "zfs", "devices": ["/dev/sda", "/dev/sdb"] }
+      { "name": "main", "type": "zfs", "devices": ["/dev/sdb", "/dev/sdb"] }
     ],
     "datasets": [
-      { "pool": "tank", "name": "media", "mountpoint": "/mnt/tank/media" }
+      { "pool": "main", "name": "allos", "mountpoint": "/mnt/tank/media" }
     ]
   },
   "shares": {

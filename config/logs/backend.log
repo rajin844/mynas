@@ -159,3 +159,1628 @@
 2025-11-12 22:26:43,141 [INFO] Configuration saved successfully.
 2025-11-12 22:26:43,400 [INFO] Configuration saved successfully.
 2025-11-12 22:26:43,610 [INFO] Configuration saved successfully.
+2025-11-14 09:32:51,622 [INFO] Initializing MyNAS backend system...
+2025-11-14 09:32:51,643 [INFO] Auto-registering RPC handlers...
+2025-11-14 09:32:51,645 [INFO] RPC registered: acl (3 methods)
+2025-11-14 09:32:51,646 [INFO] Loaded RPC module: acl
+2025-11-14 09:32:51,646 [INFO] RPC registered: backup (4 methods)
+2025-11-14 09:32:51,646 [INFO] Loaded RPC module: backup
+2025-11-14 09:32:51,647 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 09:32:51,647 [INFO] Loaded RPC module: monitoring
+2025-11-14 09:32:51,667 [WARNING] Module network has no register_rpc()
+2025-11-14 09:32:51,669 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 09:32:51,669 [INFO] Loaded RPC module: nfs
+2025-11-14 09:32:51,673 [INFO] RPC registered: samba (2 methods)
+2025-11-14 09:32:51,675 [INFO] Loaded RPC module: samba
+2025-11-14 09:32:51,677 [INFO] RPC registered: shares (5 methods)
+2025-11-14 09:32:51,680 [INFO] Loaded RPC module: shares
+2025-11-14 09:32:51,689 [INFO] RPC registered: storage (5 methods)
+2025-11-14 09:32:51,692 [INFO] Loaded RPC module: storage
+2025-11-14 09:32:51,693 [WARNING] Module system has no register_rpc()
+2025-11-14 09:32:51,695 [INFO] RPC handlers registered successfully.
+2025-11-14 09:32:51,697 [INFO] WebSocket manager registered.
+2025-11-14 09:32:51,697 [INFO] MyNAS backend initialized successfully.
+2025-11-14 09:32:51,926 [INFO] === Starting MyNAS backend services ===
+2025-11-14 09:32:52,063 [INFO] ✅ Detected ZFS pools: {'config_pools': [{'name': 'tank', 'devices': ['sdb']}], 'zpool_list': [{'name': 'main', 'health': 'ONLINE'}], 'importable_pools': []}
+2025-11-14 09:32:52,087 [INFO] Loaded 0 shares from config.
+2025-11-14 09:32:52,090 [INFO] ✅ Shares loaded successfully.
+2025-11-14 09:32:52,090 [INFO] Auto-registering RPC handlers...
+2025-11-14 09:32:52,091 [INFO] RPC registered: acl (3 methods)
+2025-11-14 09:32:52,091 [INFO] Loaded RPC module: acl
+2025-11-14 09:32:52,091 [INFO] RPC registered: backup (4 methods)
+2025-11-14 09:32:52,091 [INFO] Loaded RPC module: backup
+2025-11-14 09:32:52,091 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 09:32:52,091 [INFO] Loaded RPC module: monitoring
+2025-11-14 09:32:52,092 [WARNING] Module network has no register_rpc()
+2025-11-14 09:32:52,092 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 09:32:52,092 [INFO] Loaded RPC module: nfs
+2025-11-14 09:32:52,092 [INFO] RPC registered: samba (2 methods)
+2025-11-14 09:32:52,093 [INFO] Loaded RPC module: samba
+2025-11-14 09:32:52,094 [INFO] RPC registered: shares (5 methods)
+2025-11-14 09:32:52,094 [INFO] Loaded RPC module: shares
+2025-11-14 09:32:52,094 [INFO] RPC registered: storage (5 methods)
+2025-11-14 09:32:52,094 [INFO] Loaded RPC module: storage
+2025-11-14 09:32:52,094 [WARNING] Module system has no register_rpc()
+2025-11-14 09:32:52,094 [INFO] ✅ RPC handlers registered
+2025-11-14 09:32:52,094 [INFO] ✅ WebSocket manager configured
+2025-11-14 09:32:52,094 [INFO] === Backend startup complete ===
+2025-11-14 09:35:42,476 [INFO] Initializing MyNAS backend system...
+2025-11-14 09:35:42,476 [INFO] Auto-registering RPC handlers...
+2025-11-14 09:35:42,477 [INFO] RPC registered: acl (3 methods)
+2025-11-14 09:35:42,477 [INFO] Loaded RPC module: acl
+2025-11-14 09:35:42,477 [INFO] RPC registered: backup (4 methods)
+2025-11-14 09:35:42,478 [INFO] Loaded RPC module: backup
+2025-11-14 09:35:42,478 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 09:35:42,478 [INFO] Loaded RPC module: monitoring
+2025-11-14 09:35:42,479 [WARNING] Module network has no register_rpc()
+2025-11-14 09:35:42,480 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 09:35:42,480 [INFO] Loaded RPC module: nfs
+2025-11-14 09:35:42,481 [INFO] RPC registered: samba (2 methods)
+2025-11-14 09:35:42,483 [INFO] Loaded RPC module: samba
+2025-11-14 09:35:42,483 [INFO] RPC registered: shares (5 methods)
+2025-11-14 09:35:42,483 [INFO] Loaded RPC module: shares
+2025-11-14 09:35:42,496 [INFO] RPC registered: storage (5 methods)
+2025-11-14 09:35:42,496 [INFO] Loaded RPC module: storage
+2025-11-14 09:35:42,496 [WARNING] Module system has no register_rpc()
+2025-11-14 09:35:42,497 [INFO] RPC handlers registered successfully.
+2025-11-14 09:35:42,497 [INFO] WebSocket manager registered.
+2025-11-14 09:35:42,497 [INFO] MyNAS backend initialized successfully.
+2025-11-14 09:35:42,662 [INFO] === Starting MyNAS backend services ===
+2025-11-14 09:35:42,930 [INFO] ✅ Detected ZFS pools: {'config_pools': [{'name': 'tank', 'devices': ['sdb']}], 'zpool_list': [{'name': 'main', 'health': 'ONLINE'}], 'importable_pools': []}
+2025-11-14 09:35:42,930 [INFO] Loaded 0 shares from config.
+2025-11-14 09:35:42,932 [INFO] ✅ Shares loaded successfully.
+2025-11-14 09:35:42,932 [INFO] Auto-registering RPC handlers...
+2025-11-14 09:35:42,935 [INFO] RPC registered: acl (3 methods)
+2025-11-14 09:35:42,935 [INFO] Loaded RPC module: acl
+2025-11-14 09:35:42,935 [INFO] RPC registered: backup (4 methods)
+2025-11-14 09:35:42,935 [INFO] Loaded RPC module: backup
+2025-11-14 09:35:42,935 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 09:35:42,935 [INFO] Loaded RPC module: monitoring
+2025-11-14 09:35:42,935 [WARNING] Module network has no register_rpc()
+2025-11-14 09:35:42,935 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 09:35:42,936 [INFO] Loaded RPC module: nfs
+2025-11-14 09:35:42,936 [INFO] RPC registered: samba (2 methods)
+2025-11-14 09:35:42,936 [INFO] Loaded RPC module: samba
+2025-11-14 09:35:42,937 [INFO] RPC registered: shares (5 methods)
+2025-11-14 09:35:42,937 [INFO] Loaded RPC module: shares
+2025-11-14 09:35:42,937 [INFO] RPC registered: storage (5 methods)
+2025-11-14 09:35:42,937 [INFO] Loaded RPC module: storage
+2025-11-14 09:35:42,937 [WARNING] Module system has no register_rpc()
+2025-11-14 09:35:42,937 [INFO] ✅ RPC handlers registered
+2025-11-14 09:35:42,937 [INFO] ✅ WebSocket manager configured
+2025-11-14 09:35:42,937 [INFO] === Backend startup complete ===
+2025-11-14 09:41:16,249 [INFO] Initializing MyNAS backend system...
+2025-11-14 09:41:16,251 [INFO] Auto-registering RPC handlers...
+2025-11-14 09:41:16,255 [INFO] RPC registered: acl (3 methods)
+2025-11-14 09:41:16,258 [INFO] Loaded RPC module: acl
+2025-11-14 09:41:16,258 [INFO] RPC registered: backup (4 methods)
+2025-11-14 09:41:16,260 [INFO] Loaded RPC module: backup
+2025-11-14 09:41:16,260 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 09:41:16,260 [INFO] Loaded RPC module: monitoring
+2025-11-14 09:41:16,261 [WARNING] Module network has no register_rpc()
+2025-11-14 09:41:16,261 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 09:41:16,267 [INFO] Loaded RPC module: nfs
+2025-11-14 09:41:16,268 [INFO] RPC registered: samba (2 methods)
+2025-11-14 09:41:16,271 [INFO] Loaded RPC module: samba
+2025-11-14 09:41:16,271 [INFO] RPC registered: shares (5 methods)
+2025-11-14 09:41:16,271 [INFO] Loaded RPC module: shares
+2025-11-14 09:41:16,280 [INFO] RPC registered: storage (5 methods)
+2025-11-14 09:41:16,284 [INFO] Loaded RPC module: storage
+2025-11-14 09:41:16,285 [WARNING] Module system has no register_rpc()
+2025-11-14 09:41:16,285 [INFO] RPC handlers registered successfully.
+2025-11-14 09:41:16,285 [INFO] WebSocket manager registered.
+2025-11-14 09:41:16,285 [INFO] MyNAS backend initialized successfully.
+2025-11-14 09:41:16,463 [INFO] === Starting MyNAS backend services ===
+2025-11-14 09:41:16,578 [INFO] ✅ Detected ZFS pools: {'config_pools': [{'name': 'tank', 'devices': ['sdb']}], 'zpool_list': [{'name': 'main', 'health': 'ONLINE'}], 'importable_pools': []}
+2025-11-14 09:41:16,579 [INFO] Loaded 0 shares from config.
+2025-11-14 09:41:16,583 [INFO] ✅ Shares loaded successfully.
+2025-11-14 09:41:16,584 [INFO] Auto-registering RPC handlers...
+2025-11-14 09:41:16,585 [INFO] RPC registered: acl (3 methods)
+2025-11-14 09:41:16,585 [INFO] Loaded RPC module: acl
+2025-11-14 09:41:16,585 [INFO] RPC registered: backup (4 methods)
+2025-11-14 09:41:16,586 [INFO] Loaded RPC module: backup
+2025-11-14 09:41:16,586 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 09:41:16,586 [INFO] Loaded RPC module: monitoring
+2025-11-14 09:41:16,587 [WARNING] Module network has no register_rpc()
+2025-11-14 09:41:16,587 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 09:41:16,588 [INFO] Loaded RPC module: nfs
+2025-11-14 09:41:16,588 [INFO] RPC registered: samba (2 methods)
+2025-11-14 09:41:16,588 [INFO] Loaded RPC module: samba
+2025-11-14 09:41:16,588 [INFO] RPC registered: shares (5 methods)
+2025-11-14 09:41:16,589 [INFO] Loaded RPC module: shares
+2025-11-14 09:41:16,589 [INFO] RPC registered: storage (5 methods)
+2025-11-14 09:41:16,590 [INFO] Loaded RPC module: storage
+2025-11-14 09:41:16,590 [WARNING] Module system has no register_rpc()
+2025-11-14 09:41:16,590 [INFO] ✅ RPC handlers registered
+2025-11-14 09:41:16,591 [INFO] ✅ WebSocket manager configured
+2025-11-14 09:41:16,592 [INFO] === Backend startup complete ===
+2025-11-14 09:44:14,756 [INFO] Configuration saved successfully.
+2025-11-14 09:44:23,126 [INFO] Configuration saved successfully.
+2025-11-14 09:49:29,384 [INFO] 🛑 MyNAS Backend Shutting down...
+2025-11-14 09:49:29,385 [INFO] Backend terminated.
+2025-11-14 09:58:20,784 [INFO] Initializing MyNAS backend system...
+2025-11-14 09:58:20,784 [INFO] Auto-registering RPC handlers...
+2025-11-14 09:58:20,785 [INFO] RPC registered: acl (3 methods)
+2025-11-14 09:58:20,785 [INFO] Loaded RPC module: acl
+2025-11-14 09:58:20,785 [INFO] RPC registered: backup (4 methods)
+2025-11-14 09:58:20,785 [INFO] Loaded RPC module: backup
+2025-11-14 09:58:20,786 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 09:58:20,786 [INFO] Loaded RPC module: monitoring
+2025-11-14 09:58:20,786 [WARNING] Module network has no register_rpc()
+2025-11-14 09:58:20,787 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 09:58:20,787 [INFO] Loaded RPC module: nfs
+2025-11-14 09:58:20,788 [INFO] RPC registered: samba (2 methods)
+2025-11-14 09:58:20,788 [INFO] Loaded RPC module: samba
+2025-11-14 09:58:20,788 [INFO] RPC registered: shares (5 methods)
+2025-11-14 09:58:20,788 [INFO] Loaded RPC module: shares
+2025-11-14 09:58:20,793 [INFO] RPC registered: storage (5 methods)
+2025-11-14 09:58:20,793 [INFO] Loaded RPC module: storage
+2025-11-14 09:58:20,793 [WARNING] Module system has no register_rpc()
+2025-11-14 09:58:20,793 [INFO] RPC handlers registered successfully.
+2025-11-14 09:58:20,793 [INFO] WebSocket manager registered.
+2025-11-14 09:58:20,794 [INFO] MyNAS backend initialized successfully.
+2025-11-14 09:58:20,910 [INFO] === Starting MyNAS backend services ===
+2025-11-14 09:58:21,012 [INFO] ✅ Detected ZFS pools: {'config_pools': [], 'zpool_list': [{'name': 'main', 'health': 'ONLINE'}], 'importable_pools': []}
+2025-11-14 09:58:21,012 [INFO] Loaded 0 shares from config.
+2025-11-14 09:58:21,015 [INFO] ✅ Shares loaded successfully.
+2025-11-14 09:58:21,015 [INFO] Auto-registering RPC handlers...
+2025-11-14 09:58:21,015 [INFO] RPC registered: acl (3 methods)
+2025-11-14 09:58:21,015 [INFO] Loaded RPC module: acl
+2025-11-14 09:58:21,016 [INFO] RPC registered: backup (4 methods)
+2025-11-14 09:58:21,016 [INFO] Loaded RPC module: backup
+2025-11-14 09:58:21,016 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 09:58:21,016 [INFO] Loaded RPC module: monitoring
+2025-11-14 09:58:21,016 [WARNING] Module network has no register_rpc()
+2025-11-14 09:58:21,016 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 09:58:21,016 [INFO] Loaded RPC module: nfs
+2025-11-14 09:58:21,017 [INFO] RPC registered: samba (2 methods)
+2025-11-14 09:58:21,017 [INFO] Loaded RPC module: samba
+2025-11-14 09:58:21,017 [INFO] RPC registered: shares (5 methods)
+2025-11-14 09:58:21,017 [INFO] Loaded RPC module: shares
+2025-11-14 09:58:21,017 [INFO] RPC registered: storage (5 methods)
+2025-11-14 09:58:21,017 [INFO] Loaded RPC module: storage
+2025-11-14 09:58:21,018 [WARNING] Module system has no register_rpc()
+2025-11-14 09:58:21,018 [INFO] ✅ RPC handlers registered
+2025-11-14 09:58:21,018 [INFO] ✅ WebSocket manager configured
+2025-11-14 09:58:21,018 [INFO] === Backend startup complete ===
+2025-11-14 10:00:25,181 [INFO] Initializing MyNAS backend system...
+2025-11-14 10:00:25,184 [INFO] Auto-registering RPC handlers...
+2025-11-14 10:00:25,187 [INFO] RPC registered: acl (3 methods)
+2025-11-14 10:00:25,191 [INFO] Loaded RPC module: acl
+2025-11-14 10:00:25,191 [INFO] RPC registered: backup (4 methods)
+2025-11-14 10:00:25,192 [INFO] Loaded RPC module: backup
+2025-11-14 10:00:25,193 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 10:00:25,194 [INFO] Loaded RPC module: monitoring
+2025-11-14 10:00:25,196 [WARNING] Module network has no register_rpc()
+2025-11-14 10:00:25,200 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 10:00:25,201 [INFO] Loaded RPC module: nfs
+2025-11-14 10:00:25,204 [INFO] RPC registered: samba (2 methods)
+2025-11-14 10:00:25,210 [INFO] Loaded RPC module: samba
+2025-11-14 10:00:25,210 [INFO] RPC registered: shares (5 methods)
+2025-11-14 10:00:25,213 [INFO] Loaded RPC module: shares
+2025-11-14 10:00:25,235 [INFO] RPC registered: storage (5 methods)
+2025-11-14 10:00:25,237 [INFO] Loaded RPC module: storage
+2025-11-14 10:00:25,239 [WARNING] Module system has no register_rpc()
+2025-11-14 10:00:25,242 [INFO] RPC handlers registered successfully.
+2025-11-14 10:00:25,243 [INFO] WebSocket manager registered.
+2025-11-14 10:00:25,243 [INFO] MyNAS backend initialized successfully.
+2025-11-14 10:00:25,393 [INFO] === Starting MyNAS backend services ===
+2025-11-14 10:00:25,529 [INFO] ✅ Detected ZFS pools: {'config_pools': [], 'zpool_list': [{'name': 'main', 'health': 'ONLINE'}], 'importable_pools': []}
+2025-11-14 10:00:25,530 [INFO] Loaded 0 shares from config.
+2025-11-14 10:00:25,536 [INFO] ✅ Shares loaded successfully.
+2025-11-14 10:00:25,537 [INFO] Auto-registering RPC handlers...
+2025-11-14 10:00:25,538 [INFO] RPC registered: acl (3 methods)
+2025-11-14 10:00:25,538 [INFO] Loaded RPC module: acl
+2025-11-14 10:00:25,538 [INFO] RPC registered: backup (4 methods)
+2025-11-14 10:00:25,538 [INFO] Loaded RPC module: backup
+2025-11-14 10:00:25,539 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 10:00:25,541 [INFO] Loaded RPC module: monitoring
+2025-11-14 10:00:25,541 [WARNING] Module network has no register_rpc()
+2025-11-14 10:00:25,541 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 10:00:25,542 [INFO] Loaded RPC module: nfs
+2025-11-14 10:00:25,543 [INFO] RPC registered: samba (2 methods)
+2025-11-14 10:00:25,545 [INFO] Loaded RPC module: samba
+2025-11-14 10:00:25,545 [INFO] RPC registered: shares (5 methods)
+2025-11-14 10:00:25,546 [INFO] Loaded RPC module: shares
+2025-11-14 10:00:25,546 [INFO] RPC registered: storage (5 methods)
+2025-11-14 10:00:25,546 [INFO] Loaded RPC module: storage
+2025-11-14 10:00:25,546 [WARNING] Module system has no register_rpc()
+2025-11-14 10:00:25,546 [INFO] ✅ RPC handlers registered
+2025-11-14 10:00:25,547 [INFO] ✅ WebSocket manager configured
+2025-11-14 10:00:25,547 [INFO] === Backend startup complete ===
+2025-11-14 10:28:43,518 [INFO] Initializing MyNAS backend system...
+2025-11-14 10:28:43,523 [INFO] Auto-registering RPC handlers...
+2025-11-14 10:28:43,528 [INFO] RPC registered: acl (3 methods)
+2025-11-14 10:28:43,531 [INFO] Loaded RPC module: acl
+2025-11-14 10:28:43,534 [INFO] RPC registered: backup (4 methods)
+2025-11-14 10:28:43,536 [INFO] Loaded RPC module: backup
+2025-11-14 10:28:43,538 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 10:28:43,540 [INFO] Loaded RPC module: monitoring
+2025-11-14 10:28:43,541 [WARNING] Module network has no register_rpc()
+2025-11-14 10:28:43,544 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 10:28:43,547 [INFO] Loaded RPC module: nfs
+2025-11-14 10:28:43,549 [INFO] RPC registered: samba (2 methods)
+2025-11-14 10:28:43,551 [INFO] Loaded RPC module: samba
+2025-11-14 10:28:43,553 [INFO] RPC registered: shares (5 methods)
+2025-11-14 10:28:43,553 [INFO] Loaded RPC module: shares
+2025-11-14 10:28:43,564 [INFO] RPC registered: storage (5 methods)
+2025-11-14 10:28:43,567 [INFO] Loaded RPC module: storage
+2025-11-14 10:28:43,569 [WARNING] Module system has no register_rpc()
+2025-11-14 10:28:43,570 [INFO] RPC handlers registered successfully.
+2025-11-14 10:28:43,571 [INFO] WebSocket manager registered.
+2025-11-14 10:28:43,572 [INFO] MyNAS backend initialized successfully.
+2025-11-14 10:28:43,735 [INFO] === Starting MyNAS backend services ===
+2025-11-14 10:28:43,866 [INFO] ✅ Detected ZFS pools: {'config_pools': [{'name': 'main', 'type': 'zfs', 'devices': ['/dev/sdb']}], 'zpool_list': [{'name': 'main', 'health': 'ONLINE'}], 'importable_pools': []}
+2025-11-14 10:28:43,867 [INFO] Loaded 2 shares from config.
+2025-11-14 10:28:43,874 [INFO] ✅ Shares loaded successfully.
+2025-11-14 10:28:43,875 [INFO] Auto-registering RPC handlers...
+2025-11-14 10:28:43,876 [INFO] RPC registered: acl (3 methods)
+2025-11-14 10:28:43,877 [INFO] Loaded RPC module: acl
+2025-11-14 10:28:43,878 [INFO] RPC registered: backup (4 methods)
+2025-11-14 10:28:43,879 [INFO] Loaded RPC module: backup
+2025-11-14 10:28:43,880 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 10:28:43,880 [INFO] Loaded RPC module: monitoring
+2025-11-14 10:28:43,881 [WARNING] Module network has no register_rpc()
+2025-11-14 10:28:43,882 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 10:28:43,883 [INFO] Loaded RPC module: nfs
+2025-11-14 10:28:43,884 [INFO] RPC registered: samba (2 methods)
+2025-11-14 10:28:43,885 [INFO] Loaded RPC module: samba
+2025-11-14 10:28:43,885 [INFO] RPC registered: shares (5 methods)
+2025-11-14 10:28:43,886 [INFO] Loaded RPC module: shares
+2025-11-14 10:28:43,887 [INFO] RPC registered: storage (5 methods)
+2025-11-14 10:28:43,887 [INFO] Loaded RPC module: storage
+2025-11-14 10:28:43,888 [WARNING] Module system has no register_rpc()
+2025-11-14 10:28:43,889 [INFO] ✅ RPC handlers registered
+2025-11-14 10:28:43,890 [INFO] ✅ WebSocket manager configured
+2025-11-14 10:28:43,890 [INFO] === Backend startup complete ===
+2025-11-14 10:36:43,538 [INFO] 🛑 MyNAS Backend Shutting down...
+2025-11-14 10:36:43,646 [INFO] Backend terminated.
+2025-11-14 10:40:19,127 [INFO] Initializing MyNAS backend system...
+2025-11-14 10:40:19,128 [INFO] Auto-registering RPC handlers...
+2025-11-14 10:40:19,130 [INFO] RPC registered: acl (3 methods)
+2025-11-14 10:40:19,131 [INFO] Loaded RPC module: acl
+2025-11-14 10:40:19,133 [INFO] RPC registered: backup (4 methods)
+2025-11-14 10:40:19,134 [INFO] Loaded RPC module: backup
+2025-11-14 10:40:19,137 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 10:40:19,137 [INFO] Loaded RPC module: monitoring
+2025-11-14 10:40:19,138 [WARNING] Module network has no register_rpc()
+2025-11-14 10:40:19,141 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 10:40:19,143 [INFO] Loaded RPC module: nfs
+2025-11-14 10:40:19,147 [INFO] RPC registered: samba (2 methods)
+2025-11-14 10:40:19,147 [INFO] Loaded RPC module: samba
+2025-11-14 10:40:19,148 [INFO] RPC registered: shares (5 methods)
+2025-11-14 10:40:19,149 [INFO] Loaded RPC module: shares
+2025-11-14 10:40:19,161 [INFO] RPC registered: storage (5 methods)
+2025-11-14 10:40:19,164 [INFO] Loaded RPC module: storage
+2025-11-14 10:40:19,165 [WARNING] Module system has no register_rpc()
+2025-11-14 10:40:19,166 [INFO] RPC handlers registered successfully.
+2025-11-14 10:40:19,166 [INFO] WebSocket manager registered.
+2025-11-14 10:40:19,166 [INFO] MyNAS backend initialized successfully.
+2025-11-14 10:40:19,515 [INFO] === Starting MyNAS backend services ===
+2025-11-14 10:40:20,741 [INFO] ✅ Detected ZFS pools: {'config_pools': [{'name': 'main', 'type': 'zfs', 'devices': ['/dev/sdb1']}], 'zpool_list': [{'name': 'main', 'health': 'ONLINE'}], 'importable_pools': []}
+2025-11-14 10:40:20,741 [INFO] Loaded 2 shares from config.
+2025-11-14 10:40:20,750 [INFO] ✅ Shares loaded successfully.
+2025-11-14 10:40:20,753 [INFO] Auto-registering RPC handlers...
+2025-11-14 10:40:20,754 [INFO] RPC registered: acl (3 methods)
+2025-11-14 10:40:20,754 [INFO] Loaded RPC module: acl
+2025-11-14 10:40:20,754 [INFO] RPC registered: backup (4 methods)
+2025-11-14 10:40:20,755 [INFO] Loaded RPC module: backup
+2025-11-14 10:40:20,758 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 10:40:20,758 [INFO] Loaded RPC module: monitoring
+2025-11-14 10:40:20,758 [WARNING] Module network has no register_rpc()
+2025-11-14 10:40:20,759 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 10:40:20,760 [INFO] Loaded RPC module: nfs
+2025-11-14 10:40:20,760 [INFO] RPC registered: samba (2 methods)
+2025-11-14 10:40:20,764 [INFO] Loaded RPC module: samba
+2025-11-14 10:40:20,769 [INFO] RPC registered: shares (5 methods)
+2025-11-14 10:40:20,769 [INFO] Loaded RPC module: shares
+2025-11-14 10:40:20,769 [INFO] RPC registered: storage (5 methods)
+2025-11-14 10:40:20,769 [INFO] Loaded RPC module: storage
+2025-11-14 10:40:20,769 [WARNING] Module system has no register_rpc()
+2025-11-14 10:40:20,769 [INFO] ✅ RPC handlers registered
+2025-11-14 10:40:20,769 [INFO] ✅ WebSocket manager configured
+2025-11-14 10:40:20,769 [INFO] === Backend startup complete ===
+2025-11-14 11:21:58,810 [INFO] Initializing MyNAS backend system...
+2025-11-14 11:21:58,811 [INFO] Auto-registering RPC handlers...
+2025-11-14 11:21:58,813 [INFO] RPC registered: acl (3 methods)
+2025-11-14 11:21:58,813 [INFO] Loaded RPC module: acl
+2025-11-14 11:21:58,814 [INFO] RPC registered: backup (4 methods)
+2025-11-14 11:21:58,814 [INFO] Loaded RPC module: backup
+2025-11-14 11:21:58,815 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 11:21:58,815 [INFO] Loaded RPC module: monitoring
+2025-11-14 11:21:58,816 [WARNING] Module network has no register_rpc()
+2025-11-14 11:21:58,819 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 11:21:58,821 [INFO] Loaded RPC module: nfs
+2025-11-14 11:21:58,824 [INFO] RPC registered: samba (2 methods)
+2025-11-14 11:21:58,825 [INFO] Loaded RPC module: samba
+2025-11-14 11:21:58,829 [INFO] RPC registered: shares (5 methods)
+2025-11-14 11:21:58,831 [INFO] Loaded RPC module: shares
+2025-11-14 11:21:58,840 [INFO] RPC registered: storage (5 methods)
+2025-11-14 11:21:58,840 [INFO] Loaded RPC module: storage
+2025-11-14 11:21:58,841 [WARNING] Module system has no register_rpc()
+2025-11-14 11:21:58,841 [INFO] RPC handlers registered successfully.
+2025-11-14 11:21:58,841 [INFO] WebSocket manager registered.
+2025-11-14 11:21:58,841 [INFO] MyNAS backend initialized successfully.
+2025-11-14 11:21:59,062 [INFO] === Starting MyNAS backend services ===
+2025-11-14 11:21:59,240 [INFO] ✅ Detected ZFS pools: {'config_pools': [{'name': 'main', 'type': 'zfs', 'devices': ['/dev/sdb1']}], 'zpool_list': [{'name': 'main', 'health': 'ONLINE'}], 'importable_pools': []}
+2025-11-14 11:21:59,240 [INFO] Loaded 2 shares from config.
+2025-11-14 11:21:59,243 [INFO] ✅ Shares loaded successfully.
+2025-11-14 11:21:59,243 [INFO] Auto-registering RPC handlers...
+2025-11-14 11:21:59,244 [INFO] RPC registered: acl (3 methods)
+2025-11-14 11:21:59,245 [INFO] Loaded RPC module: acl
+2025-11-14 11:21:59,246 [INFO] RPC registered: backup (4 methods)
+2025-11-14 11:21:59,246 [INFO] Loaded RPC module: backup
+2025-11-14 11:21:59,247 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 11:21:59,248 [INFO] Loaded RPC module: monitoring
+2025-11-14 11:21:59,248 [WARNING] Module network has no register_rpc()
+2025-11-14 11:21:59,249 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 11:21:59,250 [INFO] Loaded RPC module: nfs
+2025-11-14 11:21:59,251 [INFO] RPC registered: samba (2 methods)
+2025-11-14 11:21:59,251 [INFO] Loaded RPC module: samba
+2025-11-14 11:21:59,252 [INFO] RPC registered: shares (5 methods)
+2025-11-14 11:21:59,252 [INFO] Loaded RPC module: shares
+2025-11-14 11:21:59,253 [INFO] RPC registered: storage (5 methods)
+2025-11-14 11:21:59,254 [INFO] Loaded RPC module: storage
+2025-11-14 11:21:59,254 [WARNING] Module system has no register_rpc()
+2025-11-14 11:21:59,255 [INFO] ✅ RPC handlers registered
+2025-11-14 11:21:59,256 [INFO] ✅ WebSocket manager configured
+2025-11-14 11:21:59,257 [INFO] === Backend startup complete ===
+2025-11-14 11:59:29,966 [INFO] Initializing MyNAS backend system...
+2025-11-14 11:59:29,967 [INFO] Auto-registering RPC handlers...
+2025-11-14 11:59:29,969 [INFO] RPC registered: acl (3 methods)
+2025-11-14 11:59:29,969 [INFO] Loaded RPC module: acl
+2025-11-14 11:59:29,970 [INFO] RPC registered: backup (4 methods)
+2025-11-14 11:59:29,970 [INFO] Loaded RPC module: backup
+2025-11-14 11:59:29,971 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 11:59:29,971 [INFO] Loaded RPC module: monitoring
+2025-11-14 11:59:29,972 [WARNING] Module network has no register_rpc()
+2025-11-14 11:59:29,974 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 11:59:29,975 [INFO] Loaded RPC module: nfs
+2025-11-14 11:59:29,976 [INFO] RPC registered: samba (2 methods)
+2025-11-14 11:59:29,976 [INFO] Loaded RPC module: samba
+2025-11-14 11:59:29,977 [INFO] RPC registered: shares (5 methods)
+2025-11-14 11:59:29,977 [INFO] Loaded RPC module: shares
+2025-11-14 11:59:29,983 [INFO] RPC registered: storage (5 methods)
+2025-11-14 11:59:29,983 [INFO] Loaded RPC module: storage
+2025-11-14 11:59:29,984 [WARNING] Module system has no register_rpc()
+2025-11-14 11:59:29,984 [INFO] RPC handlers registered successfully.
+2025-11-14 11:59:29,984 [INFO] WebSocket manager registered.
+2025-11-14 11:59:29,984 [INFO] MyNAS backend initialized successfully.
+2025-11-14 11:59:30,126 [INFO] === Starting MyNAS backend services ===
+2025-11-14 11:59:30,267 [INFO] ✅ Detected ZFS pools: {'config_pools': [{'name': 'main', 'type': 'zfs', 'devices': ['/dev/sdb1']}], 'zpool_list': [{'name': 'main', 'health': 'ONLINE'}], 'importable_pools': []}
+2025-11-14 11:59:30,267 [INFO] Loaded 2 shares from config.
+2025-11-14 11:59:30,270 [INFO] ✅ Shares loaded successfully.
+2025-11-14 11:59:30,270 [INFO] Auto-registering RPC handlers...
+2025-11-14 11:59:30,271 [INFO] RPC registered: acl (3 methods)
+2025-11-14 11:59:30,271 [INFO] Loaded RPC module: acl
+2025-11-14 11:59:30,271 [INFO] RPC registered: backup (4 methods)
+2025-11-14 11:59:30,271 [INFO] Loaded RPC module: backup
+2025-11-14 11:59:30,271 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 11:59:30,271 [INFO] Loaded RPC module: monitoring
+2025-11-14 11:59:30,271 [WARNING] Module network has no register_rpc()
+2025-11-14 11:59:30,272 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 11:59:30,272 [INFO] Loaded RPC module: nfs
+2025-11-14 11:59:30,272 [INFO] RPC registered: samba (2 methods)
+2025-11-14 11:59:30,272 [INFO] Loaded RPC module: samba
+2025-11-14 11:59:30,272 [INFO] RPC registered: shares (5 methods)
+2025-11-14 11:59:30,273 [INFO] Loaded RPC module: shares
+2025-11-14 11:59:30,273 [INFO] RPC registered: storage (5 methods)
+2025-11-14 11:59:30,273 [INFO] Loaded RPC module: storage
+2025-11-14 11:59:30,273 [WARNING] Module system has no register_rpc()
+2025-11-14 11:59:30,273 [INFO] ✅ RPC handlers registered
+2025-11-14 11:59:30,273 [INFO] ✅ WebSocket manager configured
+2025-11-14 11:59:30,273 [INFO] === Backend startup complete ===
+2025-11-14 12:00:42,900 [INFO] Configuration saved successfully.
+2025-11-14 13:55:12,419 [INFO] Initializing MyNAS backend system...
+2025-11-14 13:55:12,422 [INFO] Auto-registering RPC handlers...
+2025-11-14 13:55:12,425 [INFO] RPC registered: acl (3 methods)
+2025-11-14 13:55:12,426 [INFO] Loaded RPC module: acl
+2025-11-14 13:55:12,428 [INFO] RPC registered: backup (4 methods)
+2025-11-14 13:55:12,428 [INFO] Loaded RPC module: backup
+2025-11-14 13:55:12,429 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 13:55:12,430 [INFO] Loaded RPC module: monitoring
+2025-11-14 13:55:12,431 [WARNING] Module network has no register_rpc()
+2025-11-14 13:55:12,435 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 13:55:12,435 [INFO] Loaded RPC module: nfs
+2025-11-14 13:55:12,437 [INFO] RPC registered: samba (2 methods)
+2025-11-14 13:55:12,438 [INFO] Loaded RPC module: samba
+2025-11-14 13:55:12,440 [INFO] RPC registered: shares (5 methods)
+2025-11-14 13:55:12,441 [INFO] Loaded RPC module: shares
+2025-11-14 13:55:12,448 [INFO] RPC registered: storage (5 methods)
+2025-11-14 13:55:12,449 [INFO] Loaded RPC module: storage
+2025-11-14 13:55:12,450 [WARNING] Module system has no register_rpc()
+2025-11-14 13:55:12,451 [INFO] RPC handlers registered successfully.
+2025-11-14 13:55:12,451 [INFO] WebSocket manager registered.
+2025-11-14 13:55:12,452 [INFO] MyNAS backend initialized successfully.
+2025-11-14 13:55:12,627 [INFO] === Starting MyNAS backend services ===
+2025-11-14 13:55:12,804 [INFO] ✅ Detected ZFS pools: {'config_pools': [{'name': 'main', 'type': 'zfs', 'devices': ['/dev/sdb']}], 'zpool_list': [{'name': 'main', 'health': 'ONLINE'}], 'importable_pools': []}
+2025-11-14 13:55:12,805 [INFO] Loaded 2 shares from config.
+2025-11-14 13:55:12,811 [INFO] ✅ Shares loaded successfully.
+2025-11-14 13:55:12,812 [INFO] Auto-registering RPC handlers...
+2025-11-14 13:55:12,813 [INFO] RPC registered: acl (3 methods)
+2025-11-14 13:55:12,814 [INFO] Loaded RPC module: acl
+2025-11-14 13:55:12,815 [INFO] RPC registered: backup (4 methods)
+2025-11-14 13:55:12,815 [INFO] Loaded RPC module: backup
+2025-11-14 13:55:12,815 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 13:55:12,816 [INFO] Loaded RPC module: monitoring
+2025-11-14 13:55:12,817 [WARNING] Module network has no register_rpc()
+2025-11-14 13:55:12,818 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 13:55:12,819 [INFO] Loaded RPC module: nfs
+2025-11-14 13:55:12,820 [INFO] RPC registered: samba (2 methods)
+2025-11-14 13:55:12,821 [INFO] Loaded RPC module: samba
+2025-11-14 13:55:12,824 [INFO] RPC registered: shares (5 methods)
+2025-11-14 13:55:12,824 [INFO] Loaded RPC module: shares
+2025-11-14 13:55:12,824 [INFO] RPC registered: storage (5 methods)
+2025-11-14 13:55:12,824 [INFO] Loaded RPC module: storage
+2025-11-14 13:55:12,825 [WARNING] Module system has no register_rpc()
+2025-11-14 13:55:12,826 [INFO] ✅ RPC handlers registered
+2025-11-14 13:55:12,826 [INFO] ✅ WebSocket manager configured
+2025-11-14 13:55:12,826 [INFO] === Backend startup complete ===
+2025-11-14 13:56:09,293 [INFO] Initializing MyNAS backend system...
+2025-11-14 13:56:09,294 [INFO] Auto-registering RPC handlers...
+2025-11-14 13:56:09,295 [INFO] RPC registered: acl (3 methods)
+2025-11-14 13:56:09,296 [INFO] Loaded RPC module: acl
+2025-11-14 13:56:09,296 [INFO] RPC registered: backup (4 methods)
+2025-11-14 13:56:09,297 [INFO] Loaded RPC module: backup
+2025-11-14 13:56:09,298 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 13:56:09,298 [INFO] Loaded RPC module: monitoring
+2025-11-14 13:56:09,298 [WARNING] Module network has no register_rpc()
+2025-11-14 13:56:09,300 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 13:56:09,300 [INFO] Loaded RPC module: nfs
+2025-11-14 13:56:09,301 [INFO] RPC registered: samba (2 methods)
+2025-11-14 13:56:09,302 [INFO] Loaded RPC module: samba
+2025-11-14 13:56:09,303 [INFO] RPC registered: shares (5 methods)
+2025-11-14 13:56:09,303 [INFO] Loaded RPC module: shares
+2025-11-14 13:56:09,309 [INFO] RPC registered: storage (5 methods)
+2025-11-14 13:56:09,309 [INFO] Loaded RPC module: storage
+2025-11-14 13:56:09,310 [WARNING] Module system has no register_rpc()
+2025-11-14 13:56:09,311 [INFO] RPC handlers registered successfully.
+2025-11-14 13:56:09,312 [INFO] WebSocket manager registered.
+2025-11-14 13:56:09,313 [INFO] MyNAS backend initialized successfully.
+2025-11-14 13:56:09,431 [INFO] === Starting MyNAS backend services ===
+2025-11-14 13:56:09,533 [INFO] ✅ Detected ZFS pools: {'config_pools': [{'name': 'main', 'type': 'zfs', 'devices': ['/dev/sdb']}], 'zpool_list': [{'name': 'main', 'health': 'ONLINE'}], 'importable_pools': []}
+2025-11-14 13:56:09,534 [INFO] Loaded 2 shares from config.
+2025-11-14 13:56:09,537 [INFO] ✅ Shares loaded successfully.
+2025-11-14 13:56:09,537 [INFO] Auto-registering RPC handlers...
+2025-11-14 13:56:09,538 [INFO] RPC registered: acl (3 methods)
+2025-11-14 13:56:09,538 [INFO] Loaded RPC module: acl
+2025-11-14 13:56:09,538 [INFO] RPC registered: backup (4 methods)
+2025-11-14 13:56:09,538 [INFO] Loaded RPC module: backup
+2025-11-14 13:56:09,538 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 13:56:09,538 [INFO] Loaded RPC module: monitoring
+2025-11-14 13:56:09,538 [WARNING] Module network has no register_rpc()
+2025-11-14 13:56:09,540 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 13:56:09,540 [INFO] Loaded RPC module: nfs
+2025-11-14 13:56:09,540 [INFO] RPC registered: samba (2 methods)
+2025-11-14 13:56:09,541 [INFO] Loaded RPC module: samba
+2025-11-14 13:56:09,541 [INFO] RPC registered: shares (5 methods)
+2025-11-14 13:56:09,542 [INFO] Loaded RPC module: shares
+2025-11-14 13:56:09,542 [INFO] RPC registered: storage (5 methods)
+2025-11-14 13:56:09,542 [INFO] Loaded RPC module: storage
+2025-11-14 13:56:09,543 [WARNING] Module system has no register_rpc()
+2025-11-14 13:56:09,543 [INFO] ✅ RPC handlers registered
+2025-11-14 13:56:09,543 [INFO] ✅ WebSocket manager configured
+2025-11-14 13:56:09,543 [INFO] === Backend startup complete ===
+2025-11-14 13:58:16,031 [INFO] Initializing MyNAS backend system...
+2025-11-14 13:58:16,031 [INFO] Auto-registering RPC handlers...
+2025-11-14 13:58:16,032 [INFO] RPC registered: acl (3 methods)
+2025-11-14 13:58:16,032 [INFO] Loaded RPC module: acl
+2025-11-14 13:58:16,033 [INFO] RPC registered: backup (4 methods)
+2025-11-14 13:58:16,033 [INFO] Loaded RPC module: backup
+2025-11-14 13:58:16,033 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 13:58:16,033 [INFO] Loaded RPC module: monitoring
+2025-11-14 13:58:16,034 [WARNING] Module network has no register_rpc()
+2025-11-14 13:58:16,035 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 13:58:16,035 [INFO] Loaded RPC module: nfs
+2025-11-14 13:58:16,036 [INFO] RPC registered: samba (2 methods)
+2025-11-14 13:58:16,036 [INFO] Loaded RPC module: samba
+2025-11-14 13:58:16,036 [INFO] RPC registered: shares (5 methods)
+2025-11-14 13:58:16,036 [INFO] Loaded RPC module: shares
+2025-11-14 13:58:16,044 [INFO] RPC registered: storage (5 methods)
+2025-11-14 13:58:16,044 [INFO] Loaded RPC module: storage
+2025-11-14 13:58:16,045 [WARNING] Module system has no register_rpc()
+2025-11-14 13:58:16,045 [INFO] RPC handlers registered successfully.
+2025-11-14 13:58:16,046 [INFO] WebSocket manager registered.
+2025-11-14 13:58:16,046 [INFO] MyNAS backend initialized successfully.
+2025-11-14 13:58:16,174 [INFO] === Starting MyNAS backend services ===
+2025-11-14 13:58:16,316 [INFO] ✅ Detected ZFS pools: {'config_pools': [{'name': 'main', 'type': 'zfs', 'devices': ['/dev/sdb']}], 'zpool_list': [{'name': 'main', 'health': 'ONLINE'}], 'importable_pools': []}
+2025-11-14 13:58:16,321 [INFO] Loaded 2 shares from config.
+2025-11-14 13:58:16,324 [INFO] ✅ Shares loaded successfully.
+2025-11-14 13:58:16,325 [INFO] Auto-registering RPC handlers...
+2025-11-14 13:58:16,327 [INFO] RPC registered: acl (3 methods)
+2025-11-14 13:58:16,328 [INFO] Loaded RPC module: acl
+2025-11-14 13:58:16,328 [INFO] RPC registered: backup (4 methods)
+2025-11-14 13:58:16,330 [INFO] Loaded RPC module: backup
+2025-11-14 13:58:16,330 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 13:58:16,331 [INFO] Loaded RPC module: monitoring
+2025-11-14 13:58:16,332 [WARNING] Module network has no register_rpc()
+2025-11-14 13:58:16,332 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 13:58:16,332 [INFO] Loaded RPC module: nfs
+2025-11-14 13:58:16,332 [INFO] RPC registered: samba (2 methods)
+2025-11-14 13:58:16,333 [INFO] Loaded RPC module: samba
+2025-11-14 13:58:16,334 [INFO] RPC registered: shares (5 methods)
+2025-11-14 13:58:16,334 [INFO] Loaded RPC module: shares
+2025-11-14 13:58:16,334 [INFO] RPC registered: storage (5 methods)
+2025-11-14 13:58:16,335 [INFO] Loaded RPC module: storage
+2025-11-14 13:58:16,336 [WARNING] Module system has no register_rpc()
+2025-11-14 13:58:16,337 [INFO] ✅ RPC handlers registered
+2025-11-14 13:58:16,338 [INFO] ✅ WebSocket manager configured
+2025-11-14 13:58:16,339 [INFO] === Backend startup complete ===
+2025-11-14 13:58:23,138 [INFO] Initializing MyNAS backend system...
+2025-11-14 13:58:23,141 [INFO] Auto-registering RPC handlers...
+2025-11-14 13:58:23,146 [INFO] RPC registered: acl (3 methods)
+2025-11-14 13:58:23,147 [INFO] Loaded RPC module: acl
+2025-11-14 13:58:23,149 [INFO] RPC registered: backup (4 methods)
+2025-11-14 13:58:23,149 [INFO] Loaded RPC module: backup
+2025-11-14 13:58:23,150 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 13:58:23,150 [INFO] Loaded RPC module: monitoring
+2025-11-14 13:58:23,151 [WARNING] Module network has no register_rpc()
+2025-11-14 13:58:23,152 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 13:58:23,152 [INFO] Loaded RPC module: nfs
+2025-11-14 13:58:23,156 [INFO] RPC registered: samba (2 methods)
+2025-11-14 13:58:23,157 [INFO] Loaded RPC module: samba
+2025-11-14 13:58:23,158 [INFO] RPC registered: shares (5 methods)
+2025-11-14 13:58:23,159 [INFO] Loaded RPC module: shares
+2025-11-14 13:58:23,167 [INFO] RPC registered: storage (5 methods)
+2025-11-14 13:58:23,168 [INFO] Loaded RPC module: storage
+2025-11-14 13:58:23,169 [WARNING] Module system has no register_rpc()
+2025-11-14 13:58:23,169 [INFO] RPC handlers registered successfully.
+2025-11-14 13:58:23,170 [INFO] WebSocket manager registered.
+2025-11-14 13:58:23,170 [INFO] MyNAS backend initialized successfully.
+2025-11-14 13:58:23,302 [INFO] === Starting MyNAS backend services ===
+2025-11-14 13:58:23,406 [INFO] ✅ Detected ZFS pools: {'config_pools': [{'name': 'main', 'type': 'zfs', 'devices': ['/dev/sdb']}], 'zpool_list': [{'name': 'main', 'health': 'ONLINE'}], 'importable_pools': []}
+2025-11-14 13:58:23,406 [INFO] Loaded 2 shares from config.
+2025-11-14 13:58:23,408 [INFO] ✅ Shares loaded successfully.
+2025-11-14 13:58:23,408 [INFO] Auto-registering RPC handlers...
+2025-11-14 13:58:23,409 [INFO] RPC registered: acl (3 methods)
+2025-11-14 13:58:23,409 [INFO] Loaded RPC module: acl
+2025-11-14 13:58:23,410 [INFO] RPC registered: backup (4 methods)
+2025-11-14 13:58:23,410 [INFO] Loaded RPC module: backup
+2025-11-14 13:58:23,411 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 13:58:23,411 [INFO] Loaded RPC module: monitoring
+2025-11-14 13:58:23,411 [WARNING] Module network has no register_rpc()
+2025-11-14 13:58:23,411 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 13:58:23,411 [INFO] Loaded RPC module: nfs
+2025-11-14 13:58:23,412 [INFO] RPC registered: samba (2 methods)
+2025-11-14 13:58:23,412 [INFO] Loaded RPC module: samba
+2025-11-14 13:58:23,412 [INFO] RPC registered: shares (5 methods)
+2025-11-14 13:58:23,412 [INFO] Loaded RPC module: shares
+2025-11-14 13:58:23,412 [INFO] RPC registered: storage (5 methods)
+2025-11-14 13:58:23,412 [INFO] Loaded RPC module: storage
+2025-11-14 13:58:23,412 [WARNING] Module system has no register_rpc()
+2025-11-14 13:58:23,412 [INFO] ✅ RPC handlers registered
+2025-11-14 13:58:23,412 [INFO] ✅ WebSocket manager configured
+2025-11-14 13:58:23,412 [INFO] === Backend startup complete ===
+2025-11-14 13:58:27,596 [INFO] Initializing MyNAS backend system...
+2025-11-14 13:58:27,597 [INFO] Auto-registering RPC handlers...
+2025-11-14 13:58:27,598 [INFO] RPC registered: acl (3 methods)
+2025-11-14 13:58:27,599 [INFO] Loaded RPC module: acl
+2025-11-14 13:58:27,599 [INFO] RPC registered: backup (4 methods)
+2025-11-14 13:58:27,600 [INFO] Loaded RPC module: backup
+2025-11-14 13:58:27,600 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 13:58:27,600 [INFO] Loaded RPC module: monitoring
+2025-11-14 13:58:27,601 [WARNING] Module network has no register_rpc()
+2025-11-14 13:58:27,602 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 13:58:27,603 [INFO] Loaded RPC module: nfs
+2025-11-14 13:58:27,604 [INFO] RPC registered: samba (2 methods)
+2025-11-14 13:58:27,604 [INFO] Loaded RPC module: samba
+2025-11-14 13:58:27,605 [INFO] RPC registered: shares (5 methods)
+2025-11-14 13:58:27,605 [INFO] Loaded RPC module: shares
+2025-11-14 13:58:27,611 [INFO] RPC registered: storage (5 methods)
+2025-11-14 13:58:27,611 [INFO] Loaded RPC module: storage
+2025-11-14 13:58:27,611 [WARNING] Module system has no register_rpc()
+2025-11-14 13:58:27,611 [INFO] RPC handlers registered successfully.
+2025-11-14 13:58:27,611 [INFO] WebSocket manager registered.
+2025-11-14 13:58:27,611 [INFO] MyNAS backend initialized successfully.
+2025-11-14 13:58:27,732 [INFO] === Starting MyNAS backend services ===
+2025-11-14 13:58:27,842 [INFO] ✅ Detected ZFS pools: {'config_pools': [{'name': 'main', 'type': 'zfs', 'devices': ['/dev/sdb']}], 'zpool_list': [{'name': 'main', 'health': 'ONLINE'}], 'importable_pools': []}
+2025-11-14 13:58:27,848 [INFO] Loaded 2 shares from config.
+2025-11-14 13:58:27,850 [INFO] ✅ Shares loaded successfully.
+2025-11-14 13:58:27,850 [INFO] Auto-registering RPC handlers...
+2025-11-14 13:58:27,850 [INFO] RPC registered: acl (3 methods)
+2025-11-14 13:58:27,851 [INFO] Loaded RPC module: acl
+2025-11-14 13:58:27,851 [INFO] RPC registered: backup (4 methods)
+2025-11-14 13:58:27,851 [INFO] Loaded RPC module: backup
+2025-11-14 13:58:27,851 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 13:58:27,851 [INFO] Loaded RPC module: monitoring
+2025-11-14 13:58:27,852 [WARNING] Module network has no register_rpc()
+2025-11-14 13:58:27,852 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 13:58:27,852 [INFO] Loaded RPC module: nfs
+2025-11-14 13:58:27,852 [INFO] RPC registered: samba (2 methods)
+2025-11-14 13:58:27,852 [INFO] Loaded RPC module: samba
+2025-11-14 13:58:27,853 [INFO] RPC registered: shares (5 methods)
+2025-11-14 13:58:27,853 [INFO] Loaded RPC module: shares
+2025-11-14 13:58:27,853 [INFO] RPC registered: storage (5 methods)
+2025-11-14 13:58:27,853 [INFO] Loaded RPC module: storage
+2025-11-14 13:58:27,853 [WARNING] Module system has no register_rpc()
+2025-11-14 13:58:27,853 [INFO] ✅ RPC handlers registered
+2025-11-14 13:58:27,854 [INFO] ✅ WebSocket manager configured
+2025-11-14 13:58:27,854 [INFO] === Backend startup complete ===
+2025-11-14 13:59:58,181 [INFO] Initializing MyNAS backend system...
+2025-11-14 13:59:58,182 [INFO] Auto-registering RPC handlers...
+2025-11-14 13:59:58,184 [INFO] RPC registered: acl (3 methods)
+2025-11-14 13:59:58,184 [INFO] Loaded RPC module: acl
+2025-11-14 13:59:58,185 [INFO] RPC registered: backup (4 methods)
+2025-11-14 13:59:58,186 [INFO] Loaded RPC module: backup
+2025-11-14 13:59:58,187 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 13:59:58,187 [INFO] Loaded RPC module: monitoring
+2025-11-14 13:59:58,188 [WARNING] Module network has no register_rpc()
+2025-11-14 13:59:58,190 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 13:59:58,191 [INFO] Loaded RPC module: nfs
+2025-11-14 13:59:58,192 [INFO] RPC registered: samba (2 methods)
+2025-11-14 13:59:58,193 [INFO] Loaded RPC module: samba
+2025-11-14 13:59:58,193 [INFO] RPC registered: shares (5 methods)
+2025-11-14 13:59:58,194 [INFO] Loaded RPC module: shares
+2025-11-14 13:59:58,200 [INFO] RPC registered: storage (5 methods)
+2025-11-14 13:59:58,201 [INFO] Loaded RPC module: storage
+2025-11-14 13:59:58,201 [WARNING] Module system has no register_rpc()
+2025-11-14 13:59:58,202 [INFO] RPC handlers registered successfully.
+2025-11-14 13:59:58,202 [INFO] WebSocket manager registered.
+2025-11-14 13:59:58,203 [INFO] MyNAS backend initialized successfully.
+2025-11-14 13:59:58,320 [INFO] === Starting MyNAS backend services ===
+2025-11-14 13:59:58,427 [INFO] ✅ Detected ZFS pools: {'config_pools': [{'name': 'main', 'type': 'zfs', 'devices': ['/dev/sdb']}], 'zpool_list': [{'name': 'main', 'health': 'ONLINE'}], 'importable_pools': []}
+2025-11-14 13:59:58,427 [INFO] Loaded 2 shares from config.
+2025-11-14 13:59:58,430 [INFO] ✅ Shares loaded successfully.
+2025-11-14 13:59:58,431 [INFO] Auto-registering RPC handlers...
+2025-11-14 13:59:58,434 [INFO] RPC registered: acl (3 methods)
+2025-11-14 13:59:58,434 [INFO] Loaded RPC module: acl
+2025-11-14 13:59:58,434 [INFO] RPC registered: backup (4 methods)
+2025-11-14 13:59:58,435 [INFO] Loaded RPC module: backup
+2025-11-14 13:59:58,435 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 13:59:58,435 [INFO] Loaded RPC module: monitoring
+2025-11-14 13:59:58,435 [WARNING] Module network has no register_rpc()
+2025-11-14 13:59:58,436 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 13:59:58,436 [INFO] Loaded RPC module: nfs
+2025-11-14 13:59:58,437 [INFO] RPC registered: samba (2 methods)
+2025-11-14 13:59:58,437 [INFO] Loaded RPC module: samba
+2025-11-14 13:59:58,437 [INFO] RPC registered: shares (5 methods)
+2025-11-14 13:59:58,438 [INFO] Loaded RPC module: shares
+2025-11-14 13:59:58,438 [INFO] RPC registered: storage (5 methods)
+2025-11-14 13:59:58,438 [INFO] Loaded RPC module: storage
+2025-11-14 13:59:58,439 [WARNING] Module system has no register_rpc()
+2025-11-14 13:59:58,439 [INFO] ✅ RPC handlers registered
+2025-11-14 13:59:58,440 [INFO] ✅ WebSocket manager configured
+2025-11-14 13:59:58,440 [INFO] === Backend startup complete ===
+2025-11-14 14:02:52,251 [INFO] Initializing MyNAS backend system...
+2025-11-14 14:02:52,253 [INFO] Auto-registering RPC handlers...
+2025-11-14 14:02:52,254 [INFO] RPC registered: acl (3 methods)
+2025-11-14 14:02:52,255 [INFO] Loaded RPC module: acl
+2025-11-14 14:02:52,255 [INFO] RPC registered: backup (4 methods)
+2025-11-14 14:02:52,257 [INFO] Loaded RPC module: backup
+2025-11-14 14:02:52,259 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 14:02:52,260 [INFO] Loaded RPC module: monitoring
+2025-11-14 14:02:52,260 [WARNING] Module network has no register_rpc()
+2025-11-14 14:02:52,262 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 14:02:52,262 [INFO] Loaded RPC module: nfs
+2025-11-14 14:02:52,264 [INFO] RPC registered: samba (2 methods)
+2025-11-14 14:02:52,264 [INFO] Loaded RPC module: samba
+2025-11-14 14:02:52,265 [INFO] RPC registered: shares (5 methods)
+2025-11-14 14:02:52,265 [INFO] Loaded RPC module: shares
+2025-11-14 14:02:52,272 [INFO] RPC registered: storage (5 methods)
+2025-11-14 14:02:52,272 [INFO] Loaded RPC module: storage
+2025-11-14 14:02:52,273 [WARNING] Module system has no register_rpc()
+2025-11-14 14:02:52,273 [INFO] RPC handlers registered successfully.
+2025-11-14 14:02:52,273 [INFO] WebSocket manager registered.
+2025-11-14 14:02:52,274 [INFO] MyNAS backend initialized successfully.
+2025-11-14 14:02:52,388 [INFO] === Starting MyNAS backend services ===
+2025-11-14 14:02:52,492 [INFO] ✅ Detected ZFS pools: {'config_pools': [{'name': 'main', 'type': 'zfs', 'devices': ['/dev/sdb']}], 'zpool_list': [{'name': 'main', 'health': 'ONLINE'}], 'importable_pools': []}
+2025-11-14 14:02:52,492 [INFO] Loaded 2 shares from config.
+2025-11-14 14:02:52,493 [INFO] ✅ Shares loaded successfully.
+2025-11-14 14:02:52,493 [INFO] Auto-registering RPC handlers...
+2025-11-14 14:02:52,494 [INFO] RPC registered: acl (3 methods)
+2025-11-14 14:02:52,494 [INFO] Loaded RPC module: acl
+2025-11-14 14:02:52,494 [INFO] RPC registered: backup (4 methods)
+2025-11-14 14:02:52,494 [INFO] Loaded RPC module: backup
+2025-11-14 14:02:52,494 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 14:02:52,494 [INFO] Loaded RPC module: monitoring
+2025-11-14 14:02:52,494 [WARNING] Module network has no register_rpc()
+2025-11-14 14:02:52,494 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 14:02:52,494 [INFO] Loaded RPC module: nfs
+2025-11-14 14:02:52,494 [INFO] RPC registered: samba (2 methods)
+2025-11-14 14:02:52,495 [INFO] Loaded RPC module: samba
+2025-11-14 14:02:52,495 [INFO] RPC registered: shares (5 methods)
+2025-11-14 14:02:52,495 [INFO] Loaded RPC module: shares
+2025-11-14 14:02:52,495 [INFO] RPC registered: storage (5 methods)
+2025-11-14 14:02:52,495 [INFO] Loaded RPC module: storage
+2025-11-14 14:02:52,495 [WARNING] Module system has no register_rpc()
+2025-11-14 14:02:52,495 [INFO] ✅ RPC handlers registered
+2025-11-14 14:02:52,495 [INFO] ✅ WebSocket manager configured
+2025-11-14 14:02:52,495 [INFO] === Backend startup complete ===
+2025-11-14 14:05:51,261 [INFO] Initializing MyNAS backend system...
+2025-11-14 14:05:51,299 [INFO] Auto-registering RPC handlers...
+2025-11-14 14:05:51,393 [INFO] RPC registered: acl (3 methods)
+2025-11-14 14:05:51,393 [INFO] Loaded RPC module: acl
+2025-11-14 14:05:51,406 [INFO] RPC registered: backup (4 methods)
+2025-11-14 14:05:51,406 [INFO] Loaded RPC module: backup
+2025-11-14 14:05:51,407 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 14:05:51,407 [INFO] Loaded RPC module: monitoring
+2025-11-14 14:05:51,432 [WARNING] Module network has no register_rpc()
+2025-11-14 14:05:51,435 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 14:05:51,436 [INFO] Loaded RPC module: nfs
+2025-11-14 14:05:51,447 [INFO] RPC registered: samba (2 methods)
+2025-11-14 14:05:51,449 [INFO] Loaded RPC module: samba
+2025-11-14 14:05:51,462 [INFO] RPC registered: shares (5 methods)
+2025-11-14 14:05:51,462 [INFO] Loaded RPC module: shares
+2025-11-14 14:05:51,492 [INFO] RPC registered: storage (5 methods)
+2025-11-14 14:05:51,492 [INFO] Loaded RPC module: storage
+2025-11-14 14:05:51,498 [WARNING] Module system has no register_rpc()
+2025-11-14 14:05:51,499 [INFO] RPC handlers registered successfully.
+2025-11-14 14:05:51,499 [INFO] WebSocket manager registered.
+2025-11-14 14:05:51,499 [INFO] MyNAS backend initialized successfully.
+2025-11-14 14:05:52,372 [INFO] === Starting MyNAS backend services ===
+2025-11-14 14:05:53,209 [INFO] ✅ Detected ZFS pools: {'config_pools': [{'name': 'main', 'type': 'zfs', 'devices': ['/dev/sdb']}], 'zpool_list': [{'name': 'main', 'health': 'ONLINE'}], 'importable_pools': []}
+2025-11-14 14:05:53,209 [INFO] Loaded 2 shares from config.
+2025-11-14 14:05:53,242 [INFO] ✅ Shares loaded successfully.
+2025-11-14 14:05:53,242 [INFO] Auto-registering RPC handlers...
+2025-11-14 14:05:53,242 [INFO] RPC registered: acl (3 methods)
+2025-11-14 14:05:53,242 [INFO] Loaded RPC module: acl
+2025-11-14 14:05:53,242 [INFO] RPC registered: backup (4 methods)
+2025-11-14 14:05:53,244 [INFO] Loaded RPC module: backup
+2025-11-14 14:05:53,244 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 14:05:53,244 [INFO] Loaded RPC module: monitoring
+2025-11-14 14:05:53,244 [WARNING] Module network has no register_rpc()
+2025-11-14 14:05:53,245 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 14:05:53,246 [INFO] Loaded RPC module: nfs
+2025-11-14 14:05:53,246 [INFO] RPC registered: samba (2 methods)
+2025-11-14 14:05:53,246 [INFO] Loaded RPC module: samba
+2025-11-14 14:05:53,246 [INFO] RPC registered: shares (5 methods)
+2025-11-14 14:05:53,246 [INFO] Loaded RPC module: shares
+2025-11-14 14:05:53,246 [INFO] RPC registered: storage (5 methods)
+2025-11-14 14:05:53,246 [INFO] Loaded RPC module: storage
+2025-11-14 14:05:53,246 [WARNING] Module system has no register_rpc()
+2025-11-14 14:05:53,246 [INFO] ✅ RPC handlers registered
+2025-11-14 14:05:53,246 [INFO] ✅ WebSocket manager configured
+2025-11-14 14:05:53,246 [INFO] === Backend startup complete ===
+2025-11-14 14:05:55,461 [INFO] 🛑 MyNAS Backend Shutting down...
+2025-11-14 14:05:55,462 [INFO] Backend terminated.
+2025-11-14 14:06:00,327 [INFO] Initializing MyNAS backend system...
+2025-11-14 14:06:00,328 [INFO] Auto-registering RPC handlers...
+2025-11-14 14:06:00,329 [INFO] RPC registered: acl (3 methods)
+2025-11-14 14:06:00,330 [INFO] Loaded RPC module: acl
+2025-11-14 14:06:00,330 [INFO] RPC registered: backup (4 methods)
+2025-11-14 14:06:00,331 [INFO] Loaded RPC module: backup
+2025-11-14 14:06:00,332 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 14:06:00,333 [INFO] Loaded RPC module: monitoring
+2025-11-14 14:06:00,333 [WARNING] Module network has no register_rpc()
+2025-11-14 14:06:00,334 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 14:06:00,336 [INFO] Loaded RPC module: nfs
+2025-11-14 14:06:00,338 [INFO] RPC registered: samba (2 methods)
+2025-11-14 14:06:00,338 [INFO] Loaded RPC module: samba
+2025-11-14 14:06:00,339 [INFO] RPC registered: shares (5 methods)
+2025-11-14 14:06:00,339 [INFO] Loaded RPC module: shares
+2025-11-14 14:06:00,346 [INFO] RPC registered: storage (5 methods)
+2025-11-14 14:06:00,346 [INFO] Loaded RPC module: storage
+2025-11-14 14:06:00,346 [WARNING] Module system has no register_rpc()
+2025-11-14 14:06:00,346 [INFO] RPC handlers registered successfully.
+2025-11-14 14:06:00,347 [INFO] WebSocket manager registered.
+2025-11-14 14:06:00,347 [INFO] MyNAS backend initialized successfully.
+2025-11-14 14:06:00,476 [INFO] === Starting MyNAS backend services ===
+2025-11-14 14:06:00,580 [INFO] ✅ Detected ZFS pools: {'config_pools': [{'name': 'main', 'type': 'zfs', 'devices': ['/dev/sdb']}], 'zpool_list': [{'name': 'main', 'health': 'ONLINE'}], 'importable_pools': []}
+2025-11-14 14:06:00,580 [INFO] Loaded 2 shares from config.
+2025-11-14 14:06:00,582 [INFO] ✅ Shares loaded successfully.
+2025-11-14 14:06:00,582 [INFO] Auto-registering RPC handlers...
+2025-11-14 14:06:00,583 [INFO] RPC registered: acl (3 methods)
+2025-11-14 14:06:00,583 [INFO] Loaded RPC module: acl
+2025-11-14 14:06:00,583 [INFO] RPC registered: backup (4 methods)
+2025-11-14 14:06:00,583 [INFO] Loaded RPC module: backup
+2025-11-14 14:06:00,584 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 14:06:00,584 [INFO] Loaded RPC module: monitoring
+2025-11-14 14:06:00,584 [WARNING] Module network has no register_rpc()
+2025-11-14 14:06:00,584 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 14:06:00,584 [INFO] Loaded RPC module: nfs
+2025-11-14 14:06:00,585 [INFO] RPC registered: samba (2 methods)
+2025-11-14 14:06:00,585 [INFO] Loaded RPC module: samba
+2025-11-14 14:06:00,585 [INFO] RPC registered: shares (5 methods)
+2025-11-14 14:06:00,586 [INFO] Loaded RPC module: shares
+2025-11-14 14:06:00,586 [INFO] RPC registered: storage (5 methods)
+2025-11-14 14:06:00,586 [INFO] Loaded RPC module: storage
+2025-11-14 14:06:00,586 [WARNING] Module system has no register_rpc()
+2025-11-14 14:06:00,587 [INFO] ✅ RPC handlers registered
+2025-11-14 14:06:00,588 [INFO] ✅ WebSocket manager configured
+2025-11-14 14:06:00,588 [INFO] === Backend startup complete ===
+2025-11-14 14:09:24,950 [INFO] Initializing MyNAS backend system...
+2025-11-14 14:09:24,950 [INFO] Auto-registering RPC handlers...
+2025-11-14 14:09:24,952 [INFO] RPC registered: acl (3 methods)
+2025-11-14 14:09:24,952 [INFO] Loaded RPC module: acl
+2025-11-14 14:09:24,952 [INFO] RPC registered: backup (4 methods)
+2025-11-14 14:09:24,952 [INFO] Loaded RPC module: backup
+2025-11-14 14:09:24,953 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 14:09:24,953 [INFO] Loaded RPC module: monitoring
+2025-11-14 14:09:24,956 [WARNING] Module network has no register_rpc()
+2025-11-14 14:09:24,960 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 14:09:24,962 [INFO] Loaded RPC module: nfs
+2025-11-14 14:09:24,963 [INFO] RPC registered: samba (2 methods)
+2025-11-14 14:09:24,963 [INFO] Loaded RPC module: samba
+2025-11-14 14:09:24,966 [INFO] RPC registered: shares (5 methods)
+2025-11-14 14:09:24,966 [INFO] Loaded RPC module: shares
+2025-11-14 14:09:24,979 [INFO] RPC registered: storage (5 methods)
+2025-11-14 14:09:24,980 [INFO] Loaded RPC module: storage
+2025-11-14 14:09:24,980 [WARNING] Module system has no register_rpc()
+2025-11-14 14:09:24,981 [INFO] RPC handlers registered successfully.
+2025-11-14 14:09:24,981 [INFO] WebSocket manager registered.
+2025-11-14 14:09:24,981 [INFO] MyNAS backend initialized successfully.
+2025-11-14 14:09:25,123 [INFO] === Starting MyNAS backend services ===
+2025-11-14 14:09:25,231 [INFO] ✅ Detected ZFS pools: {'config_pools': [{'name': 'main', 'type': 'zfs', 'devices': ['/dev/sdb']}], 'zpool_list': [{'name': 'main', 'health': 'ONLINE'}], 'importable_pools': []}
+2025-11-14 14:09:25,232 [INFO] Loaded 2 shares from config.
+2025-11-14 14:09:25,234 [INFO] ✅ Shares loaded successfully.
+2025-11-14 14:09:25,234 [INFO] Auto-registering RPC handlers...
+2025-11-14 14:09:25,234 [INFO] RPC registered: acl (3 methods)
+2025-11-14 14:09:25,234 [INFO] Loaded RPC module: acl
+2025-11-14 14:09:25,234 [INFO] RPC registered: backup (4 methods)
+2025-11-14 14:09:25,235 [INFO] Loaded RPC module: backup
+2025-11-14 14:09:25,235 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 14:09:25,235 [INFO] Loaded RPC module: monitoring
+2025-11-14 14:09:25,235 [WARNING] Module network has no register_rpc()
+2025-11-14 14:09:25,236 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 14:09:25,236 [INFO] Loaded RPC module: nfs
+2025-11-14 14:09:25,236 [INFO] RPC registered: samba (2 methods)
+2025-11-14 14:09:25,236 [INFO] Loaded RPC module: samba
+2025-11-14 14:09:25,236 [INFO] RPC registered: shares (5 methods)
+2025-11-14 14:09:25,236 [INFO] Loaded RPC module: shares
+2025-11-14 14:09:25,236 [INFO] RPC registered: storage (5 methods)
+2025-11-14 14:09:25,236 [INFO] Loaded RPC module: storage
+2025-11-14 14:09:25,236 [WARNING] Module system has no register_rpc()
+2025-11-14 14:09:25,238 [INFO] ✅ RPC handlers registered
+2025-11-14 14:09:25,238 [INFO] ✅ WebSocket manager configured
+2025-11-14 14:09:25,239 [INFO] === Backend startup complete ===
+2025-11-14 14:34:10,752 [INFO] Initializing MyNAS backend system...
+2025-11-14 14:34:10,754 [INFO] Auto-registering RPC handlers...
+2025-11-14 14:34:10,756 [INFO] RPC registered: acl (3 methods)
+2025-11-14 14:34:10,756 [INFO] Loaded RPC module: acl
+2025-11-14 14:34:10,758 [INFO] RPC registered: backup (4 methods)
+2025-11-14 14:34:10,758 [INFO] Loaded RPC module: backup
+2025-11-14 14:34:10,759 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 14:34:10,759 [INFO] Loaded RPC module: monitoring
+2025-11-14 14:34:10,760 [WARNING] Module network has no register_rpc()
+2025-11-14 14:34:10,761 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 14:34:10,761 [INFO] Loaded RPC module: nfs
+2025-11-14 14:34:10,763 [INFO] RPC registered: samba (2 methods)
+2025-11-14 14:34:10,764 [INFO] Loaded RPC module: samba
+2025-11-14 14:34:10,766 [INFO] RPC registered: shares (5 methods)
+2025-11-14 14:34:10,767 [INFO] Loaded RPC module: shares
+2025-11-14 14:34:10,773 [INFO] RPC registered: storage (5 methods)
+2025-11-14 14:34:10,773 [INFO] Loaded RPC module: storage
+2025-11-14 14:34:10,774 [WARNING] Module system has no register_rpc()
+2025-11-14 14:34:10,774 [INFO] RPC handlers registered successfully.
+2025-11-14 14:34:10,774 [INFO] WebSocket manager registered.
+2025-11-14 14:34:10,775 [INFO] MyNAS backend initialized successfully.
+2025-11-14 14:34:10,932 [INFO] === Starting MyNAS backend services ===
+2025-11-14 14:34:11,060 [INFO] ✅ Detected ZFS pools: {'config_pools': [{'name': 'main', 'type': 'zfs', 'devices': ['/dev/sdb']}], 'zpool_list': [{'name': 'main', 'health': 'ONLINE'}], 'importable_pools': []}
+2025-11-14 14:34:11,060 [INFO] Loaded 2 shares from config.
+2025-11-14 14:34:11,063 [INFO] ✅ Shares loaded successfully.
+2025-11-14 14:34:11,063 [INFO] Auto-registering RPC handlers...
+2025-11-14 14:34:11,063 [INFO] RPC registered: acl (3 methods)
+2025-11-14 14:34:11,063 [INFO] Loaded RPC module: acl
+2025-11-14 14:34:11,063 [INFO] RPC registered: backup (4 methods)
+2025-11-14 14:34:11,064 [INFO] Loaded RPC module: backup
+2025-11-14 14:34:11,064 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 14:34:11,064 [INFO] Loaded RPC module: monitoring
+2025-11-14 14:34:11,064 [WARNING] Module network has no register_rpc()
+2025-11-14 14:34:11,064 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 14:34:11,064 [INFO] Loaded RPC module: nfs
+2025-11-14 14:34:11,065 [INFO] RPC registered: samba (2 methods)
+2025-11-14 14:34:11,065 [INFO] Loaded RPC module: samba
+2025-11-14 14:34:11,065 [INFO] RPC registered: shares (5 methods)
+2025-11-14 14:34:11,065 [INFO] Loaded RPC module: shares
+2025-11-14 14:34:11,065 [INFO] RPC registered: storage (5 methods)
+2025-11-14 14:34:11,065 [INFO] Loaded RPC module: storage
+2025-11-14 14:34:11,065 [WARNING] Module system has no register_rpc()
+2025-11-14 14:34:11,066 [INFO] ✅ RPC handlers registered
+2025-11-14 14:34:11,066 [INFO] ✅ WebSocket manager configured
+2025-11-14 14:34:11,066 [INFO] === Backend startup complete ===
+2025-11-14 14:35:28,521 [INFO] Initializing MyNAS backend system...
+2025-11-14 14:35:28,523 [INFO] Auto-registering RPC handlers...
+2025-11-14 14:35:28,524 [INFO] RPC registered: acl (3 methods)
+2025-11-14 14:35:28,525 [INFO] Loaded RPC module: acl
+2025-11-14 14:35:28,525 [INFO] RPC registered: backup (4 methods)
+2025-11-14 14:35:28,526 [INFO] Loaded RPC module: backup
+2025-11-14 14:35:28,526 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 14:35:28,527 [INFO] Loaded RPC module: monitoring
+2025-11-14 14:35:28,527 [WARNING] Module network has no register_rpc()
+2025-11-14 14:35:28,528 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 14:35:28,529 [INFO] Loaded RPC module: nfs
+2025-11-14 14:35:28,530 [INFO] RPC registered: samba (2 methods)
+2025-11-14 14:35:28,530 [INFO] Loaded RPC module: samba
+2025-11-14 14:35:28,531 [INFO] RPC registered: shares (5 methods)
+2025-11-14 14:35:28,531 [INFO] Loaded RPC module: shares
+2025-11-14 14:35:28,537 [INFO] RPC registered: storage (5 methods)
+2025-11-14 14:35:28,537 [INFO] Loaded RPC module: storage
+2025-11-14 14:35:28,538 [WARNING] Module system has no register_rpc()
+2025-11-14 14:35:28,538 [INFO] RPC handlers registered successfully.
+2025-11-14 14:35:28,538 [INFO] WebSocket manager registered.
+2025-11-14 14:35:28,538 [INFO] MyNAS backend initialized successfully.
+2025-11-14 14:35:28,655 [INFO] === Starting MyNAS backend services ===
+2025-11-14 14:35:28,755 [INFO] ✅ Detected ZFS pools: {'config_pools': [{'name': 'main', 'type': 'zfs', 'devices': ['/dev/sdb']}], 'zpool_list': [{'name': 'main', 'health': 'ONLINE'}], 'importable_pools': []}
+2025-11-14 14:35:28,756 [INFO] Loaded 2 shares from config.
+2025-11-14 14:35:28,758 [INFO] ✅ Shares loaded successfully.
+2025-11-14 14:35:28,759 [INFO] Auto-registering RPC handlers...
+2025-11-14 14:35:28,759 [INFO] RPC registered: acl (3 methods)
+2025-11-14 14:35:28,759 [INFO] Loaded RPC module: acl
+2025-11-14 14:35:28,759 [INFO] RPC registered: backup (4 methods)
+2025-11-14 14:35:28,759 [INFO] Loaded RPC module: backup
+2025-11-14 14:35:28,760 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 14:35:28,760 [INFO] Loaded RPC module: monitoring
+2025-11-14 14:35:28,760 [WARNING] Module network has no register_rpc()
+2025-11-14 14:35:28,760 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 14:35:28,760 [INFO] Loaded RPC module: nfs
+2025-11-14 14:35:28,760 [INFO] RPC registered: samba (2 methods)
+2025-11-14 14:35:28,761 [INFO] Loaded RPC module: samba
+2025-11-14 14:35:28,761 [INFO] RPC registered: shares (5 methods)
+2025-11-14 14:35:28,761 [INFO] Loaded RPC module: shares
+2025-11-14 14:35:28,761 [INFO] RPC registered: storage (5 methods)
+2025-11-14 14:35:28,761 [INFO] Loaded RPC module: storage
+2025-11-14 14:35:28,761 [WARNING] Module system has no register_rpc()
+2025-11-14 14:35:28,762 [INFO] ✅ RPC handlers registered
+2025-11-14 14:35:28,762 [INFO] ✅ WebSocket manager configured
+2025-11-14 14:35:28,762 [INFO] === Backend startup complete ===
+2025-11-14 14:35:50,850 [INFO] 🛑 MyNAS Backend Shutting down...
+2025-11-14 14:35:50,851 [INFO] Backend terminated.
+2025-11-14 14:41:18,967 [INFO] Initializing MyNAS backend system...
+2025-11-14 14:41:18,967 [INFO] Auto-registering RPC handlers...
+2025-11-14 14:41:18,973 [INFO] RPC registered: acl (3 methods)
+2025-11-14 14:41:18,974 [INFO] Loaded RPC module: acl
+2025-11-14 14:41:18,976 [INFO] RPC registered: backup (4 methods)
+2025-11-14 14:41:18,980 [INFO] Loaded RPC module: backup
+2025-11-14 14:41:18,981 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 14:41:18,983 [INFO] Loaded RPC module: monitoring
+2025-11-14 14:41:18,984 [WARNING] Module network has no register_rpc()
+2025-11-14 14:41:18,988 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 14:41:18,989 [INFO] Loaded RPC module: nfs
+2025-11-14 14:41:18,991 [INFO] RPC registered: samba (2 methods)
+2025-11-14 14:41:18,995 [INFO] Loaded RPC module: samba
+2025-11-14 14:41:18,996 [INFO] RPC registered: shares (5 methods)
+2025-11-14 14:41:18,997 [INFO] Loaded RPC module: shares
+2025-11-14 14:41:19,008 [INFO] RPC registered: storage (5 methods)
+2025-11-14 14:41:19,010 [INFO] Loaded RPC module: storage
+2025-11-14 14:41:19,011 [WARNING] Module system has no register_rpc()
+2025-11-14 14:41:19,013 [INFO] RPC handlers registered successfully.
+2025-11-14 14:41:19,013 [INFO] WebSocket manager registered.
+2025-11-14 14:41:19,013 [INFO] MyNAS backend initialized successfully.
+2025-11-14 14:41:19,213 [INFO] === Starting MyNAS backend services ===
+2025-11-14 14:41:19,335 [INFO] ✅ Detected ZFS pools: {'config_pools': [{'name': 'main', 'type': 'zfs', 'devices': ['/dev/sdb']}], 'zpool_list': [{'name': 'main', 'health': 'ONLINE'}], 'importable_pools': []}
+2025-11-14 14:41:19,335 [INFO] Loaded 2 shares from config.
+2025-11-14 14:41:19,338 [INFO] ✅ Shares loaded successfully.
+2025-11-14 14:41:19,338 [INFO] Auto-registering RPC handlers...
+2025-11-14 14:41:19,340 [INFO] RPC registered: acl (3 methods)
+2025-11-14 14:41:19,340 [INFO] Loaded RPC module: acl
+2025-11-14 14:41:19,341 [INFO] RPC registered: backup (4 methods)
+2025-11-14 14:41:19,343 [INFO] Loaded RPC module: backup
+2025-11-14 14:41:19,343 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 14:41:19,343 [INFO] Loaded RPC module: monitoring
+2025-11-14 14:41:19,343 [WARNING] Module network has no register_rpc()
+2025-11-14 14:41:19,344 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 14:41:19,345 [INFO] Loaded RPC module: nfs
+2025-11-14 14:41:19,345 [INFO] RPC registered: samba (2 methods)
+2025-11-14 14:41:19,345 [INFO] Loaded RPC module: samba
+2025-11-14 14:41:19,345 [INFO] RPC registered: shares (5 methods)
+2025-11-14 14:41:19,346 [INFO] Loaded RPC module: shares
+2025-11-14 14:41:19,346 [INFO] RPC registered: storage (5 methods)
+2025-11-14 14:41:19,347 [INFO] Loaded RPC module: storage
+2025-11-14 14:41:19,348 [WARNING] Module system has no register_rpc()
+2025-11-14 14:41:19,349 [INFO] ✅ RPC handlers registered
+2025-11-14 14:41:19,349 [INFO] ✅ WebSocket manager configured
+2025-11-14 14:41:19,350 [INFO] === Backend startup complete ===
+2025-11-14 14:55:39,492 [INFO] Initializing MyNAS backend system...
+2025-11-14 14:55:39,493 [INFO] Auto-registering RPC handlers...
+2025-11-14 14:55:39,494 [INFO] RPC registered: acl (3 methods)
+2025-11-14 14:55:39,494 [INFO] Loaded RPC module: acl
+2025-11-14 14:55:39,495 [INFO] RPC registered: backup (4 methods)
+2025-11-14 14:55:39,495 [INFO] Loaded RPC module: backup
+2025-11-14 14:55:39,496 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 14:55:39,497 [INFO] Loaded RPC module: monitoring
+2025-11-14 14:55:39,498 [WARNING] Module network has no register_rpc()
+2025-11-14 14:55:39,500 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 14:55:39,500 [INFO] Loaded RPC module: nfs
+2025-11-14 14:55:39,501 [INFO] RPC registered: samba (2 methods)
+2025-11-14 14:55:39,502 [INFO] Loaded RPC module: samba
+2025-11-14 14:55:39,503 [INFO] RPC registered: shares (5 methods)
+2025-11-14 14:55:39,503 [INFO] Loaded RPC module: shares
+2025-11-14 14:55:39,509 [INFO] RPC registered: storage (5 methods)
+2025-11-14 14:55:39,510 [INFO] Loaded RPC module: storage
+2025-11-14 14:55:39,511 [WARNING] Module system has no register_rpc()
+2025-11-14 14:55:39,511 [INFO] RPC handlers loaded successfully.
+2025-11-14 14:55:39,511 [INFO] WebSocket manager registered.
+2025-11-14 14:55:39,511 [INFO] Backend initialization completed.
+2025-11-14 14:55:39,512 [INFO] Starting Flutter: /root/mynas/frontend_flutter (mode=release) at 192.168.1.2:8084
+2025-11-14 14:55:39,713 [INFO] === Starting MyNAS backend services ===
+2025-11-14 14:55:39,883 [INFO] ✅ Detected ZFS pools: {'config_pools': [{'name': 'main', 'type': 'zfs', 'devices': ['/dev/sdb']}], 'zpool_list': [{'name': 'main', 'health': 'ONLINE'}], 'importable_pools': []}
+2025-11-14 14:55:39,883 [INFO] Loaded 2 shares from config.
+2025-11-14 14:55:39,886 [INFO] ✅ Shares loaded successfully.
+2025-11-14 14:55:39,886 [INFO] Auto-registering RPC handlers...
+2025-11-14 14:55:39,886 [INFO] RPC registered: acl (3 methods)
+2025-11-14 14:55:39,887 [INFO] Loaded RPC module: acl
+2025-11-14 14:55:39,887 [INFO] RPC registered: backup (4 methods)
+2025-11-14 14:55:39,887 [INFO] Loaded RPC module: backup
+2025-11-14 14:55:39,887 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 14:55:39,887 [INFO] Loaded RPC module: monitoring
+2025-11-14 14:55:39,887 [WARNING] Module network has no register_rpc()
+2025-11-14 14:55:39,887 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 14:55:39,887 [INFO] Loaded RPC module: nfs
+2025-11-14 14:55:39,887 [INFO] RPC registered: samba (2 methods)
+2025-11-14 14:55:39,887 [INFO] Loaded RPC module: samba
+2025-11-14 14:55:39,887 [INFO] RPC registered: shares (5 methods)
+2025-11-14 14:55:39,890 [INFO] Loaded RPC module: shares
+2025-11-14 14:55:39,890 [INFO] RPC registered: storage (5 methods)
+2025-11-14 14:55:39,890 [INFO] Loaded RPC module: storage
+2025-11-14 14:55:39,890 [WARNING] Module system has no register_rpc()
+2025-11-14 14:55:39,890 [INFO] ✅ RPC handlers registered
+2025-11-14 14:55:39,891 [INFO] ✅ WebSocket manager configured
+2025-11-14 14:55:39,891 [INFO] === Backend startup complete ===
+2025-11-14 14:56:44,029 [INFO] Flutter appears ready — opening browser at http://192.168.1.2:8084
+2025-11-14 15:38:52,317 [INFO] Initializing MyNAS backend system...
+2025-11-14 15:38:52,321 [INFO] Auto-registering RPC handlers...
+2025-11-14 15:38:52,324 [INFO] RPC registered: acl (3 methods)
+2025-11-14 15:38:52,326 [INFO] Loaded RPC module: acl
+2025-11-14 15:38:52,330 [INFO] RPC registered: backup (4 methods)
+2025-11-14 15:38:52,330 [INFO] Loaded RPC module: backup
+2025-11-14 15:38:52,331 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 15:38:52,331 [INFO] Loaded RPC module: monitoring
+2025-11-14 15:38:52,332 [WARNING] Module network has no register_rpc()
+2025-11-14 15:38:52,335 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 15:38:52,335 [INFO] Loaded RPC module: nfs
+2025-11-14 15:38:52,336 [INFO] RPC registered: samba (2 methods)
+2025-11-14 15:38:52,338 [INFO] Loaded RPC module: samba
+2025-11-14 15:38:52,339 [INFO] RPC registered: shares (5 methods)
+2025-11-14 15:38:52,339 [INFO] Loaded RPC module: shares
+2025-11-14 15:38:52,352 [INFO] RPC registered: storage (5 methods)
+2025-11-14 15:38:52,352 [INFO] Loaded RPC module: storage
+2025-11-14 15:38:52,352 [WARNING] Module system has no register_rpc()
+2025-11-14 15:38:52,352 [INFO] RPC handlers loaded successfully.
+2025-11-14 15:38:52,353 [INFO] WebSocket manager registered.
+2025-11-14 15:38:52,353 [INFO] Backend initialization completed.
+2025-11-14 15:38:52,355 [INFO] Starting Flutter: /root/mynas/frontend_flutter (mode=release) at 192.168.1.2:8084
+2025-11-14 15:38:52,609 [INFO] === Starting MyNAS backend services ===
+2025-11-14 15:38:52,790 [INFO] ✅ Detected ZFS pools: {'config_pools': [{'name': 'main', 'type': 'zfs', 'devices': ['/dev/sdb']}], 'zpool_list': [{'name': 'main', 'health': 'ONLINE'}], 'importable_pools': []}
+2025-11-14 15:38:52,791 [INFO] Loaded 2 shares from config.
+2025-11-14 15:38:52,794 [INFO] ✅ Shares loaded successfully.
+2025-11-14 15:38:52,794 [INFO] Auto-registering RPC handlers...
+2025-11-14 15:38:52,795 [INFO] RPC registered: acl (3 methods)
+2025-11-14 15:38:52,795 [INFO] Loaded RPC module: acl
+2025-11-14 15:38:52,795 [INFO] RPC registered: backup (4 methods)
+2025-11-14 15:38:52,796 [INFO] Loaded RPC module: backup
+2025-11-14 15:38:52,796 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 15:38:52,797 [INFO] Loaded RPC module: monitoring
+2025-11-14 15:38:52,797 [WARNING] Module network has no register_rpc()
+2025-11-14 15:38:52,797 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 15:38:52,798 [INFO] Loaded RPC module: nfs
+2025-11-14 15:38:52,799 [INFO] RPC registered: samba (2 methods)
+2025-11-14 15:38:52,799 [INFO] Loaded RPC module: samba
+2025-11-14 15:38:52,799 [INFO] RPC registered: shares (5 methods)
+2025-11-14 15:38:52,799 [INFO] Loaded RPC module: shares
+2025-11-14 15:38:52,800 [INFO] RPC registered: storage (5 methods)
+2025-11-14 15:38:52,802 [INFO] Loaded RPC module: storage
+2025-11-14 15:38:52,802 [WARNING] Module system has no register_rpc()
+2025-11-14 15:38:52,802 [INFO] ✅ RPC handlers registered
+2025-11-14 15:38:52,802 [INFO] ✅ WebSocket manager configured
+2025-11-14 15:38:52,803 [INFO] === Backend startup complete ===
+2025-11-14 15:39:22,048 [INFO] Initializing MyNAS backend system...
+2025-11-14 15:39:22,049 [INFO] Auto-registering RPC handlers...
+2025-11-14 15:39:22,052 [INFO] RPC registered: acl (3 methods)
+2025-11-14 15:39:22,053 [INFO] Loaded RPC module: acl
+2025-11-14 15:39:22,054 [INFO] RPC registered: backup (4 methods)
+2025-11-14 15:39:22,054 [INFO] Loaded RPC module: backup
+2025-11-14 15:39:22,056 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 15:39:22,056 [INFO] Loaded RPC module: monitoring
+2025-11-14 15:39:22,057 [WARNING] Module network has no register_rpc()
+2025-11-14 15:39:22,058 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 15:39:22,058 [INFO] Loaded RPC module: nfs
+2025-11-14 15:39:22,062 [INFO] RPC registered: samba (2 methods)
+2025-11-14 15:39:22,065 [INFO] Loaded RPC module: samba
+2025-11-14 15:39:22,065 [INFO] RPC registered: shares (5 methods)
+2025-11-14 15:39:22,066 [INFO] Loaded RPC module: shares
+2025-11-14 15:39:22,075 [INFO] RPC registered: storage (5 methods)
+2025-11-14 15:39:22,078 [INFO] Loaded RPC module: storage
+2025-11-14 15:39:22,079 [WARNING] Module system has no register_rpc()
+2025-11-14 15:39:22,080 [INFO] RPC handlers loaded successfully.
+2025-11-14 15:39:22,080 [INFO] WebSocket manager registered.
+2025-11-14 15:39:22,081 [INFO] Backend initialization completed.
+2025-11-14 15:39:22,083 [INFO] Starting Flutter: /root/mynas/frontend_flutter (mode=release) at 192.168.1.2:8084
+2025-11-14 15:39:22,304 [INFO] === Starting MyNAS backend services ===
+2025-11-14 15:39:22,458 [INFO] ✅ Detected ZFS pools: {'config_pools': [{'name': 'main', 'type': 'zfs', 'devices': ['/dev/sdb']}], 'zpool_list': [{'name': 'main', 'health': 'ONLINE'}], 'importable_pools': []}
+2025-11-14 15:39:22,459 [INFO] Loaded 2 shares from config.
+2025-11-14 15:39:22,463 [INFO] ✅ Shares loaded successfully.
+2025-11-14 15:39:22,464 [INFO] Auto-registering RPC handlers...
+2025-11-14 15:39:22,464 [INFO] RPC registered: acl (3 methods)
+2025-11-14 15:39:22,464 [INFO] Loaded RPC module: acl
+2025-11-14 15:39:22,464 [INFO] RPC registered: backup (4 methods)
+2025-11-14 15:39:22,464 [INFO] Loaded RPC module: backup
+2025-11-14 15:39:22,464 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 15:39:22,464 [INFO] Loaded RPC module: monitoring
+2025-11-14 15:39:22,467 [WARNING] Module network has no register_rpc()
+2025-11-14 15:39:22,467 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 15:39:22,467 [INFO] Loaded RPC module: nfs
+2025-11-14 15:39:22,467 [INFO] RPC registered: samba (2 methods)
+2025-11-14 15:39:22,467 [INFO] Loaded RPC module: samba
+2025-11-14 15:39:22,469 [INFO] RPC registered: shares (5 methods)
+2025-11-14 15:39:22,469 [INFO] Loaded RPC module: shares
+2025-11-14 15:39:22,469 [INFO] RPC registered: storage (5 methods)
+2025-11-14 15:39:22,469 [INFO] Loaded RPC module: storage
+2025-11-14 15:39:22,469 [WARNING] Module system has no register_rpc()
+2025-11-14 15:39:22,469 [INFO] ✅ RPC handlers registered
+2025-11-14 15:39:22,469 [INFO] ✅ WebSocket manager configured
+2025-11-14 15:39:22,469 [INFO] === Backend startup complete ===
+2025-11-14 15:50:55,502 [INFO] Initializing MyNAS backend system...
+2025-11-14 15:50:55,503 [INFO] Auto-registering RPC handlers...
+2025-11-14 15:50:55,505 [INFO] RPC registered: acl (3 methods)
+2025-11-14 15:50:55,505 [INFO] Loaded RPC module: acl
+2025-11-14 15:50:55,506 [INFO] RPC registered: backup (4 methods)
+2025-11-14 15:50:55,506 [INFO] Loaded RPC module: backup
+2025-11-14 15:50:55,506 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 15:50:55,506 [INFO] Loaded RPC module: monitoring
+2025-11-14 15:50:55,506 [WARNING] Module network has no register_rpc()
+2025-11-14 15:50:55,510 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 15:50:55,510 [INFO] Loaded RPC module: nfs
+2025-11-14 15:50:55,512 [INFO] RPC registered: samba (2 methods)
+2025-11-14 15:50:55,512 [INFO] Loaded RPC module: samba
+2025-11-14 15:50:55,513 [INFO] RPC registered: shares (5 methods)
+2025-11-14 15:50:55,513 [INFO] Loaded RPC module: shares
+2025-11-14 15:50:55,520 [INFO] RPC registered: storage (5 methods)
+2025-11-14 15:50:55,522 [INFO] Loaded RPC module: storage
+2025-11-14 15:50:55,522 [WARNING] Module system has no register_rpc()
+2025-11-14 15:50:55,522 [INFO] RPC handlers loaded successfully.
+2025-11-14 15:50:55,522 [INFO] WebSocket manager registered.
+2025-11-14 15:50:55,523 [INFO] Backend initialization completed.
+2025-11-14 15:50:55,524 [INFO] Starting Flutter: /root/mynas/frontend_flutter (mode=release) at 192.168.1.2:8084
+2025-11-14 15:50:55,787 [INFO] === Starting MyNAS backend services ===
+2025-11-14 15:50:55,995 [INFO] ✅ Detected ZFS pools: {'config_pools': [{'name': 'main', 'type': 'zfs', 'devices': ['/dev/sdb']}], 'zpool_list': [{'name': 'main', 'health': 'ONLINE'}], 'importable_pools': []}
+2025-11-14 15:50:55,995 [INFO] Loaded 2 shares from config.
+2025-11-14 15:50:55,997 [INFO] ✅ Shares loaded successfully.
+2025-11-14 15:50:55,997 [INFO] Auto-registering RPC handlers...
+2025-11-14 15:50:55,997 [INFO] RPC registered: acl (3 methods)
+2025-11-14 15:50:55,997 [INFO] Loaded RPC module: acl
+2025-11-14 15:50:55,997 [INFO] RPC registered: backup (4 methods)
+2025-11-14 15:50:55,997 [INFO] Loaded RPC module: backup
+2025-11-14 15:50:56,005 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 15:50:56,006 [INFO] Loaded RPC module: monitoring
+2025-11-14 15:50:56,007 [WARNING] Module network has no register_rpc()
+2025-11-14 15:50:56,007 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 15:50:56,007 [INFO] Loaded RPC module: nfs
+2025-11-14 15:50:56,008 [INFO] RPC registered: samba (2 methods)
+2025-11-14 15:50:56,008 [INFO] Loaded RPC module: samba
+2025-11-14 15:50:56,009 [INFO] RPC registered: shares (5 methods)
+2025-11-14 15:50:56,010 [INFO] Loaded RPC module: shares
+2025-11-14 15:50:56,011 [INFO] RPC registered: storage (5 methods)
+2025-11-14 15:50:56,012 [INFO] Loaded RPC module: storage
+2025-11-14 15:50:56,012 [WARNING] Module system has no register_rpc()
+2025-11-14 15:50:56,012 [INFO] ✅ RPC handlers registered
+2025-11-14 15:50:56,013 [INFO] ✅ WebSocket manager configured
+2025-11-14 15:50:56,013 [INFO] === Backend startup complete ===
+2025-11-14 15:51:44,436 [INFO] Initializing MyNAS backend system...
+2025-11-14 15:51:44,441 [INFO] Auto-registering RPC handlers...
+2025-11-14 15:51:44,448 [INFO] RPC registered: acl (3 methods)
+2025-11-14 15:51:44,453 [INFO] Loaded RPC module: acl
+2025-11-14 15:51:44,457 [INFO] RPC registered: backup (4 methods)
+2025-11-14 15:51:44,460 [INFO] Loaded RPC module: backup
+2025-11-14 15:51:44,463 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 15:51:44,466 [INFO] Loaded RPC module: monitoring
+2025-11-14 15:51:44,467 [WARNING] Module network has no register_rpc()
+2025-11-14 15:51:44,478 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 15:51:44,479 [INFO] Loaded RPC module: nfs
+2025-11-14 15:51:44,484 [INFO] RPC registered: samba (2 methods)
+2025-11-14 15:51:44,487 [INFO] Loaded RPC module: samba
+2025-11-14 15:51:44,490 [INFO] RPC registered: shares (5 methods)
+2025-11-14 15:51:44,491 [INFO] Loaded RPC module: shares
+2025-11-14 15:51:44,507 [INFO] RPC registered: storage (5 methods)
+2025-11-14 15:51:44,511 [INFO] Loaded RPC module: storage
+2025-11-14 15:51:44,512 [WARNING] Module system has no register_rpc()
+2025-11-14 15:51:44,513 [INFO] RPC handlers loaded successfully.
+2025-11-14 15:51:44,514 [INFO] WebSocket manager registered.
+2025-11-14 15:51:44,515 [INFO] Backend initialization completed.
+2025-11-14 15:51:44,521 [INFO] Starting Flutter: /root/mynas/frontend_flutter (mode=release) at 192.168.1.2:8084
+2025-11-14 15:51:44,839 [INFO] === Starting MyNAS backend services ===
+2025-11-14 15:51:45,015 [INFO] ✅ Detected ZFS pools: {'config_pools': [{'name': 'main', 'type': 'zfs', 'devices': ['/dev/sdb']}], 'zpool_list': [{'name': 'main', 'health': 'ONLINE'}], 'importable_pools': []}
+2025-11-14 15:51:45,016 [INFO] Loaded 2 shares from config.
+2025-11-14 15:51:45,024 [INFO] ✅ Shares loaded successfully.
+2025-11-14 15:51:45,024 [INFO] Auto-registering RPC handlers...
+2025-11-14 15:51:45,025 [INFO] RPC registered: acl (3 methods)
+2025-11-14 15:51:45,025 [INFO] Loaded RPC module: acl
+2025-11-14 15:51:45,025 [INFO] RPC registered: backup (4 methods)
+2025-11-14 15:51:45,025 [INFO] Loaded RPC module: backup
+2025-11-14 15:51:45,025 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 15:51:45,025 [INFO] Loaded RPC module: monitoring
+2025-11-14 15:51:45,025 [WARNING] Module network has no register_rpc()
+2025-11-14 15:51:45,025 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 15:51:45,031 [INFO] Loaded RPC module: nfs
+2025-11-14 15:51:45,031 [INFO] RPC registered: samba (2 methods)
+2025-11-14 15:51:45,031 [INFO] Loaded RPC module: samba
+2025-11-14 15:51:45,031 [INFO] RPC registered: shares (5 methods)
+2025-11-14 15:51:45,031 [INFO] Loaded RPC module: shares
+2025-11-14 15:51:45,032 [INFO] RPC registered: storage (5 methods)
+2025-11-14 15:51:45,032 [INFO] Loaded RPC module: storage
+2025-11-14 15:51:45,032 [WARNING] Module system has no register_rpc()
+2025-11-14 15:51:45,032 [INFO] ✅ RPC handlers registered
+2025-11-14 15:51:45,034 [INFO] ✅ WebSocket manager configured
+2025-11-14 15:51:45,034 [INFO] === Backend startup complete ===
+2025-11-14 15:53:28,575 [INFO] Initializing MyNAS backend system...
+2025-11-14 15:53:28,577 [INFO] Auto-registering RPC handlers...
+2025-11-14 15:53:28,580 [INFO] RPC registered: acl (3 methods)
+2025-11-14 15:53:28,581 [INFO] Loaded RPC module: acl
+2025-11-14 15:53:28,582 [INFO] RPC registered: backup (4 methods)
+2025-11-14 15:53:28,583 [INFO] Loaded RPC module: backup
+2025-11-14 15:53:28,584 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 15:53:28,586 [INFO] Loaded RPC module: monitoring
+2025-11-14 15:53:28,586 [WARNING] Module network has no register_rpc()
+2025-11-14 15:53:28,589 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 15:53:28,592 [INFO] Loaded RPC module: nfs
+2025-11-14 15:53:28,595 [INFO] RPC registered: samba (2 methods)
+2025-11-14 15:53:28,596 [INFO] Loaded RPC module: samba
+2025-11-14 15:53:28,598 [INFO] RPC registered: shares (5 methods)
+2025-11-14 15:53:28,599 [INFO] Loaded RPC module: shares
+2025-11-14 15:53:28,610 [INFO] RPC registered: storage (5 methods)
+2025-11-14 15:53:28,613 [INFO] Loaded RPC module: storage
+2025-11-14 15:53:28,616 [WARNING] Module system has no register_rpc()
+2025-11-14 15:53:28,616 [INFO] RPC handlers loaded successfully.
+2025-11-14 15:53:28,618 [INFO] WebSocket manager registered.
+2025-11-14 15:53:28,619 [INFO] Backend initialization completed.
+2025-11-14 15:53:28,619 [INFO] Starting Flutter: /root/mynas/frontend_flutter (mode=release) at 192.168.1.2:8084
+2025-11-14 15:53:28,846 [INFO] === Starting MyNAS backend services ===
+2025-11-14 15:53:28,967 [INFO] ✅ Detected ZFS pools: {'config_pools': [{'name': 'main', 'type': 'zfs', 'devices': ['/dev/sdb']}], 'zpool_list': [{'name': 'main', 'health': 'ONLINE'}], 'importable_pools': []}
+2025-11-14 15:53:28,967 [INFO] Loaded 2 shares from config.
+2025-11-14 15:53:28,970 [INFO] ✅ Shares loaded successfully.
+2025-11-14 15:53:28,973 [INFO] Auto-registering RPC handlers...
+2025-11-14 15:53:28,973 [INFO] RPC registered: acl (3 methods)
+2025-11-14 15:53:28,973 [INFO] Loaded RPC module: acl
+2025-11-14 15:53:28,973 [INFO] RPC registered: backup (4 methods)
+2025-11-14 15:53:28,973 [INFO] Loaded RPC module: backup
+2025-11-14 15:53:28,973 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 15:53:28,973 [INFO] Loaded RPC module: monitoring
+2025-11-14 15:53:28,973 [WARNING] Module network has no register_rpc()
+2025-11-14 15:53:28,974 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 15:53:28,974 [INFO] Loaded RPC module: nfs
+2025-11-14 15:53:28,974 [INFO] RPC registered: samba (2 methods)
+2025-11-14 15:53:28,974 [INFO] Loaded RPC module: samba
+2025-11-14 15:53:28,975 [INFO] RPC registered: shares (5 methods)
+2025-11-14 15:53:28,975 [INFO] Loaded RPC module: shares
+2025-11-14 15:53:28,976 [INFO] RPC registered: storage (5 methods)
+2025-11-14 15:53:28,977 [INFO] Loaded RPC module: storage
+2025-11-14 15:53:28,977 [WARNING] Module system has no register_rpc()
+2025-11-14 15:53:28,977 [INFO] ✅ RPC handlers registered
+2025-11-14 15:53:28,977 [INFO] ✅ WebSocket manager configured
+2025-11-14 15:53:28,978 [INFO] === Backend startup complete ===
+2025-11-14 15:53:32,192 [INFO] Flutter appears ready — opening browser at http://192.168.1.2:8084
+2025-11-14 15:54:25,977 [INFO] Initializing MyNAS backend system...
+2025-11-14 15:54:25,978 [INFO] Auto-registering RPC handlers...
+2025-11-14 15:54:25,981 [INFO] RPC registered: acl (3 methods)
+2025-11-14 15:54:25,981 [INFO] Loaded RPC module: acl
+2025-11-14 15:54:25,982 [INFO] RPC registered: backup (4 methods)
+2025-11-14 15:54:25,983 [INFO] Loaded RPC module: backup
+2025-11-14 15:54:25,984 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 15:54:25,985 [INFO] Loaded RPC module: monitoring
+2025-11-14 15:54:25,985 [WARNING] Module network has no register_rpc()
+2025-11-14 15:54:25,987 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 15:54:25,987 [INFO] Loaded RPC module: nfs
+2025-11-14 15:54:25,988 [INFO] RPC registered: samba (2 methods)
+2025-11-14 15:54:25,990 [INFO] Loaded RPC module: samba
+2025-11-14 15:54:25,990 [INFO] RPC registered: shares (5 methods)
+2025-11-14 15:54:25,992 [INFO] Loaded RPC module: shares
+2025-11-14 15:54:26,000 [INFO] RPC registered: storage (5 methods)
+2025-11-14 15:54:26,003 [INFO] Loaded RPC module: storage
+2025-11-14 15:54:26,005 [WARNING] Module system has no register_rpc()
+2025-11-14 15:54:26,006 [INFO] RPC handlers loaded successfully.
+2025-11-14 15:54:26,008 [INFO] WebSocket manager registered.
+2025-11-14 15:54:26,009 [INFO] Backend initialization completed.
+2025-11-14 15:54:26,010 [INFO] Starting Flutter: /root/mynas/frontend_flutter (mode=release) at 192.168.1.2:8084
+2025-11-14 15:54:26,257 [INFO] === Starting MyNAS backend services ===
+2025-11-14 15:54:26,406 [INFO] ✅ Detected ZFS pools: {'config_pools': [{'name': 'main', 'type': 'zfs', 'devices': ['/dev/sdb']}], 'zpool_list': [{'name': 'main', 'health': 'ONLINE'}], 'importable_pools': []}
+2025-11-14 15:54:26,406 [INFO] Loaded 2 shares from config.
+2025-11-14 15:54:26,412 [INFO] ✅ Shares loaded successfully.
+2025-11-14 15:54:26,415 [INFO] Auto-registering RPC handlers...
+2025-11-14 15:54:26,415 [INFO] RPC registered: acl (3 methods)
+2025-11-14 15:54:26,415 [INFO] Loaded RPC module: acl
+2025-11-14 15:54:26,415 [INFO] RPC registered: backup (4 methods)
+2025-11-14 15:54:26,416 [INFO] Loaded RPC module: backup
+2025-11-14 15:54:26,417 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 15:54:26,417 [INFO] Loaded RPC module: monitoring
+2025-11-14 15:54:26,418 [WARNING] Module network has no register_rpc()
+2025-11-14 15:54:26,418 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 15:54:26,419 [INFO] Loaded RPC module: nfs
+2025-11-14 15:54:26,420 [INFO] RPC registered: samba (2 methods)
+2025-11-14 15:54:26,420 [INFO] Loaded RPC module: samba
+2025-11-14 15:54:26,420 [INFO] RPC registered: shares (5 methods)
+2025-11-14 15:54:26,421 [INFO] Loaded RPC module: shares
+2025-11-14 15:54:26,421 [INFO] RPC registered: storage (5 methods)
+2025-11-14 15:54:26,422 [INFO] Loaded RPC module: storage
+2025-11-14 15:54:26,422 [WARNING] Module system has no register_rpc()
+2025-11-14 15:54:26,423 [INFO] ✅ RPC handlers registered
+2025-11-14 15:54:26,423 [INFO] ✅ WebSocket manager configured
+2025-11-14 15:54:26,424 [INFO] === Backend startup complete ===
+2025-11-14 15:57:32,490 [INFO] Initializing MyNAS backend system...
+2025-11-14 15:57:32,491 [INFO] Auto-registering RPC handlers...
+2025-11-14 15:57:32,491 [INFO] RPC registered: acl (3 methods)
+2025-11-14 15:57:32,492 [INFO] Loaded RPC module: acl
+2025-11-14 15:57:32,492 [INFO] RPC registered: backup (4 methods)
+2025-11-14 15:57:32,492 [INFO] Loaded RPC module: backup
+2025-11-14 15:57:32,492 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 15:57:32,492 [INFO] Loaded RPC module: monitoring
+2025-11-14 15:57:32,493 [WARNING] Module network has no register_rpc()
+2025-11-14 15:57:32,493 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 15:57:32,494 [INFO] Loaded RPC module: nfs
+2025-11-14 15:57:32,494 [INFO] RPC registered: samba (2 methods)
+2025-11-14 15:57:32,495 [INFO] Loaded RPC module: samba
+2025-11-14 15:57:32,495 [INFO] RPC registered: shares (5 methods)
+2025-11-14 15:57:32,495 [INFO] Loaded RPC module: shares
+2025-11-14 15:57:32,501 [INFO] RPC registered: storage (5 methods)
+2025-11-14 15:57:32,501 [INFO] Loaded RPC module: storage
+2025-11-14 15:57:32,502 [WARNING] Module system has no register_rpc()
+2025-11-14 15:57:32,502 [INFO] RPC handlers loaded successfully.
+2025-11-14 15:57:32,502 [INFO] WebSocket manager registered.
+2025-11-14 15:57:32,502 [INFO] Backend initialization completed.
+2025-11-14 15:57:32,503 [INFO] Starting Flutter: /root/mynas/frontend_flutter (mode=release) at 192.168.1.2:8084
+2025-11-14 15:57:32,728 [INFO] === Starting MyNAS backend services ===
+2025-11-14 15:57:32,857 [INFO] ✅ Detected ZFS pools: {'config_pools': [{'name': 'main', 'type': 'zfs', 'devices': ['/dev/sdb']}], 'zpool_list': [{'name': 'main', 'health': 'ONLINE'}], 'importable_pools': []}
+2025-11-14 15:57:32,858 [INFO] Loaded 2 shares from config.
+2025-11-14 15:57:32,863 [INFO] ✅ Shares loaded successfully.
+2025-11-14 15:57:32,864 [INFO] Auto-registering RPC handlers...
+2025-11-14 15:57:32,865 [INFO] RPC registered: acl (3 methods)
+2025-11-14 15:57:32,866 [INFO] Loaded RPC module: acl
+2025-11-14 15:57:32,867 [INFO] RPC registered: backup (4 methods)
+2025-11-14 15:57:32,868 [INFO] Loaded RPC module: backup
+2025-11-14 15:57:32,868 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 15:57:32,870 [INFO] Loaded RPC module: monitoring
+2025-11-14 15:57:32,871 [WARNING] Module network has no register_rpc()
+2025-11-14 15:57:32,871 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 15:57:32,871 [INFO] Loaded RPC module: nfs
+2025-11-14 15:57:32,872 [INFO] RPC registered: samba (2 methods)
+2025-11-14 15:57:32,873 [INFO] Loaded RPC module: samba
+2025-11-14 15:57:32,874 [INFO] RPC registered: shares (5 methods)
+2025-11-14 15:57:32,874 [INFO] Loaded RPC module: shares
+2025-11-14 15:57:32,876 [INFO] RPC registered: storage (5 methods)
+2025-11-14 15:57:32,877 [INFO] Loaded RPC module: storage
+2025-11-14 15:57:32,877 [WARNING] Module system has no register_rpc()
+2025-11-14 15:57:32,877 [INFO] ✅ RPC handlers registered
+2025-11-14 15:57:32,877 [INFO] ✅ WebSocket manager configured
+2025-11-14 15:57:32,878 [INFO] === Backend startup complete ===
+2025-11-14 15:57:35,688 [INFO] Flutter appears ready — opening browser at http://192.168.1.2:8084
+2025-11-14 16:08:14,954 [INFO] Initializing MyNAS backend system...
+2025-11-14 16:08:14,955 [INFO] Auto-registering RPC handlers...
+2025-11-14 16:08:14,957 [INFO] RPC registered: acl (3 methods)
+2025-11-14 16:08:14,957 [INFO] Loaded RPC module: acl
+2025-11-14 16:08:14,958 [INFO] RPC registered: backup (4 methods)
+2025-11-14 16:08:14,959 [INFO] Loaded RPC module: backup
+2025-11-14 16:08:14,959 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 16:08:14,960 [INFO] Loaded RPC module: monitoring
+2025-11-14 16:08:14,960 [WARNING] Module network has no register_rpc()
+2025-11-14 16:08:14,961 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 16:08:14,962 [INFO] Loaded RPC module: nfs
+2025-11-14 16:08:14,963 [INFO] RPC registered: samba (2 methods)
+2025-11-14 16:08:14,963 [INFO] Loaded RPC module: samba
+2025-11-14 16:08:14,964 [INFO] RPC registered: shares (5 methods)
+2025-11-14 16:08:14,964 [INFO] Loaded RPC module: shares
+2025-11-14 16:08:14,969 [INFO] RPC registered: storage (5 methods)
+2025-11-14 16:08:14,970 [INFO] Loaded RPC module: storage
+2025-11-14 16:08:14,971 [WARNING] Module system has no register_rpc()
+2025-11-14 16:08:14,971 [INFO] RPC handlers loaded successfully.
+2025-11-14 16:08:14,972 [INFO] WebSocket manager registered.
+2025-11-14 16:08:14,972 [INFO] Backend initialization completed.
+2025-11-14 16:08:14,974 [INFO] Starting Flutter: /root/mynas/frontend_flutter (mode=release) at 192.168.1.2:8084
+2025-11-14 16:08:15,200 [INFO] === Starting MyNAS backend services ===
+2025-11-14 16:08:15,388 [INFO] ✅ Detected ZFS pools: {'config_pools': [{'name': 'main', 'type': 'zfs', 'devices': ['/dev/sdb']}], 'zpool_list': [{'name': 'main', 'health': 'ONLINE'}], 'importable_pools': []}
+2025-11-14 16:08:15,388 [INFO] Loaded 2 shares from config.
+2025-11-14 16:08:15,395 [INFO] ✅ Shares loaded successfully.
+2025-11-14 16:08:15,395 [INFO] Auto-registering RPC handlers...
+2025-11-14 16:08:15,395 [INFO] RPC registered: acl (3 methods)
+2025-11-14 16:08:15,395 [INFO] Loaded RPC module: acl
+2025-11-14 16:08:15,399 [INFO] RPC registered: backup (4 methods)
+2025-11-14 16:08:15,400 [INFO] Loaded RPC module: backup
+2025-11-14 16:08:15,401 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 16:08:15,401 [INFO] Loaded RPC module: monitoring
+2025-11-14 16:08:15,401 [WARNING] Module network has no register_rpc()
+2025-11-14 16:08:15,401 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 16:08:15,401 [INFO] Loaded RPC module: nfs
+2025-11-14 16:08:15,401 [INFO] RPC registered: samba (2 methods)
+2025-11-14 16:08:15,401 [INFO] Loaded RPC module: samba
+2025-11-14 16:08:15,401 [INFO] RPC registered: shares (5 methods)
+2025-11-14 16:08:15,401 [INFO] Loaded RPC module: shares
+2025-11-14 16:08:15,406 [INFO] RPC registered: storage (5 methods)
+2025-11-14 16:08:15,406 [INFO] Loaded RPC module: storage
+2025-11-14 16:08:15,406 [WARNING] Module system has no register_rpc()
+2025-11-14 16:08:15,406 [INFO] ✅ RPC handlers registered
+2025-11-14 16:08:15,406 [INFO] ✅ WebSocket manager configured
+2025-11-14 16:08:15,406 [INFO] === Backend startup complete ===
+2025-11-14 16:11:48,470 [INFO] Initializing MyNAS backend system...
+2025-11-14 16:11:48,472 [INFO] Auto-registering RPC handlers...
+2025-11-14 16:11:48,473 [INFO] RPC registered: acl (3 methods)
+2025-11-14 16:11:48,473 [INFO] Loaded RPC module: acl
+2025-11-14 16:11:48,476 [INFO] RPC registered: backup (4 methods)
+2025-11-14 16:11:48,476 [INFO] Loaded RPC module: backup
+2025-11-14 16:11:48,479 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 16:11:48,479 [INFO] Loaded RPC module: monitoring
+2025-11-14 16:11:48,479 [WARNING] Module network has no register_rpc()
+2025-11-14 16:11:48,480 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 16:11:48,485 [INFO] Loaded RPC module: nfs
+2025-11-14 16:11:48,488 [INFO] RPC registered: samba (2 methods)
+2025-11-14 16:11:48,488 [INFO] Loaded RPC module: samba
+2025-11-14 16:11:48,490 [INFO] RPC registered: shares (5 methods)
+2025-11-14 16:11:48,494 [INFO] Loaded RPC module: shares
+2025-11-14 16:11:48,511 [INFO] RPC registered: storage (5 methods)
+2025-11-14 16:11:48,511 [INFO] Loaded RPC module: storage
+2025-11-14 16:11:48,511 [WARNING] Module system has no register_rpc()
+2025-11-14 16:11:48,511 [INFO] RPC handlers loaded successfully.
+2025-11-14 16:11:48,511 [INFO] WebSocket manager registered.
+2025-11-14 16:11:48,512 [INFO] Backend initialization completed.
+2025-11-14 16:11:48,512 [INFO] Starting Flutter: /root/mynas/frontend_flutter (mode=profile) at 192.168.1.2:8084
+2025-11-14 16:11:48,903 [INFO] === Starting MyNAS backend services ===
+2025-11-14 16:11:49,097 [INFO] ✅ Detected ZFS pools: {'config_pools': [{'name': 'main', 'type': 'zfs', 'devices': ['/dev/sdb']}], 'zpool_list': [{'name': 'main', 'health': 'ONLINE'}], 'importable_pools': []}
+2025-11-14 16:11:49,097 [INFO] Loaded 2 shares from config.
+2025-11-14 16:11:49,100 [INFO] ✅ Shares loaded successfully.
+2025-11-14 16:11:49,100 [INFO] Auto-registering RPC handlers...
+2025-11-14 16:11:49,104 [INFO] RPC registered: acl (3 methods)
+2025-11-14 16:11:49,105 [INFO] Loaded RPC module: acl
+2025-11-14 16:11:49,105 [INFO] RPC registered: backup (4 methods)
+2025-11-14 16:11:49,105 [INFO] Loaded RPC module: backup
+2025-11-14 16:11:49,105 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 16:11:49,105 [INFO] Loaded RPC module: monitoring
+2025-11-14 16:11:49,105 [WARNING] Module network has no register_rpc()
+2025-11-14 16:11:49,105 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 16:11:49,105 [INFO] Loaded RPC module: nfs
+2025-11-14 16:11:49,105 [INFO] RPC registered: samba (2 methods)
+2025-11-14 16:11:49,107 [INFO] Loaded RPC module: samba
+2025-11-14 16:11:49,107 [INFO] RPC registered: shares (5 methods)
+2025-11-14 16:11:49,107 [INFO] Loaded RPC module: shares
+2025-11-14 16:11:49,107 [INFO] RPC registered: storage (5 methods)
+2025-11-14 16:11:49,108 [INFO] Loaded RPC module: storage
+2025-11-14 16:11:49,108 [WARNING] Module system has no register_rpc()
+2025-11-14 16:11:49,108 [INFO] ✅ RPC handlers registered
+2025-11-14 16:11:49,108 [INFO] ✅ WebSocket manager configured
+2025-11-14 16:11:49,108 [INFO] === Backend startup complete ===
+2025-11-14 16:16:25,805 [INFO] Initializing MyNAS backend system...
+2025-11-14 16:16:25,807 [INFO] Auto-registering RPC handlers...
+2025-11-14 16:16:25,810 [INFO] RPC registered: acl (3 methods)
+2025-11-14 16:16:25,811 [INFO] Loaded RPC module: acl
+2025-11-14 16:16:25,813 [INFO] RPC registered: backup (4 methods)
+2025-11-14 16:16:25,814 [INFO] Loaded RPC module: backup
+2025-11-14 16:16:25,815 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 16:16:25,815 [INFO] Loaded RPC module: monitoring
+2025-11-14 16:16:25,820 [WARNING] Module network has no register_rpc()
+2025-11-14 16:16:25,823 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 16:16:25,824 [INFO] Loaded RPC module: nfs
+2025-11-14 16:16:25,826 [INFO] RPC registered: samba (2 methods)
+2025-11-14 16:16:25,828 [INFO] Loaded RPC module: samba
+2025-11-14 16:16:25,830 [INFO] RPC registered: shares (5 methods)
+2025-11-14 16:16:25,831 [INFO] Loaded RPC module: shares
+2025-11-14 16:16:25,843 [INFO] RPC registered: storage (5 methods)
+2025-11-14 16:16:25,845 [INFO] Loaded RPC module: storage
+2025-11-14 16:16:25,848 [WARNING] Module system has no register_rpc()
+2025-11-14 16:16:25,848 [INFO] RPC handlers loaded successfully.
+2025-11-14 16:16:25,848 [INFO] WebSocket manager registered.
+2025-11-14 16:16:25,849 [INFO] Backend initialization completed.
+2025-11-14 16:16:25,851 [INFO] Starting Flutter: /root/mynas/frontend_flutter (mode=profile) at 192.168.1.2:8084
+2025-11-14 16:16:26,208 [INFO] === Starting MyNAS backend services ===
+2025-11-14 16:16:26,481 [INFO] ✅ Detected ZFS pools: {'config_pools': [{'name': 'main', 'type': 'zfs', 'devices': ['/dev/sdb']}], 'zpool_list': [{'name': 'main', 'health': 'ONLINE'}], 'importable_pools': []}
+2025-11-14 16:16:26,481 [INFO] Loaded 2 shares from config.
+2025-11-14 16:16:26,485 [INFO] ✅ Shares loaded successfully.
+2025-11-14 16:16:26,485 [INFO] Auto-registering RPC handlers...
+2025-11-14 16:16:26,489 [INFO] RPC registered: acl (3 methods)
+2025-11-14 16:16:26,489 [INFO] Loaded RPC module: acl
+2025-11-14 16:16:26,489 [INFO] RPC registered: backup (4 methods)
+2025-11-14 16:16:26,489 [INFO] Loaded RPC module: backup
+2025-11-14 16:16:26,489 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 16:16:26,489 [INFO] Loaded RPC module: monitoring
+2025-11-14 16:16:26,489 [WARNING] Module network has no register_rpc()
+2025-11-14 16:16:26,489 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 16:16:26,495 [INFO] Loaded RPC module: nfs
+2025-11-14 16:16:26,495 [INFO] RPC registered: samba (2 methods)
+2025-11-14 16:16:26,495 [INFO] Loaded RPC module: samba
+2025-11-14 16:16:26,495 [INFO] RPC registered: shares (5 methods)
+2025-11-14 16:16:26,495 [INFO] Loaded RPC module: shares
+2025-11-14 16:16:26,495 [INFO] RPC registered: storage (5 methods)
+2025-11-14 16:16:26,495 [INFO] Loaded RPC module: storage
+2025-11-14 16:16:26,495 [WARNING] Module system has no register_rpc()
+2025-11-14 16:16:26,495 [INFO] ✅ RPC handlers registered
+2025-11-14 16:16:26,495 [INFO] ✅ WebSocket manager configured
+2025-11-14 16:16:26,496 [INFO] === Backend startup complete ===
+2025-11-14 16:33:34,796 [INFO] Initializing MyNAS backend system...
+2025-11-14 16:33:34,798 [INFO] Auto-registering RPC handlers...
+2025-11-14 16:33:34,802 [INFO] RPC registered: acl (3 methods)
+2025-11-14 16:33:34,805 [INFO] Loaded RPC module: acl
+2025-11-14 16:33:34,805 [INFO] RPC registered: backup (4 methods)
+2025-11-14 16:33:34,805 [INFO] Loaded RPC module: backup
+2025-11-14 16:33:34,806 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 16:33:34,809 [INFO] Loaded RPC module: monitoring
+2025-11-14 16:33:34,818 [WARNING] Module network has no register_rpc()
+2025-11-14 16:33:34,833 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 16:33:34,835 [INFO] Loaded RPC module: nfs
+2025-11-14 16:33:34,843 [INFO] RPC registered: samba (2 methods)
+2025-11-14 16:33:34,846 [INFO] Loaded RPC module: samba
+2025-11-14 16:33:34,847 [INFO] RPC registered: shares (5 methods)
+2025-11-14 16:33:34,847 [INFO] Loaded RPC module: shares
+2025-11-14 16:33:34,874 [INFO] RPC registered: storage (5 methods)
+2025-11-14 16:33:34,874 [INFO] Loaded RPC module: storage
+2025-11-14 16:33:34,874 [WARNING] Module system has no register_rpc()
+2025-11-14 16:33:34,881 [INFO] RPC handlers loaded successfully.
+2025-11-14 16:33:34,881 [INFO] WebSocket manager registered.
+2025-11-14 16:33:34,881 [INFO] Backend initialization completed.
+2025-11-14 16:41:12,213 [INFO] Initializing MyNAS backend system...
+2025-11-14 16:41:12,220 [INFO] Auto-registering RPC handlers...
+2025-11-14 16:41:12,224 [INFO] RPC registered: acl (3 methods)
+2025-11-14 16:41:12,228 [INFO] Loaded RPC module: acl
+2025-11-14 16:41:12,229 [INFO] RPC registered: backup (4 methods)
+2025-11-14 16:41:12,231 [INFO] Loaded RPC module: backup
+2025-11-14 16:41:12,232 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 16:41:12,234 [INFO] Loaded RPC module: monitoring
+2025-11-14 16:41:12,235 [WARNING] Module network has no register_rpc()
+2025-11-14 16:41:12,237 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 16:41:12,237 [INFO] Loaded RPC module: nfs
+2025-11-14 16:41:12,243 [INFO] RPC registered: samba (2 methods)
+2025-11-14 16:41:12,244 [INFO] Loaded RPC module: samba
+2025-11-14 16:41:12,246 [INFO] RPC registered: shares (5 methods)
+2025-11-14 16:41:12,246 [INFO] Loaded RPC module: shares
+2025-11-14 16:41:12,273 [INFO] RPC registered: storage (5 methods)
+2025-11-14 16:41:12,276 [INFO] Loaded RPC module: storage
+2025-11-14 16:41:12,276 [WARNING] Module system has no register_rpc()
+2025-11-14 16:41:12,276 [INFO] RPC handlers loaded successfully.
+2025-11-14 16:41:12,276 [INFO] WebSocket manager registered.
+2025-11-14 16:41:12,276 [INFO] Backend initialization completed.
+2025-11-14 16:41:28,155 [INFO] Starting Flutter: /root/mynas/frontend_flutter (mode=profile) at 192.168.1.2:8084
+2025-11-14 16:41:28,399 [INFO] === Starting MyNAS backend services ===
+2025-11-14 16:41:28,611 [INFO] ✅ Detected ZFS pools: {'config_pools': [{'name': 'main', 'type': 'zfs', 'devices': ['/dev/sdb']}], 'zpool_list': [{'name': 'main', 'health': 'ONLINE'}], 'importable_pools': []}
+2025-11-14 16:41:28,612 [INFO] Loaded 2 shares from config.
+2025-11-14 16:41:28,618 [INFO] ✅ Shares loaded successfully.
+2025-11-14 16:41:28,618 [INFO] Auto-registering RPC handlers...
+2025-11-14 16:41:28,618 [INFO] RPC registered: acl (3 methods)
+2025-11-14 16:41:28,618 [INFO] Loaded RPC module: acl
+2025-11-14 16:41:28,618 [INFO] RPC registered: backup (4 methods)
+2025-11-14 16:41:28,619 [INFO] Loaded RPC module: backup
+2025-11-14 16:41:28,619 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 16:41:28,619 [INFO] Loaded RPC module: monitoring
+2025-11-14 16:41:28,619 [WARNING] Module network has no register_rpc()
+2025-11-14 16:41:28,619 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 16:41:28,619 [INFO] Loaded RPC module: nfs
+2025-11-14 16:41:28,619 [INFO] RPC registered: samba (2 methods)
+2025-11-14 16:41:28,619 [INFO] Loaded RPC module: samba
+2025-11-14 16:41:28,619 [INFO] RPC registered: shares (5 methods)
+2025-11-14 16:41:28,619 [INFO] Loaded RPC module: shares
+2025-11-14 16:41:28,625 [INFO] RPC registered: storage (5 methods)
+2025-11-14 16:41:28,625 [INFO] Loaded RPC module: storage
+2025-11-14 16:41:28,626 [WARNING] Module system has no register_rpc()
+2025-11-14 16:41:28,626 [INFO] ✅ RPC handlers registered
+2025-11-14 16:41:28,629 [INFO] ✅ WebSocket manager configured
+2025-11-14 16:41:28,629 [INFO] === Backend startup complete ===
+2025-11-14 16:41:36,078 [INFO] Flutter appears ready — opening browser at http://192.168.1.2:8084
+2025-11-14 16:42:00,329 [INFO] Initializing MyNAS backend system...
+2025-11-14 16:42:00,330 [INFO] Auto-registering RPC handlers...
+2025-11-14 16:42:00,332 [INFO] RPC registered: acl (3 methods)
+2025-11-14 16:42:00,334 [INFO] Loaded RPC module: acl
+2025-11-14 16:42:00,334 [INFO] RPC registered: backup (4 methods)
+2025-11-14 16:42:00,335 [INFO] Loaded RPC module: backup
+2025-11-14 16:42:00,337 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 16:42:00,339 [INFO] Loaded RPC module: monitoring
+2025-11-14 16:42:00,340 [WARNING] Module network has no register_rpc()
+2025-11-14 16:42:00,341 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 16:42:00,345 [INFO] Loaded RPC module: nfs
+2025-11-14 16:42:00,346 [INFO] RPC registered: samba (2 methods)
+2025-11-14 16:42:00,348 [INFO] Loaded RPC module: samba
+2025-11-14 16:42:00,349 [INFO] RPC registered: shares (5 methods)
+2025-11-14 16:42:00,350 [INFO] Loaded RPC module: shares
+2025-11-14 16:42:00,360 [INFO] RPC registered: storage (5 methods)
+2025-11-14 16:42:00,362 [INFO] Loaded RPC module: storage
+2025-11-14 16:42:00,364 [WARNING] Module system has no register_rpc()
+2025-11-14 16:42:00,364 [INFO] RPC handlers loaded successfully.
+2025-11-14 16:42:00,365 [INFO] WebSocket manager registered.
+2025-11-14 16:42:00,365 [INFO] Backend initialization completed.
+2025-11-14 16:42:00,368 [INFO] Starting Flutter: /root/mynas/frontend_flutter (mode=profile) at 192.168.1.2:8084
+2025-11-14 16:42:00,656 [INFO] === Starting MyNAS backend services ===
+2025-11-14 16:42:00,803 [INFO] ✅ Detected ZFS pools: {'config_pools': [{'name': 'main', 'type': 'zfs', 'devices': ['/dev/sdb']}], 'zpool_list': [{'name': 'main', 'health': 'ONLINE'}], 'importable_pools': []}
+2025-11-14 16:42:00,803 [INFO] Loaded 2 shares from config.
+2025-11-14 16:42:00,805 [INFO] ✅ Shares loaded successfully.
+2025-11-14 16:42:00,805 [INFO] Auto-registering RPC handlers...
+2025-11-14 16:42:00,805 [INFO] RPC registered: acl (3 methods)
+2025-11-14 16:42:00,806 [INFO] Loaded RPC module: acl
+2025-11-14 16:42:00,807 [INFO] RPC registered: backup (4 methods)
+2025-11-14 16:42:00,807 [INFO] Loaded RPC module: backup
+2025-11-14 16:42:00,809 [INFO] RPC registered: monitoring (1 methods)
+2025-11-14 16:42:00,809 [INFO] Loaded RPC module: monitoring
+2025-11-14 16:42:00,809 [WARNING] Module network has no register_rpc()
+2025-11-14 16:42:00,809 [INFO] RPC registered: nfs (2 methods)
+2025-11-14 16:42:00,809 [INFO] Loaded RPC module: nfs
+2025-11-14 16:42:00,809 [INFO] RPC registered: samba (2 methods)
+2025-11-14 16:42:00,809 [INFO] Loaded RPC module: samba
+2025-11-14 16:42:00,809 [INFO] RPC registered: shares (5 methods)
+2025-11-14 16:42:00,809 [INFO] Loaded RPC module: shares
+2025-11-14 16:42:00,810 [INFO] RPC registered: storage (5 methods)
+2025-11-14 16:42:00,811 [INFO] Loaded RPC module: storage
+2025-11-14 16:42:00,811 [WARNING] Module system has no register_rpc()
+2025-11-14 16:42:00,811 [INFO] ✅ RPC handlers registered
+2025-11-14 16:42:00,811 [INFO] ✅ WebSocket manager configured
+2025-11-14 16:42:00,811 [INFO] === Backend startup complete ===
+2025-11-14 16:42:05,847 [INFO] Flutter appears ready — opening browser at http://192.168.1.2:8084

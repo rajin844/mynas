@@ -7,53 +7,54 @@ class ApiService {
       : baseUrl = baseUrl ?? "http://${Uri.base.host}:8000";
 
   Future<dynamic> callRpc(
-      String module, String method, Map<String, dynamic> params) async {
-    final url = Uri.parse('$baseUrl/rpc');
-    //final url = Uri.parse(
-    //  '$baseUrl/api/${module.toLowerCase()}/${method.toLowerCase()}');
-    final response = await http.post(
+      String service, String method, Map<String, dynamic> params) async {
+    // final url = Uri.parse('$baseUrl/api');
+    final url = Uri.parse(
+        '$baseUrl/api/${service.toLowerCase()}/${method.toLowerCase()}');
+
+    final payload = {"service": service, "method": method, "params": params};
+
+    final resp = await http.post(
       url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(params),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode(payload),
     );
 
-    if (response.statusCode == 200) {
-      try {
-        return jsonDecode(response.body);
-      } catch (e) {
-        return response.body;
-      }
+    if (resp.statusCode != 200) {
+      throw Exception(
+          'API ${url.toString()} failed: ${resp.statusCode} ${resp.body}');
     }
-    throw Exception(
-        'API ${url.toString()} failed: ${response.statusCode} ${response.body}');
+
+    final data = jsonDecode(resp.body);
+    if (data["error"] != null) {
+      throw Exception("RPC error: ${data["error"]}");
+    }
+    return data["response"];
   }
 
   // convenience wrappers
   Future<List<dynamic>> listPools() async =>
-      await callRpc("ZFS", "listPools", {});
+      List.from(await callRpc("ZFS", "listPools", {}));
   Future<List<dynamic>> listDatasets(String? pool) async =>
-      await callRpc("ZFS", "listDatasets", {"pool": pool});
+      List.from(await callRpc("ZFS", "listDatasets", {"pool": pool}));
   Future<List<dynamic>> listShares() async =>
-      await callRpc("SHARE", "listShares", {});
+      List.from(await callRpc("SHARE", "listShares", {}));
   Future<dynamic> createPool(String name, List<String> devices,
           {bool dryRun = true}) async =>
       await callRpc("STORAGE", "create_pool",
           {"name": name, "devices": devices, "dry_run": dryRun});
   Future<dynamic> createDataset(String pool, String name,
-          {String? mountpoint, bool dryRun = true}) async =>
-      await callRpc("ZFS", "createDataset", {
-        "pool": pool,
-        "name": name,
-        "mountpoint": mountpoint,
-        "dry_run": dryRun
-      });
+          {String? mountpoint}) async =>
+      await callRpc("ZFS", "createDataset",
+          {"pool": pool, "name": name, "mountpoint": mountpoint});
   Future<dynamic> createShare(
           String name, String path, String protocol) async =>
       await callRpc("SHARE", "createShare",
           {"name": name, "path": path, "protocol": protocol});
   Future<dynamic> deleteShare(String uuid) async =>
       await callRpc("SHARE", "deleteShare", {"uuid": uuid});
-  Future<dynamic> listBackups() async => await callRpc("BACKUP", "list", {});
+  Future<List<dynamic>> listBackups() async =>
+      List.from(await callRpc("BACKUP", "list", {}));
   Future<dynamic> createBackup() async => await callRpc("BACKUP", "create", {});
   Future<dynamic> restoreBackup(String file) async =>
       await callRpc("BACKUP", "restore", {"file": file});
