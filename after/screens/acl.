@@ -10,7 +10,7 @@ class AclScreen extends StatefulWidget {
 }
 
 class _AclScreenState extends State<AclScreen> {
-  final api = ApiService(baseUrl: 'http://localhost:8000');
+  final api = ApiService();
   List acls = [];
 
   @override

@@ -1,7 +1,7 @@
 import requests
 import json
 
-API_URL = "http://localhost:8082"
+API_URL = "http://localhost:8000"
 
 def pretty(data):
     print(json.dumps(data, indent=2))

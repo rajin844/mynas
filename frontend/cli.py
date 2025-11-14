@@ -1,37 +1,60 @@
-#!/usr/bin/env python3
-import threading, asyncio, requests, json, time
-from websockets import connect
+# frontend/cli.py
+import asyncio
+import json
+import websockets
+import socket
+import argparse
+import signal
 
-API = API_URL = "http://localhost:8000"
-
-def create_user(u, p):
-    r = requests.post(f"{API}/api/users/create", json={"username":u,"password":p,"role":"admin"})
-    print(r.json())
-
-def create_pool(name, devices):
-    r = requests.post(f"{API}/api/storage/pools/create", json={"name":name,"devices": devices})
-    print(r.json())
-
-async def listen_ws():
-    uri = "ws://127.0.0.1:8000/ws"
+def get_server_ip():
+    """Auto detect server LAN IP via default route."""
     try:
-        async with connect(uri) as ws:
-            print("WS connected")
-            async for msg in ws:
-                print("EVENT:", msg)
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("192.168.1.1", 80))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except:
+        return "127.0.0.1"
+
+async def ws_listener(ws):
+    while True:
+        try:
+            msg = await ws.recv()
+            print(f"\n[WS] {msg}")
+            print("> ", end="", flush=True)
+        except:
+            print("WS disconnected.")
+            return
+
+async def ws_sender(ws):
+    while True:
+        cmd = await asyncio.to_thread(input, "> ")
+        if cmd.strip() == "exit":
+            await ws.close()
+            return
+        await ws.send(json.dumps({"command": cmd}))
+
+async def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--host", default=None)
+    parser.add_argument("--port", default=6789)
+    args = parser.parse_args()
+
+    host = args.host or get_server_ip()
+    port = args.port
+
+    uri = f"ws://{host}:{port}/ws"
+    print(f"Connecting to: {uri}")
+
+    try:
+        async with websockets.connect(uri) as ws:
+            print("✔ Connected to WebSocket.")
+            listener = asyncio.create_task(ws_listener(ws))
+            sender = asyncio.create_task(ws_sender(ws))
+            await asyncio.gather(listener, sender)
     except Exception as e:
-        print("WS error:", e)
+        print("❌ Failed to connect:", e)
 
 if __name__ == "__main__":
-    threading.Thread(target=lambda: asyncio.run(listen_ws()), daemon=True).start()
-    time.sleep(0.5)
-    print("CLI ready. commands: user <u> <p>, pool <name> <devs...>, exit")
-    while True:
-        cmd = input("> ").strip()
-        if cmd == "exit": break
-        parts = cmd.split()
-        if not parts: continue
-        if parts[0] == "user":
-            create_user(parts[1], parts[2])
-        elif parts[0] == "pool":
-            create_pool(parts[1], parts[2:])
+    asyncio.run(main())

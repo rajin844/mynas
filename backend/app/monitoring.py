@@ -1,46 +1,43 @@
 """
-Monitoring helpers using psutil.
-Provides functions to get cpu/memory/disk stats and an optional
-async broadcaster wrapper for periodic pushes.
+Monitoring helpers for MyNAS backend
+Provides CPU, RAM, Disk, and (optional ZFS) stats.
 """
 
 import psutil
-import asyncio
-from typing import Dict
-from backend.realtime.websocket_server import WSManagerProxy
 
-def get_cpu_percent(interval: float = 0.5) -> float:
-    """Return CPU percent (0-100)."""
-    return psutil.cpu_percent(interval=interval)
+def cpu_info():
+    """Returns current CPU usage %."""
+    return psutil.cpu_percent(interval=0.1)
 
-
-def get_memory_percent() -> float:
+def ram_info():
+    """Returns RAM usage stats."""
     mem = psutil.virtual_memory()
-    return mem.percent
+    return {
+        "total": mem.total,
+        "used": mem.used,
+        "free": mem.available,
+        "percent": mem.percent,
+    }
 
-
-def get_disk_percent(path: str = "/") -> float:
-    return psutil.disk_usage(path).percent
-
-
-async def periodic_broadcast(interval: float = 5.0):
+def disk_info():
     """
-    Periodically broadcast monitoring data to connected websocket clients.
-    Use: asyncio.create_task(periodic_broadcast()) from your startup code.
+    Returns info for ALL disks.
+    IMPORTANT: no arguments — compatible with main.py
     """
-    while True:
+    disks = []
+    for part in psutil.disk_partitions(all=False):
         try:
-            data: Dict = {
-                "module": "monitoring",
-                "cpu": int(get_cpu_percent(0.1)),
-                "memory": int(get_memory_percent()),
-                "disk": int(get_disk_percent("/")),
-            }
-            # broadcast best-effort
-            try:
-                WSManagerProxy.broadcast(data)
-            except Exception:
-                pass
-        except Exception:
-            pass
-        await asyncio.sleep(interval)
+            usage = psutil.disk_usage(part.mountpoint)
+        except PermissionError:
+            continue  # skip restricted mounts
+
+        disks.append({
+            "device": part.device,
+            "mount": part.mountpoint,
+            "fstype": part.fstype,
+            "total": usage.total,
+            "used": usage.used,
+            "free": usage.free,
+            "percent": usage.percent,
+        })
+    return disks

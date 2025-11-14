@@ -67,7 +67,7 @@ async def initialize_system():
     #periodic_broadcast()
     #logger.info("Monitoring loop started (interval=5s).")
 
-    #logger.info("MyNAS backend initialized successfully.")
+    logger.info("MyNAS backend initialized successfully.")
 
 
 def main():

@@ -10,7 +10,7 @@ class BackupScreen extends StatefulWidget {
 }
 
 class _BackupScreenState extends State<BackupScreen> {
-  final api = ApiService(baseUrl: 'http://localhost:8000');
+  final api = ApiService();
   List backups = [];
 
   @override

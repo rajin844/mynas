@@ -59,7 +59,7 @@ def delete_dataset(name: str):
 
 def register_rpc(register):
     register("storage", {
-        "list_pools": list_pools,
+        "listpools": list_pools,
         "create_pool": create_pool,
         "destroy_pool": delete_pool,
         "create_dataset": create_dataset,

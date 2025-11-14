@@ -11,7 +11,7 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   WebSocketService wsService = WebSocketService();
-  final ApiService apiService = ApiService(baseUrl: "http://localhost:8000");
+  final ApiService apiService = ApiService();
   List<Map<String, dynamic>> pools = [];
   List<Map<String, dynamic>> datasets = [];
   List<Map<String, dynamic>> shares = [];
@@ -26,7 +26,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   void connectWebSocket() async {
-    await wsService.connect("ws://localhost:6789");
+    //ws://0.0.0.0:6789
+
+    //final wsUrl = "ws://$host:6789/ws";
+    await wsService.connect();
+
     wsService.setListener((msg) {
       setState(() {
         status = "Event: ${msg['event']}";
@@ -41,7 +45,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     try {
       var poolResp = await apiService.callRpc("ZFS", "listPools", {});
       var datasetResp = await apiService.callRpc("ZFS", "listDatasets", {});
-      var shareResp = await apiService.callRpc("SHARE", "listShares", {});
+      //var shareResp = await apiService.callRpc("SHARE", "listShares", {});
 
       if (poolResp is List) {
         pools = poolResp.map((e) => Map<String, dynamic>.from(e)).toList();
@@ -50,9 +54,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
         datasets =
             datasetResp.map((e) => Map<String, dynamic>.from(e)).toList();
       }
-      if (shareResp is List) {
-        shares = shareResp.map((e) => Map<String, dynamic>.from(e)).toList();
-      }
+      //if (shareResp is List) {
+      //shares = shareResp.map((e) => Map<String, dynamic>.from(e)).toList();
+      // }
     } catch (e) {
       debugPrint("Error loading dashboard data: $e");
     }
@@ -76,7 +80,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   children: [
                     _buildSection("ZFS Pools main", pools),
                     _buildSection("Datasets", datasets),
-                    _buildSection("Shares", shares),
+                    //_buildSection("Shares", shares),
                   ],
                 ),
               ),

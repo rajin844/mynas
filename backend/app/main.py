@@ -26,7 +26,7 @@ from backend.realtime.websocket_server import WSManager, WSManagerProxy
 from backend.storage.storage_manager import detect_disks, list_filesystems, list_pools , disk_info
 from backend.storage.zfs_manager import list_datasets_api
 from backend.storage.share_manager import load_shares
-from backend.app.monitoring import periodic_broadcast
+#from backend.app.monitoring import periodic_broadcast
 
 # --- REST API routers ---
 from backend.api import (

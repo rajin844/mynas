@@ -1,6 +1,11 @@
+// lib/pages/dashboard_page.dart
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../providers/monitoring_provider.dart';
+import '../providers/zfs_provider.dart';
+import '../providers/shares_provider.dart';
 import '../services/websocket_service.dart';
-import '../services/api_service.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -10,146 +15,132 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-  final WebSocketService wsService = WebSocketService();
-  final ApiService apiService = ApiService(baseUrl: "http://localhost:8000");
-
-  String status = "Connecting to WebSocket...";
-  int? datasets;
-  int? pools;
-  int? shares;
-
-  bool isLoading = true;
-  bool isConnected = false;
-
   @override
   void initState() {
     super.initState();
-    _initDashboard();
-  }
 
-  Future<void> _initDashboard() async {
-    try {
-      await wsService.connect("ws://localhost:6789");
+    final ws = context.read<WebSocketService>();
+    // final monitor = context.read<MonitoringProvider>();
+    final zfs = context.read<ZfsProvider>();
+    final shares = context.read<SharesProvider>();
 
-      setState(() {
-        status = "Connected ✅";
-        isConnected = true;
-      });
+    // initial loads
+    Future.microtask(() async {
+      //await monitor.refresh();
+      await zfs.loadPools();
+      await shares.loadShares();
+    });
 
-      // ✅ WebSocket event handler
-      wsService.event = (msg) {
-        setState(() {
-          status = "Event: ${msg['event'] ?? 'unknown'}";
-        });
-        _fetchSummary();
-      };
+    //if (msg['module'] == 'zfs') {
+    //     monitor.addEvent("monitor: ${msg.toString()}");
+    // } else
 
-      await _fetchSummary();
-    } catch (e) {
-      setState(() {
-        status = "WebSocket error: $e";
-        isConnected = false;
-      });
-    }
-  }
-
-  Future<void> _fetchSummary() async {
-    setState(() => isLoading = true);
-
-    try {
-      var poolResp = await apiService.callRpc("ZFS", "listPools", {});
-      var datasetResp = await apiService.callRpc("ZFS", "listDatasets", {});
-      var shareResp = await apiService.callRpc("SHARE", "listShares", {});
-
-      // 👇 Debug prints — check actual API structure
-      debugPrint("PoolResp: $poolResp");
-      debugPrint("DatasetResp: $datasetResp");
-      debugPrint("ShareResp: $shareResp");
-
-      // ✅ Automatically detect data structure
-      setState(() {
-        pools = (poolResp['pools'] ?? poolResp['response'] ?? poolResp ?? [])
-            .length;
-        datasets = (datasetResp['datasets'] ??
-                datasetResp['response'] ??
-                datasetResp ??
-                [])
-            .length;
-        shares =
-            (shareResp['shares'] ?? shareResp['response'] ?? shareResp ?? [])
-                .length;
-
-        status = "Updated at ${TimeOfDay.now().format(context)}";
-      });
-    } catch (e) {
-      setState(() {
-        status = "Error fetching data: $e";
-      });
-    } finally {
-      setState(() => isLoading = false);
-    }
-  }
-
-  @override
-  void dispose() {
-    wsService.disconnect();
-    super.dispose();
+    ws.stream.listen((msg) {
+      if (!mounted) return;
+      if (msg is Map) {
+        if (msg['module'] == 'zfs') {
+          zfs.loadPools();
+        } else if (msg['module'] == 'shares') {
+          shares.loadShares();
+        }
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final monitor = context.watch<MonitoringProvider>();
+    final ws = context.watch<WebSocketService>();
+
     return Scaffold(
-      backgroundColor: Colors.grey[100],
-      appBar: AppBar(
-        title: const Text("MyNAS Dashboard"),
-        backgroundColor: Colors.blueAccent,
-        foregroundColor: Colors.white,
-      ),
+      appBar: AppBar(title: const Text('MyNAS Dashboard')),
       body: Padding(
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.all(16),
         child: Column(
           children: [
+            Row(children: [
+              Chip(
+                avatar: Icon(ws.connected ? Icons.check_circle : Icons.error),
+                label: Text(ws.connected ? "Connected" : "Disconnected"),
+                backgroundColor:
+                    ws.connected ? Colors.green[50] : Colors.red[50],
+              ),
+              const SizedBox(width: 16),
+              ElevatedButton(
+                onPressed: () => context.read<MonitoringProvider>().refresh(),
+                child: const Text('Refresh metrics'),
+              ),
+            ]),
+            const SizedBox(height: 14),
             Row(
               children: [
-                Icon(
-                  isConnected ? Icons.circle : Icons.circle_outlined,
-                  color: isConnected ? Colors.green : Colors.red,
-                  size: 14,
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  isConnected ? "Connected" : "Disconnected",
-                  style: TextStyle(
-                    color: isConnected ? Colors.green : Colors.red,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                _metricCard('CPU', '${monitor.cpu}%'),
+                const SizedBox(width: 12),
+                _metricCard('RAM', '${monitor.ram}%'),
+                const SizedBox(width: 12),
+                _metricCard('Disk', '${monitor.disk}%'),
               ],
             ),
-            const SizedBox(height: 8),
-            Text(
-              status,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-            ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 20),
             Expanded(
-              child: isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : RefreshIndicator(
-                      onRefresh: _fetchSummary,
-                      child: GridView.count(
-                        crossAxisCount: 2,
-                        padding: const EdgeInsets.all(12),
-                        crossAxisSpacing: 10,
-                        mainAxisSpacing: 10,
-                        childAspectRatio: 1.2,
-                        children: [
-                          _buildCard("Pools", pools),
-                          _buildCard("Datasets", datasets),
-                          _buildCard("Shares", shares),
-                        ],
-                      ),
-                    ),
+              child: ListView(
+                children: monitor.events
+                    .map((e) => ListTile(title: Text(e)))
+                    .toList(),
+              ),
+            )
+          ],
+        ),
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            const DrawerHeader(child: Text('MyNAS')),
+            ListTile(
+              leading: const Icon(Icons.dashboard),
+              title: const Text('Dashboard'),
+              onTap: () => Navigator.pop(context),
+            ),
+            ListTile(
+              leading: const Icon(Icons.storage),
+              title: const Text('Pools'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/pools');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.folder),
+              title: const Text('Datasets'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/datasets');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.share),
+              title: const Text('Shares'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/shares');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.backup),
+              title: const Text('Backups'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/backup');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.settings),
+              title: const Text('Settings'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/settings');
+              },
             ),
           ],
         ),
@@ -157,36 +148,21 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  Widget _buildCard(String title, int? value) {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 300),
-        child: value == null
-            ? const Center(child: CircularProgressIndicator())
-            : Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    "$value",
-                    key: ValueKey(value),
-                    style: const TextStyle(
-                      fontSize: 38,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.blueAccent,
-                    ),
-                  ),
-                ],
-              ),
+  Widget _metricCard(String title, String value) {
+    return Expanded(
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(18),
+          child: Column(
+            children: [
+              Text(title),
+              const SizedBox(height: 8),
+              Text(value,
+                  style: const TextStyle(
+                      fontSize: 22, fontWeight: FontWeight.bold)),
+            ],
+          ),
+        ),
       ),
     );
   }

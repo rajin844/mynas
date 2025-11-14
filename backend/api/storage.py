@@ -49,7 +49,7 @@ def api_list_pools():
     """
     Return list of existing ZFS pools.
     """
-    pools = list_zfs_pools()
+    pools = list_pools
     return {"response": pools, "error": None}
 
 

@@ -1,38 +1,41 @@
-# backend/app/rpc_handlers/samba.py
-import subprocess, os, json
-from ..ws_server import notify_clients
+# backend/rpc_handlers/shsamba.py
+"""
+RPC handlers for Samba-specific tasks.
+Service: "samba"
+"""
 
-DATA_DIR = os.path.join(os.path.dirname(__file__), "../../data")
-SHARES_FILE = os.path.join(DATA_DIR,"shares.json")
+from typing import Dict, Any, List
 
-SAMBA_CONF = "/etc/samba/smb.conf"
+# Prefer app.utils.smb_nfs_ops or app.samba_utils
+try:
+    from app.utils.smb_nfs_ops import write_smb_conf as _write_smb_conf
+except Exception:
+    try:
+        from app.samba_utils import write_smb_conf as _write_smb_conf  # type: ignore
+    except Exception:
+        _write_smb_conf = None
 
-def _load_shares():
-    if not os.path.exists(SHARES_FILE): return []
-    with open(SHARES_FILE) as f: return json.load(f)
+# use share manager to get current shares
+try:
+    from app.share_manager import list_shares as _list_shares
+except Exception:
+    from backend.storage.share_manager import list_shares as _list_shares  # type: ignore
 
-def _save_samba_conf():
-    shares = _load_shares()
-    lines = ["[global]",
-             "   workgroup = WORKGROUP",
-             "   server string = NAS Server",
-             "   map to guest = Bad User",
-             "   security = user",
-             ""]
-    for s in shares:
-        path = f"/mnt/{s['dataset']}"
-        os.makedirs(path, exist_ok=True)
-        lines.append(f"[{s['dataset']}]")
-        lines.append(f"   path = {path}")
-        lines.append(f"   read only = {'yes' if s.get('readonly', False) else 'no'}")
-        lines.append(f"   guest ok = {'yes' if s.get('guest', False) else 'no'}")
-        lines.append(f"   create mask = 0775")
-        lines.append(f"   directory mask = 0775")
-        lines.append("")
-    with open(SAMBA_CONF, "w") as f:
-        f.write("\n".join(lines))
-    subprocess.call(["systemctl","restart","smbd"])
-    notify_clients({"module":"shares","action":"samba_update"})
+def rpc_write_config() -> Dict[str, Any]:
+    shares = _list_shares()
+    if _write_smb_conf is None:
+        return {"status": "error", "reason": "smb helper not available"}
+    try:
+        _write_smb_conf([s for s in shares if s.get("protocol") == "smb"])
+        return {"status": "ok", "written": len([s for s in shares if s.get("protocol") == "smb"])}
+    except Exception as e:
+        return {"status": "error", "reason": str(e)}
 
-def apply_samba():
-    _save_samba_conf()
+def rpc_list_shares() -> List[Dict[str, Any]]:
+    return [s for s in _list_shares() if s.get("protocol") == "smb"]
+
+def register_rpc(register):
+    register("samba", {
+        "write_config": rpc_write_config,
+        "list_shares": rpc_list_shares
+    })

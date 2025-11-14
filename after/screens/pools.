@@ -9,7 +9,7 @@ class PoolsScreen extends StatefulWidget {
 }
 
 class _PoolsScreenState extends State<PoolsScreen> {
-  final apiService = ApiService(baseUrl: 'http://localhost:8000');
+  final apiService = ApiService();
   List pools = [];
 
   @override

@@ -1,0 +1,82 @@
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import '../services/api_service.dart';
+import '../services/ws_service.dart';
+
+class AppState extends ChangeNotifier {
+  final ApiService api = ApiService();
+  final WSService ws = WSService();
+
+  // cached collections
+  List users = [];
+  List datasets = [];
+  List shares = [];
+  Map monitoring = {"cpu": 0, "memory": 0, "disk": 0};
+  List<String> events = [];
+
+  AppState() {
+    _loadAll();
+    ws.onMessage(_handleWS);
+  }
+
+  void startWS() => ws.connect();
+
+  void _handleWS(dynamic data) {
+    // data expected as JSON-decoded Map
+    events.insert(0, data.toString());
+    // update models based on module field
+    if (data is Map && data['module'] == 'monitoring') {
+      monitoring = {
+        "cpu": data['cpu'],
+        "memory": data['memory'],
+        "disk": data['disk']
+      };
+    } else if (data is Map && data['module'] == 'storage') {
+      // refresh lists
+      _loadDatasets();
+    } else if (data is Map && data['module'] == 'user') {
+      _loadUsers();
+    } else if (data is Map && data['module'] == 'shares') {
+      _loadShares();
+    }
+    notifyListeners();
+  }
+
+  Future<void> _loadAll() async {
+    await _loadUsers();
+    await _loadDatasets();
+    await _loadShares();
+  }
+
+  Future<void> _loadUsers() async {
+    try {
+      users = await api.getUsers();
+      notifyListeners();
+    } catch (_) {}
+  }
+
+  Future<void> _loadDatasets() async {
+    try {
+      datasets = await api.getDatasets();
+      notifyListeners();
+    } catch (_) {}
+  }
+
+  Future<void> _loadShares() async {
+    try {
+      shares = await api.getShares();
+      notifyListeners();
+    } catch (_) {}
+  }
+
+  // actions
+  Future<Map> createUser(String username, String password) =>
+      api.createUser(username, password);
+  Future<Map> createDataset(String name, String mount) =>
+      api.createDataset(name, mount);
+  Future<Map> createShare(String dataset, String proto) =>
+      api.createShare(dataset, proto);
+  //uture<Map> applyAcl(String path, String user, String perms) =>
+  //    api.applyAcl(path, user, perms);
+//  Future<Map> createBackup() => api.createBackup();
+}

@@ -1,92 +1,69 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import 'services/api_service.dart';
 import 'services/websocket_service.dart';
-import 'provider/dataset_provider.dart';
-import 'screens/dashboard.dart';
-import 'screens/pools.dart';
-import 'screens/datasets.dart';
-import 'screens/shares.dart';
-import 'screens/acl.dart';
-import 'screens/backup.dart';
-import 'screens/network.dart';
-import 'screens/monitoring.dart';
-import 'widgets/drawer.dart';
+
+import 'providers/zfs_provider.dart';
+import 'providers/shares_provider.dart';
+import 'providers/monitoring_provider.dart';
+import 'providers/backup_provider.dart';
+import 'providers/network_provider.dart';
+import 'providers/acl_provider.dart';
+import 'providers/settings_provider.dart';
+
+import 'pages/dashboard_page.dart';
+import 'pages/pools_page.dart';
+import 'pages/datasets_page.dart';
+import 'pages/shares_page.dart';
+import 'pages/acl_page.dart';
+import 'pages/backup_page.dart';
+import 'pages/network_page.dart';
+import 'pages/monitoring_page.dart';
+import 'pages/settings_page.dart';
 
 void main() {
-  runApp(MyNASApp());
+  runApp(const MyNASApp());
 }
 
 class MyNASApp extends StatelessWidget {
-  final api = ApiService(baseUrl: 'http://localhost:8000'); // change if needed
-  final ws = WebSocketService();
-
-  MyNASApp({super.key});
+  const MyNASApp({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final api = ApiService();
+    final ws = WebSocketService();
+    ws.connect(); // start websocket connection
+
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(
-            create: (_) => DatasetProvider(api: api, ws: ws)),
-        // add other providers similarly when created
+        Provider<ApiService>.value(value: api),
+        Provider<WebSocketService>.value(value: ws),
+        ChangeNotifierProvider(create: (_) => ZfsProvider(api: api)),
+        ChangeNotifierProvider(create: (_) => SharesProvider(api: api)),
+        ChangeNotifierProvider(create: (_) => MonitoringProvider(api: api)),
+        ChangeNotifierProvider(create: (_) => BackupProvider(api: api)),
+        ChangeNotifierProvider(create: (_) => NetworkProvider(api: api)),
+        ChangeNotifierProvider(create: (_) => AclProvider(api: api)),
+        ChangeNotifierProvider(create: (_) => SettingsProvider(api: api)),
       ],
       child: MaterialApp(
         title: 'MyNAS',
-        theme: ThemeData(primarySwatch: Colors.blue),
+        theme: ThemeData.dark(useMaterial3: true),
         initialRoute: '/',
         routes: {
-          '/': (_) => HomeShell(api: api, ws: ws),
-          '/pools': (_) => PoolsScreen(),
-          '/datasets': (_) => DatasetsScreen(),
-          '/shares': (_) => SharesScreen(),
-          '/acl': (_) => AclScreen(),
-          '/backup': (_) => BackupScreen(),
-          '/network': (_) => NetworkScreen(),
-          '/monitoring': (_) => MonitoringScreen(),
+          '/': (ctx) => const DashboardPage(),
+          '/pools': (ctx) => const PoolsPage(),
+          '/datasets': (ctx) => const DatasetsPage(),
+          '/shares': (ctx) => const SharesPage(),
+          '/acl': (ctx) => const AclPage(),
+          '/backup': (ctx) => const BackupPage(),
+          '/network': (ctx) => const NetworkPage(),
+          '/monitoring': (ctx) => const MonitoringPage(),
+          '/settings': (ctx) => const SettingsPage(),
         },
       ),
-    );
-  }
-}
-
-class HomeShell extends StatefulWidget {
-  final ApiService api;
-  final WebSocketService ws;
-  const HomeShell({super.key, required this.api, required this.ws});
-  @override
-  State<HomeShell> createState() => _HomeShellState();
-}
-
-class _HomeShellState extends State<HomeShell> {
-  @override
-  void initState() {
-    super.initState();
-    widget.ws.event = (evt) {
-      // broadcast to providers if needed; simple example:
-      if (evt['event'] == 'dataset_created' ||
-          evt['event'] == 'dataset_deleted') {
-        Provider.of<DatasetProvider>(context, listen: false).fetchDatasets();
-      }
-    };
-    widget.ws.connect('ws://127.0.0.1:8000/ws');
-  }
-
-  @override
-  void dispose() {
-    widget.ws.disconnect();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('MyNAS Dashboard')),
-      drawer: AppDrawer(onSelect: (route) {
-        Navigator.of(context).pushNamed(route);
-      }),
-      body: DashboardScreen(api: widget.api),
     );
   }
 }

@@ -145,3 +145,25 @@ def modify_dataset_api(
         print(f"[ERROR] modify_dataset_api failed: {e}")
         ok = False
     return {"ok": ok}
+    
+def list_zfs_datasets(pool: str = None):
+    """
+    If pool provided → list datasets under that pool
+    Else → list all datasets
+    """
+    datasets = []
+
+    if pool:
+        cmd = ["zfs", "list", "-H", "-o", "name", "-r", pool]
+    else:
+        cmd = ["zfs", "list", "-H", "-o", "name"]
+
+    try:
+        out = subprocess.check_output(cmd).decode().strip().split("\n")
+        for line in out:
+            if line:
+                datasets.append(line)
+        return datasets
+
+    except Exception:
+        return []
