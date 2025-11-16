@@ -7005,3 +7005,7 @@ ModuleNotFoundError: No module named 'backend.storage.samba_manager'
 2025-11-16 05:23:41,748 [INFO] ✓ RPC handlers auto-loaded
 2025-11-16 05:23:41,752 [INFO] ✓ WebSocket manager registered
 2025-11-16 05:23:41,752 [INFO] === Backend startup complete ===
+2025-11-16 05:27:21,047 [INFO] Configuration saved successfully.
+2025-11-16 05:27:21,084 [INFO] Configuration saved successfully.
+2025-11-16 05:29:56,526 [INFO] Configuration saved successfully.
+2025-11-16 05:29:56,565 [INFO] Configuration saved successfully.
