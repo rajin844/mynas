@@ -14,9 +14,9 @@ class _PoolsPageState extends State<PoolsPage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
-      context.read<ZfsProvider>().loadPools();
+      await context.read<ZfsProvider>().loadPools();
     });
   }
 

@@ -15,7 +15,7 @@ class _DatasetsPageState extends State<DatasetsPage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      () async => await context.read<ZfsProvider>().loadAllDatasets();
+      context.read<ZfsProvider>().loadAllDatasets();
     });
   }
 

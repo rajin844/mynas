@@ -23,8 +23,21 @@ from fastapi.middleware.cors import CORSMiddleware
 from backend.app.config_manager import ConfigManager
 from backend.realtime.websocket_server import WSManager, WSManagerProxy
 from backend.app.monitor_broadcaster import periodic_monitor
-from backend.api import monitoring
+ # API CONFIG FILESAPI
+from backend.api import storage
 from backend.api import zfs
+from backend.api import shares
+from backend.api import acl
+from backend.api import backup
+from backend.api import monitoring
+from backend.api import compat
+from backend.api import nas
+from backend.api import network
+from backend.api import system
+from backend.api import users
+from backend.api import raidz
+from backend.api import smart
+
 
 # Storage boot systems
 from backend.storage.storage_manager import detect_disks, list_disks
@@ -32,19 +45,6 @@ from backend.storage.zfs_manager import list_pools, list_datasets
 from backend.storage.share_manager import load_shares
 
 # REST Routers
-from backend.api import (
-    #zfs,
-    storage,
-    users,
-    acl,
-    shares,
-    backup,
-    network,
-    compat,
-    raidz,
-    smart,
-    system,
-)
 
 # RPC auto-loader
 from backend.rpc_handlers.rpc_server import (

@@ -3,8 +3,8 @@ from fastapi import APIRouter, HTTPException
 from backend.storage.storage_manager import (
     list_disks,
     detect_disks,
-   disk_usage,
-   smart_health,
+    disk_usage,
+    smart_health,
     get_storage_summary,
 )
 

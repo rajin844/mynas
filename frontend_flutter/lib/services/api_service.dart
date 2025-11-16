@@ -43,7 +43,7 @@ class ApiService {
       await callRpc("STORAGE", "rescanSata", {});
 // ZFS
   Future<List<dynamic>> listPools() async =>
-      List.from(await callRpc("ZFS", "listPools", {}));
+      List.from(await callRpc("ZFS", "listpools", {}));
   Future<dynamic> poolStatus(String pool) async =>
       await callRpc("ZFS", "poolStatus", {"pool": pool});
 
