@@ -1,44 +1,32 @@
 # backend/api/compat.py
-"""
-Universal compatibility wrapper:
-POST /api/<service>/<method>
-maps to RPC handler service.method
-
-Ex:
-POST /api/zfs/listpools
-POST /api/storage/list_pools
-POST /api/backup/list
-→ calls RPC automatically
-"""
-
 from fastapi import APIRouter, Request, HTTPException
-from backend.rpc_handlers.rpc_server import get_services
+from backend.rpc_handlers.rpc_server import _RPC_REGISTRY
 
 router = APIRouter()
 
 @router.post("/{service}/{method}")
 async def compat_handler(service: str, method: str, request: Request):
-    services = get_services()
+    service = service.lower()
+    method = method.lower()
 
-    if service not in services:
-        raise HTTPException(status_code=404, detail=f"Service '{service}' not found")
+    if service not in _RPC_REGISTRY:
+        raise HTTPException(404, f"Service '{service}' not found")
 
-    if method not in services[service]:
-        raise HTTPException(status_code=404, detail=f"Method '{method}' not found")
+    if method not in _RPC_REGISTRY[service]:
+        raise HTTPException(404, f"Method '{method}' missing")
 
-    func = services[service][method]
+    func = _RPC_REGISTRY[service][method]
 
-    body = {}
     try:
         body = await request.json()
     except:
-        pass
+        body = {}
 
-    if callable(func):
-        try:
-            result = func(**body) if body else func()
-            return {"response": result, "error": None}
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+    params = body.get("params", body)
 
-    raise HTTPException(status_code=500, detail="Invalid RPC function")
+    if isinstance(params, dict):
+        result = func(**params)
+    else:
+        result = func(params)
+
+    return {"response": result, "error": None}

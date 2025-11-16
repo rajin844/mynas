@@ -1,34 +1,46 @@
 # backend/rpc_handlers/shares.py
-from typing import Dict, Any, List
+import logging
+logger = logging.getLogger("mynas.rpc.shares")
 
-try:
-    from backend.storage.share_manager import list_shares as _list_shares, add_share as _add_share, remove_share as _remove_share, update_share as _update_share, sync_shares_with_system as _sync
-except Exception:
-    from backend.storage.share_manager import list_shares as _list_shares, add_share as _add_share, remove_share as _remove_share, update_share as _update_share, sync_shares_with_system as _sync  # type: ignore
+from backend.storage.share_manager import (
+    list_shares,
+    create_smb_share,
+    create_nfs_share,
+    remove_share,
+    smb_status,
+    nfs_status,
+)
 
-def rpc_list() -> List[Dict[str, Any]]:
-    return _list_shares()
+def rpc_list():
+    return list_shares()
 
-def rpc_add(name: str, path: str, protocol: str = "smb", readonly: bool = False, comment: str = "") -> Dict[str, Any]:
-    return _add_share(name, path, protocol, readonly, comment)
+def rpc_smb_create(name: str, path: str, options: dict = None):
+    return create_smb_share(name, path, options or {})
 
-def rpc_remove(name: str) -> Dict[str, Any]:
-    return _remove_share(name)
+def rpc_nfs_create(name: str, path: str, options: dict = None):
+    return create_nfs_share(name, path, options or {})
 
-def rpc_update(name: str, updates: dict) -> Dict[str, Any]:
-    return _update_share(name, updates)
+def rpc_create(name: str, path: str, protocol: str, options: dict = None):
+    try: return create_share(name, path, protocol, options or {})
+    except Exception as e: logger.exception(e); return {"error": str(e)}
 
-def rpc_sync_system() -> Dict[str, Any]:
-    try:
-        return _sync()
-    except Exception:
-        return {"status": "error", "reason": "sync not implemented"}
+
+def rpc_delete(uuid: str):
+    return remove_share(uuid)
+
+def rpc_smb_status():
+    return smb_status()
+
+def rpc_nfs_status():
+    return nfs_status()
+
 
 def register_rpc(register):
     register("shares", {
         "list": rpc_list,
-        "add": rpc_add,
-        "remove": rpc_remove,
-        "update": rpc_update,
-        "sync": rpc_sync_system,
+        "smb_create": rpc_smb_create,
+        "nfs_create": rpc_nfs_create,
+        "delete": rpc_delete,
+        "smb_status": rpc_smb_status,
+        "nfs_status": rpc_nfs_status,
     })

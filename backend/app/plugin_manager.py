@@ -32,3 +32,25 @@ class PluginManager:
         for name in self.discover():
             self.load(name)
         return list(self.plugins.keys())
+
+def register_plugin(event_name, func):
+    """
+    Register a plugin function to an event.
+    Example: register_plugin("dataset_created", my_func)
+    """
+    if event_name not in _plugins:
+        _plugins[event_name] = []
+    _plugins[event_name].append(func)
+    print(f"[Plugin] Registered plugin for event '{event_name}'")
+
+def trigger_event(event_name, data=None):
+    """
+    Trigger all plugins attached to an event
+    """
+    if event_name in _plugins:
+        for func in _plugins[event_name]:
+            try:
+                func(data)
+            except Exception as e:
+                print(f"[Plugin] Error in plugin '{func.__name__}': {e}")
+

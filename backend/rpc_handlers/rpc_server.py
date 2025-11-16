@@ -1,110 +1,147 @@
+# backend/rpc_handlers/rpc_server.py
 """
-backend/rpc_handlers/rpc_server.py
-----------------------------------
-JSON-RPC dispatcher for MyNAS.
-Automatically loads all RPC handler modules under backend/rpc_handlers/.
+RPC server / registry for MyNAS.
+
+Provides:
+ - register(service, methods_dict)
+ - auto_register()       -> import all backend.rpc_handlers.* modules and call register_rpc(register)
+ - get_services()        -> readonly view of registry
+ - APIRouter `router`    -> POST /api/rpc/{service}/{method}
 """
 
-import os
 import pkgutil
 import importlib
 import logging
-import inspect
-from fastapi import APIRouter, Request
-from fastapi.responses import JSONResponse
+from typing import Callable, Dict, Any
+from fastapi import APIRouter, Request, HTTPException
 
 logger = logging.getLogger("mynas.rpc")
 
 router = APIRouter()
 
+# internal registry: service -> method -> callable
+_RPC_REGISTRY: Dict[str, Dict[str, Callable]] = {}
 
-# Global registry
-_services = {}
+def register(service: str, methods: Dict[str, Callable]) -> None:
+    """
+    Register a service and its methods.
+    service: "zfs", methods: {"list": callable, "create": callable}
+    """
+    s = service.lower()
+    _RPC_REGISTRY[s] = {k.lower(): v for k, v in methods.items()}
+    logger.info("RPC registered: %s -> %s", s, list(_RPC_REGISTRY[s].keys()))
 
-# Path to rpc_handlers package
-PACKAGE_DIR = os.path.dirname(__file__)
-PACKAGE_NAME = "backend.rpc_handlers"
+def get_services() -> Dict[str, Dict[str, Callable]]:
+    """Return the registry (read-only view ok)."""
+    return _RPC_REGISTRY
+
+def get_services(pretty: bool = False):
+    """
+    Return the RPC registry.
+
+    pretty = False → raw dict (machine-friendly)
+    pretty = True  → human-friendly list for UI/debugging
+
+    Example (pretty=True):
+    [
+        { "service": "zfs", "methods": ["list", "create", "destroy"] },
+        { "service": "snapshot", "methods": ["list", "create", "destroy"] },
+        ...
+    ]
+    """
+    if not pretty:
+        return _RPC_REGISTRY
+
+    out = []
+    for svc, methods in _RPC_REGISTRY.items():
+        out.append({
+            "service": svc,
+            "methods": sorted(list(methods.keys())),
+            "method_count": len(methods),
+        })
+    return out
 
 
-def get_services():
-    return _services
-
-
-# ---------------------------------------------------------
-# Registration
-# ---------------------------------------------------------
-def register(service: str, methods: dict):
-    _services[service] = methods
-    logger.info(f"RPC registered: {service} ({len(methods)} methods)")
-
-
-# ---------------------------------------------------------
-# Auto-load RPC modules
-# ---------------------------------------------------------
 def auto_register():
     """
-    Load all Python modules in backend/rpc_handlers except rpc_server itself.
+    Import all modules under backend.rpc_handlers and call register_rpc(register) if present.
+    This lets each handler module call register(...) to populate the registry.
     """
-    logger.info("Auto-registering RPC handlers...")
-
-    for module_finder, module_name, is_pkg in pkgutil.iter_modules([PACKAGE_DIR]):
-
-        if module_name in ("rpc_server", "__init__"):
-            continue
-
-        full_name = f"{PACKAGE_NAME}.{module_name}"
-
-        try:
-            module = importlib.import_module(full_name)
-
-            if hasattr(module, "register_rpc"):
-                module.register_rpc(register)
-                logger.info(f"Loaded RPC module: {module_name}")
-
-            else:
-                logger.warning(f"Module {module_name} has no register_rpc()")
-
-        except Exception as e:
-            logger.error(f"Failed to import RPC handler '{module_name}': {e}")
-
-
-# ---------------------------------------------------------
-# RPC endpoint
-# ---------------------------------------------------------
-@router.post("/rpc")
-async def rpc_endpoint(request: Request):
-    """
-    JSON-RPC endpoint.
-    {
-      "service": "backup",
-      "method": "list",
-      "params": {}
-    }
-    """
+    logger.info("RPC: auto-registering handlers from backend.rpc_handlers")
     try:
-        payload = await request.json()
-
-        service = payload.get("service")
-        method = payload.get("method")
-        params = payload.get("params", {}) or {}
-
-        if service not in _services:
-            return JSONResponse({"error": f"Unknown service '{service}'"}, status_code=404)
-
-        methods = _services[service]
-
-        if method not in methods:
-            return JSONResponse({"error": f"Unknown method '{method}' for service '{service}'"}, status_code=404)
-
-        func = methods[method]
-
-        if inspect.iscoroutinefunction(func):
-            result = await func(**params)
-        else:
-            result = func(**params)
-
-        return JSONResponse({"response": result, "error": None})
-
+        import backend.rpc_handlers as handlers_pkg
     except Exception as e:
-        logger.exception("RPC processing error:")
-        return JSONResponse({"response": None, "error": str(e)})
+        logger.exception("RPC: cannot import backend.rpc_handlers package: %s", e)
+        return
+
+    for finder, name, ispkg in pkgutil.iter_modules(handlers_pkg.__path__):
+        fullname = f"backend.rpc_handlers.{name}"
+        try:
+            mod = importlib.import_module(fullname)
+            if hasattr(mod, "register_rpc"):
+                try:
+                    mod.register_rpc(register)
+                    logger.info("RPC: module registered -> %s", fullname)
+                except Exception as e:
+                    logger.exception("RPC: register_rpc failed in %s: %s", fullname, e)
+            else:
+                logger.debug("RPC: module has no register_rpc() -> %s", fullname)
+        except Exception as e:
+            logger.exception("RPC: import failed for %s: %s", fullname, e)
+
+# -----------------------
+# Dispatcher endpoint(s)
+# -----------------------
+
+@router.post("/{service}/{method}")
+async def rpc_dispatch(service: str, method: str, request: Request):
+    """
+    POST /api/rpc/{service}/{method}
+    Body may be:
+      { "params": { ... } }
+    or directly any json object which will be used as kwargs.
+    It also accepts an array for positional params.
+    """
+    svc = service.lower()
+    m = method.lower()
+
+    if svc not in _RPC_REGISTRY:
+        raise HTTPException(status_code=404, detail=f"RPC service '{svc}' not found")
+
+    methods = _RPC_REGISTRY[svc]
+    if m not in methods:
+        raise HTTPException(status_code=404, detail=f"RPC method '{m}' not found in service '{svc}'")
+
+    func = methods[m]
+
+    # parse payload
+    try:
+        payload = {}
+        try:
+            payload = await request.json()
+        except Exception:
+            payload = {}
+
+        params = payload.get("params", payload)
+
+        # call
+        if isinstance(params, list):
+            result = func(*params)
+        elif isinstance(params, dict):
+            result = func(**params)
+        elif params is None or params == {}:
+            result = func()
+        else:
+            # single positional param
+            result = func(params)
+        return {"response": result, "error": None}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception("RPC dispatch error: %s.%s -> %s", svc, m, e)
+        raise HTTPException(status_code=500, detail=str(e))
+
+# convenience endpoint: list services
+@router.get("/services")
+async def rpc_services():
+    return {"services": list(_RPC_REGISTRY.keys())}

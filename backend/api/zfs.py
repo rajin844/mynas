@@ -1,51 +1,108 @@
 # backend/api/zfs.py
 from fastapi import APIRouter, HTTPException, Body
-from typing import Any, Dict, List
-from backend.storage.storage_manager import list_pools
-from backend.storage.zfs_manager import list_datasets_api, create_dataset_api
-
+from typing import Dict, Any, Optional
+from backend.storage.zfs_manager import (
+    list_pools,
+    pool_status,
+    create_pool,
+    destroy_pool,
+    import_pool,
+    export_pool,
+    list_datasets,
+    create_dataset,
+    destroy_dataset,
+)
 
 router = APIRouter()
 
+# ------- POOLS -------
+
 @router.post("/listpools")
 def api_list_pools():
-    return {"response": list_pools(), "error": None}
+    try:
+        return {"response": list_pools(), "error": None}
+    except Exception as e:
+        raise HTTPException(500, str(e))
 
+@router.post("/pool/status")
+def api_pool_status(name: str):
+    try:
+        return {"response": pool_status(name), "error": None}
+    except Exception as e:
+        raise HTTPException(500, str(e))
 
-@router.post("/listdatasets")
-def api_list_datasets(payload: dict = Body(None)):
-    """
-    Body may contain:
-    { "pool": "tank" }
-    or empty {}
-    """
-    pool = None
-    if payload:
-        pool = payload.get("pool")
+@router.post("/pool/create")
+def api_create_pool(payload: dict = Body(...)):
+    name = payload.get("name")
+    devices = payload.get("devices")
+    raidz = payload.get("raidz")
+    dry = payload.get("dryRun", True)
+
+    if not name or not devices:
+        raise HTTPException(400, "Pool name + devices required")
 
     try:
-        if pool:
-            datasets = list_datasets_api(pool=pool)
-        else:
-            datasets = list_datasets_api()
-        return {"response": datasets, "error": None}
+        return {
+            "response": create_pool(name, devices, raidz=raidz, dryRun=dry),
+            "error": None,
+        }
+    except Exception as e:
+        raise HTTPException(500, str(e))
 
+@router.post("/pool/destroy")
+def api_destroy_pool(payload: dict = Body(...)):
+    name = payload.get("name")
+    if not name:
+        raise HTTPException(400, "Pool name required")
+    try:
+        return {"response": destroy_pool(name), "error": None}
+    except Exception as e:
+        raise HTTPException(500, str(e))
+
+@router.post("/pool/import")
+def api_import_pool(name: str):
+    return {"response": import_pool(name), "error": None}
+
+@router.post("/pool/export")
+def api_export_pool(name: str):
+    return {"response": export_pool(name), "error": None}
+
+# ------- DATASETS -------
+
+@router.post("/listdatasets")
+def api_list_datasets(payload: Dict[str, Any] = Body(None)):
+    try:
+        pool = payload.get("pool") if payload else None
+        return {"response": list_datasets(pool), "error": None}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
-@router.post("/createdataset")
+@router.post("/dataset/create")
 def api_create_dataset(payload: dict = Body(...)):
-    """
-    Body must contain {pool:"tank", name:"data", mountpoint:"/mnt/tank/data"}
-    """
-    if "pool" not in payload or "name" not in payload:
-        raise HTTPException(400, "Both 'pool' and 'name' are required")
+    pool = payload.get("pool")
+    name = payload.get("name")
+    mountpoint = payload.get("mountpoint")
 
-    pool = payload["pool"]
-    name = payload["name"]
-    mount = payload.get("mountpoint")
+    if not pool or not name:
+        raise HTTPException(400, "Pool + dataset name required")
 
-    ok = create_dataset_api(pool, name, mount)
+    try:
+        return {
+            "response": create_dataset(pool, name, mountpoint=mountpoint),
+            "error": None,
+        }
+    except Exception as e:
+        raise HTTPException(500, str(e))
 
-    return {"response": {"created": bool(ok)}, "error": None}
+@router.post("/dataset/destroy")
+def api_destroy_dataset(payload: dict = Body(...)):
+    pool = payload.get("pool")
+    name = payload.get("name")
+
+    if not pool or not name:
+        raise HTTPException(400, "Pool + dataset name required")
+
+    try:
+        return {"response": destroy_dataset(pool, name), "error": None}
+    except Exception as e:
+        raise HTTPException(500, str(e))

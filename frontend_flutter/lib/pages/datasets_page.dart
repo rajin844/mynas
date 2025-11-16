@@ -4,116 +4,115 @@ import '../providers/zfs_provider.dart';
 
 class DatasetsPage extends StatefulWidget {
   const DatasetsPage({super.key});
+
   @override
   State<DatasetsPage> createState() => _DatasetsPageState();
 }
 
 class _DatasetsPageState extends State<DatasetsPage> {
-  String? _selectedPool;
-
   @override
   void initState() {
     super.initState();
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      context.read<ZfsProvider>().loadPools();
+      () async => await context.read<ZfsProvider>().loadAllDatasets();
     });
   }
 
   @override
   Widget build(BuildContext context) {
     final zfs = context.watch<ZfsProvider>();
-    final pools = zfs.pools;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Datasets')),
+      appBar: AppBar(title: const Text("ZFS Datasets")),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _createDataset(context),
+        child: const Icon(Icons.add),
+      ),
       body: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(children: [
-          DropdownButtonFormField<String>(
-            initialValue: _selectedPool,
-            items: pools
-                .map<DropdownMenuItem<String>>((p) =>
-                    DropdownMenuItem(value: p['name'], child: Text(p['name'])))
-                .toList(),
-            hint: const Text('Select pool'),
-            onChanged: (v) async {
-              setState(() => _selectedPool = v);
-              if (v != null) {
-                await context.read<ZfsProvider>().loadDatasets(v);
-              }
-            },
-          ),
-          const SizedBox(height: 12),
-          ElevatedButton(
-              onPressed: _selectedPool == null
-                  ? null
-                  : () => _showCreateDatasetDialog(context, _selectedPool!),
-              child: const Text('Create Dataset')),
-          const SizedBox(height: 12),
-          Expanded(
-              child: ListView(
-                  children: (_selectedPool == null
-                          ? []
-                          : (zfs.datasets[_selectedPool] ?? []))
-                      .map((d) => Card(
-                          child: ListTile(
-                              title: Text(d['name'] ?? ''),
-                              subtitle:
-                                  Text('mount: ${d['mountpoint'] ?? ''}'))))
-                      .toList()))
-        ]),
+        padding: const EdgeInsets.all(16),
+        child: ListView.builder(
+            itemCount: zfs.datasets.length,
+            itemBuilder: (context, i) {
+              final d = zfs.datasets[i];
+              return Card(
+                child: ListTile(
+                  leading: const Icon(Icons.folder),
+                  title: Text(d["name"]),
+                  subtitle: Text("Mountpoint: ${d['mountpoint']}"),
+                  trailing: IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      onPressed: () => _deleteDataset(context, d)),
+                ),
+              );
+            }),
       ),
     );
   }
 
-  void _showCreateDatasetDialog(BuildContext ctx, String pool) {
+  void _createDataset(BuildContext ctx) {
+    final poolCtrl = TextEditingController();
     final nameCtrl = TextEditingController();
     final mountCtrl = TextEditingController();
 
     showDialog(
         context: ctx,
-        builder: (_) {
-          return AlertDialog(
-            title: const Text('Create Dataset'),
-            content: Column(mainAxisSize: MainAxisSize.min, children: [
-              TextField(
-                  controller: nameCtrl,
-                  decoration: const InputDecoration(labelText: 'Name')),
-              TextField(
-                  controller: mountCtrl,
-                  decoration: const InputDecoration(
-                      labelText: 'Mountpoint (optional)')),
-            ]),
-            actions: [
-              TextButton(
-                  onPressed: () => Navigator.pop(ctx),
-                  child: const Text('Cancel')),
-              ElevatedButton(
-                  onPressed: () async {
-                    final name = nameCtrl.text.trim();
-                    final mount = mountCtrl.text.trim().isEmpty
-                        ? null
-                        : mountCtrl.text.trim();
-                    if (name.isEmpty) return;
-                    try {
-                      await context
-                          .read<ZfsProvider>()
-                          .createDataset(pool, name, mountpoint: mount);
-                      if (!context.mounted) return;
+        builder: (_) => AlertDialog(
+              title: const Text("Create Dataset"),
+              content: Column(mainAxisSize: MainAxisSize.min, children: [
+                TextField(
+                    controller: poolCtrl,
+                    decoration: const InputDecoration(labelText: "Pool Name")),
+                TextField(
+                    controller: nameCtrl,
+                    decoration:
+                        const InputDecoration(labelText: "Dataset Name")),
+                TextField(
+                    controller: mountCtrl,
+                    decoration: const InputDecoration(
+                        labelText: "Mountpoint (optional)")),
+              ]),
+              actions: [
+                TextButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    child: const Text("Cancel")),
+                ElevatedButton(
+                    onPressed: () {
+                      ctx.read<ZfsProvider>().createDataset(
+                            poolCtrl.text.trim(),
+                            nameCtrl.text.trim(),
+                            mountpoint: mountCtrl.text.trim().isEmpty
+                                ? null
+                                : mountCtrl.text.trim(),
+                          );
                       Navigator.pop(ctx);
-                      ScaffoldMessenger.of(ctx).showSnackBar(
-                          const SnackBar(content: Text('Dataset created')));
-                    } catch (e) {
-                      if (!context.mounted) return;
-                      ScaffoldMessenger.of(ctx)
-                          .showSnackBar(SnackBar(content: Text('Error: $e')));
-                    }
-                  },
-                  child: const Text('Create'))
-            ],
-          );
-        });
+                    },
+                    child: const Text("Create"))
+              ],
+            ));
+  }
+
+  void _deleteDataset(BuildContext ctx, dynamic d) {
+    final parts = d["name"].split("/");
+    final pool = parts.first;
+    final dsName = parts.sublist(1).join("/");
+
+    showDialog(
+        context: ctx,
+        builder: (_) => AlertDialog(
+              title: const Text("Delete Dataset"),
+              content: Text("Delete '${d["name"]}' permanently?"),
+              actions: [
+                TextButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    child: const Text("Cancel")),
+                ElevatedButton(
+                    onPressed: () {
+                      ctx.read<ZfsProvider>().destroyDataset(pool, dsName);
+                      Navigator.pop(ctx);
+                    },
+                    child: const Text("Delete"))
+              ],
+            ));
   }
 }

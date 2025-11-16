@@ -1,40 +1,13 @@
-# backend/rpc_handlers/shnfs.py
-"""
-RPC handlers for NFS-specific tasks.
-Service: "nfs"
-"""
+# backend/rpc_handlers/shares.py
+import logging
+logger = logging.getLogger("mynas.rpc.shares")
+from backend.storage.share_manager import list_shares, create_share, delete_share, smb_status, nfs_status
 
-from typing import Dict, Any, List
-
-try:
-    from app.utils.smb_nfs_ops import write_nfs_exports as _write_nfs_exports
-except Exception:
-    try:
-        from app.nfs_utils import write_nfs_exports as _write_nfs_exports  # type: ignore
-    except Exception:
-        _write_nfs_exports = None
-
-try:
-    from app.share_manager import list_shares as _list_shares
-except Exception:
-    from backend.storage.share_manager import list_shares as _list_shares  # type: ignore
-
-def rpc_write_exports() -> Dict[str, Any]:
-    shares = _list_shares()
-    nfs_shares = [s for s in shares if s.get("protocol") == "nfs"]
-    if _write_nfs_exports is None:
-        return {"status": "error", "reason": "nfs helper not available"}
-    try:
-        _write_nfs_exports(nfs_shares)
-        return {"status": "ok", "written": len(nfs_shares)}
-    except Exception as e:
-        return {"status": "error", "reason": str(e)}
-
-def rpc_list_shares() -> List[Dict[str, Any]]:
-    return [s for s in _list_shares() if s.get("protocol") == "nfs"]
+def rpc_list(): return list_shares()
+def rpc_create(name: str, path: str, protocol: str, options: dict = None): return create_share(name, path, protocol, options or {})
+def rpc_delete(uuid: str): return delete_share(uuid)
+def rpc_smb_status(): return smb_status()
+def rpc_nfs_status(): return nfs_status()
 
 def register_rpc(register):
-    register("nfs", {
-        "write_exports": rpc_write_exports,
-        "list_shares": rpc_list_shares
-    })
+    register("shares", {"list": rpc_list, "create": rpc_create, "delete": rpc_delete, "smb_status": rpc_smb_status, "nfs_status": rpc_nfs_status})

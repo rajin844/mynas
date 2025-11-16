@@ -32,21 +32,63 @@ class ApiService {
     return data["response"];
   }
 
-  // convenience wrappers
+  // Storage
+  Future<List<dynamic>> listDisks() async =>
+      List.from(await callRpc("STORAGE", "listDisks", {}));
+  Future<dynamic> detectDisks() async =>
+      await callRpc("STORAGE", "detectDisks", {});
+  Future<dynamic> storageSummary() async =>
+      await callRpc("STORAGE", "summary", {});
+  Future<dynamic> rescanSata() async =>
+      await callRpc("STORAGE", "rescanSata", {});
+// ZFS
   Future<List<dynamic>> listPools() async =>
       List.from(await callRpc("ZFS", "listPools", {}));
-  Future<List<dynamic>> listDatasets(String? pool) async =>
-      List.from(await callRpc("ZFS", "listDatasets", {"pool": pool}));
-  Future<List<dynamic>> listShares() async =>
-      List.from(await callRpc("SHARE", "listShares", {}));
-  Future<dynamic> createPool(String name, List<String> devices,
-          {bool dryRun = true}) async =>
-      await callRpc("STORAGE", "create_pool",
-          {"name": name, "devices": devices, "dry_run": dryRun});
+  Future<dynamic> poolStatus(String pool) async =>
+      await callRpc("ZFS", "poolStatus", {"pool": pool});
+
+  Future<dynamic> createPool(
+    String name,
+    List<String> devices, {
+    String? raidz,
+    bool force = false,
+    required bool dryRun,
+  }) async {
+    return await callRpc("ZFS", "createPool", {
+      "name": name,
+      "devices": devices,
+      "raidz": raidz,
+      "force": force,
+      "dryRun": dryRun,
+    });
+  }
+
+  Future<dynamic> destroyPool(String name, {bool force = false}) async =>
+      await callRpc("ZFS", "destroyPool", {"name": name, "force": force});
+
+  Future<List<dynamic>> listDatasets({String? pool}) async =>
+      List.from(await callRpc("zfs", "listdatasets", {"pool": pool}));
+
   Future<dynamic> createDataset(String pool, String name,
           {String? mountpoint}) async =>
-      await callRpc("ZFS", "createDataset",
+      await callRpc("ZFS", "createdataset",
           {"pool": pool, "name": name, "mountpoint": mountpoint});
+
+  Future<dynamic> destroyDataset(String pool, String name,
+          {bool recursive = false}) async =>
+      await callRpc("ZFS", "destroydataset",
+          {"pool": pool, "name": name, "recursive": recursive});
+
+  Future<dynamic> importPool(String name, {String? path}) async =>
+      await callRpc("ZFS", "importPool", {"name": name, "path": path});
+  Future<dynamic> exportPool(String name) async =>
+      await callRpc("ZFS", "exportPool", {"name": name});
+
+  Future<dynamic> scrubPool(String name) async =>
+      await callRpc("ZFS", "scrubPool", {"name": name});
+  Future<List<dynamic>> listShares() async =>
+      List.from(await callRpc("share", "list", {}));
+
   Future<dynamic> createShare(
           String name, String path, String protocol) async =>
       await callRpc("SHARE", "createShare",
@@ -60,11 +102,18 @@ class ApiService {
       await callRpc("BACKUP", "restore", {"file": file});
   Future<dynamic> listInterfaces() async =>
       await callRpc("NETWORK", "listInterfaces", {});
-  Future<dynamic> getMetrics() async => await callRpc("MONITOR", "metrics", {});
-  Future<dynamic> listAcl(String path) async =>
+
+  Future<dynamic> getMetrics() async => await callRpc("monitor", "metrics", {});
+
+  Future<List<dynamic>> listAcl(String path) async =>
       await callRpc("ACL", "getAcl", {"path": path});
-  Future<dynamic> setAcl(String path, dynamic acl) async =>
+
+  Future<dynamic> setAcl(String path, List<Map<String, dynamic>> acl) async =>
       await callRpc("ACL", "setAcl", {"path": path, "acl": acl});
+
   Future<dynamic> removeAcl(String path) async =>
       await callRpc("ACL", "removeAcl", {"path": path});
+
+  Future<List<dynamic>> listUsers() async =>
+      List.from(await callRpc("USERS", "listUsers", {}));
 }

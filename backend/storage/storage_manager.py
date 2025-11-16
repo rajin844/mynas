@@ -1,152 +1,133 @@
-import os
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      # backend/storage/storage_manager.py
+"""
+Storage manager: disk enumeration, SMART, disk usage, storage summary.
+
+Functions:
+ - list_disks()
+ - detect_disks()
+ - smart_health(dev)
+ - smart_test(dev, test_type="short")
+ - disk_usage(dev)
+ - get_storage_summary()
+"""
+import shutil
 import subprocess
-from fastapi import HTTPException
-from typing import List, Dict
-from backend.app.config_manager import ConfigManager
-from backend.app.utils.zfs_ops import (
-    PoolInfo,
-    DatasetInfo,
-    zpool_list,
-    zpool_import_list,
-    create_pool,
-    destroy_pool,
-    import_pool,
-)
-from backend.realtime.events import emit_event
+import json
+import logging
+from pathlib import Path
+from typing import List, Dict, Any
 
-cfg = ConfigManager()
+from backend.app.config_manager import cfg
+try:
+    from backend.realtime.websocket_server import WSManagerProxy
+except Exception:
+    WSManagerProxy = None
 
-"""
-Storage Manager
-Detects and manages disks, filesystems, and ZFS pools/datasets.
-"""
+logger = logging.getLogger("mynas.storage")
 
-# ------------------------------
-# Disk Detection and Info
-# ------------------------------
+def _has_cmd(name: str) -> bool:
+    return shutil.which(name) is not None
 
-def detect_disks() -> List[str]:
-    """Detect available block devices (non-partition)."""
-    disks: List[str] = []
+def list_disks() -> List[Dict[str, Any]]:
+    """Return list of block devices. Uses lsblk -J when available, else config fallback."""
+    if _has_cmd("lsblk"):
+        try:
+            out = subprocess.check_output(["lsblk", "-J", "-o", "NAME,SIZE,TYPE,MOUNTPOINT,MODEL,VENDOR,ROTA"], text=True)
+            data = json.loads(out)
+            disks = []
+            for d in data.get("blockdevices", []):
+                if d.get("type") in ("disk",):
+                    disks.append({
+                        "name": d.get("name"),
+                        "devpath": f"/dev/{d.get('name')}",
+                        "size": d.get("size"),
+                        "mountpoint": d.get("mountpoint"),
+                        "model": d.get("model"),
+                        "vendor": d.get("vendor"),
+                        "rotational": d.get("rota"),
+                    })
+            # persist candidate disk inventory
+            cfg.data.setdefault("storage", {})["disks"] = disks
+            cfg.save(cfg.data)
+            return disks
+        except Exception as e:
+            logger.exception("lsblk failed: %s", e)
+
+    # fallback to saved config
+    return cfg.get("storage", {}).get("disks", [])
+
+def detect_disks() -> Dict[str, Any]:
+    """Run disk detection and broadcast result."""
+    disks = list_disks()
+    result = {"count": len(disks), "disks": disks}
     try:
-        output = subprocess.check_output(["lsblk", "-dn", "-o", "NAME,TYPE"]).decode()
-        for line in output.splitlines():
-            name, typ = line.split()
-            if typ == "disk":
-                disks.append(f"/dev/{name}")
-    except Exception as e:
-        print(f"[ERROR] Failed to detect disks: {e}")
-    return disks
+        if WSManagerProxy:
+            WSManagerProxy.broadcast({"module": "storage", "event": "disks_detected", "count": len(disks)})
+    except Exception:
+        pass
+    return result
 
+def disk_usage(dev: str) -> Dict[str, Any]:
+    """Return filesystem usage for a device (best-effort)."""
+    # Try lsblk for FSUSED/FSUSE%; fallback to zeroes
+    if _has_cmd("lsblk"):
+        try:
+            out = subprocess.check_output(["lsblk", "-b", "-o", "NAME,SIZE,TYPE,MOUNTPOINT,MODEL,VENDOR,FSTYPE,FSUSED,FSUSE%", dev], text=True)
+            # parse lines
+            lines = [l for l in out.strip().splitlines() if l.strip()]
+            if len(lines) >= 2:
+                parts = lines[1].split()
+                # best-effort mapping
+                size = parts[1] if len(parts) > 1 else "0"
+                used = parts[-2] if len(parts) > 2 else "0"
+                pct = parts[-1] if len(parts) > 2 else "0%"
+                return {"device": dev, "size": int(size) if size.isdigit() else size, "used": int(used) if str(used).isdigit() else used, "percent": pct}
+        except Exception as e:
+            logger.debug("lsblk disk_usage parse failed: %s", e)
 
-def disk_info(disk: str) -> Dict:
-    """Return dictionary with disk size, partitions, and mount points."""
-    info = {"disk": disk, "partitions": []}
+    return {"device": dev, "size": 0, "used": 0, "percent": "0%"}
+
+def smart_health(dev: str) -> Dict[str, Any]:
+    """Return a light summary of SMART health. Requires smartctl."""
+    if not _has_cmd("smartctl"):
+        return {"supported": False, "message": "smartctl not installed"}
     try:
-        output = subprocess.check_output(["lsblk", "-o", "NAME,SIZE,MOUNTPOINT", disk]).decode()
-        lines = output.splitlines()[1:]
-        for l in lines:
-            parts = l.split()
-            if not parts:
-                continue
-            entry = {
-                "name": parts[0],
-                "size": parts[1],
-                "mountpoint": parts[2] if len(parts) > 2 else None,
-            }
-            info["partitions"].append(entry)
+        out = subprocess.check_output(["smartctl", "-H", "-i", dev], text=True, stderr=subprocess.STDOUT)
+        return {"supported": True, "output": out}
+    except subprocess.CalledProcessError as e:
+        return {"supported": True, "success": False, "output": getattr(e, "output", str(e))}
     except Exception as e:
-        print(f"[ERROR] Failed to get disk info for {disk}: {e}")
-    return info
+        logger.exception("smartctl failed: %s", e)
+        return {"supported": False, "error": str(e)}
 
-
-def list_filesystems() -> Dict[str, str]:
-    """Return dictionary of filesystem types per disk/partition."""
-    fsmap: Dict[str, str] = {}
+def smart_test(dev: str, test_type: str = "short") -> Dict[str, Any]:
+    """Start a SMART test (short/long/conveyance) if smartctl present."""
+    if not _has_cmd("smartctl"):
+        return {"supported": False, "message": "smartctl not installed"}
     try:
-        output = subprocess.check_output(["blkid"]).decode()
-        for line in output.splitlines():
-            parts = line.split(":")
-            if len(parts) < 2:
-                continue
-            dev = parts[0]
-            if 'TYPE="' in line:
-                fs_type = line.split('TYPE="')[1].split('"')[0]
-                fsmap[dev] = fs_type
+        cmd = ["smartctl", "-t", test_type, dev]
+        out = subprocess.check_output(cmd, text=True, stderr=subprocess.STDOUT)
+        return {"started": True, "cmd": " ".join(cmd), "output": out}
     except Exception as e:
-        print(f"[WARN] blkid not available or failed: {e}")
-    return fsmap
+        logger.exception("smart test failed: %s", e)
+        return {"started": False, "error": str(e)}
 
-
-def mount_disk(disk: str, path: str) -> bool:
-    """Mount disk to path."""
-    try:
-        os.makedirs(path, exist_ok=True)
-        subprocess.run(["mount", disk, path], check=False)
-        return True
-    except Exception as e:
-        print(f"[ERROR] Failed to mount {disk} to {path}: {e}")
-        return False
-
-
-# ------------------------------
-# ZFS Pool Management
-# ------------------------------
-
-def list_pools() -> Dict[str, List[PoolInfo]]:
-    """
-    Return:
-    {
-        "config_pools": [...],
-        "zpool_list": [...],
-        "importable_pools": [...]
-    }
-    """
-    stored = cfg.get_section("storage") or {}
+def get_storage_summary() -> Dict[str, Any]:
+    storage = cfg.get_storage()
+    pools = storage.get("pools", [])
+    datasets = storage.get("datasets", [])
+    disks = list_disks()
+    total_used = 0
+    total = 0
+    for d in disks:
+        u = d.get("usage", {})
+        if u and u.get("total"):
+            total_used += u.get("used", 0)
+            total += u.get("total", 0)
+    percent = (total_used / total * 100) if total else 0
     return {
-        "config_pools": stored.get("pools", []),
-        "zpool_list": zpool_list(),
-        "importable_pools": zpool_import_list(),
+        "pools": pools,
+        "datasets": datasets,
+        "disks": disks,
+        "capacity_percent": round(percent, 2)
     }
-
-
-def create_pool_api(name: str, devices: List[str]) -> Dict[str, bool]:
-    """Create ZFS pool and record in config.json."""
-    if not name or not devices:
-        raise HTTPException(status_code=400, detail="Pool name and devices required")
-
-    ok = create_pool(name, devices)
-    if ok:
-        storage = cfg.get_section("storage") or {}
-        pools = storage.get("pools", [])
-        pools.append({"name": name, "devices": devices})
-        storage["pools"] = pools
-        cfg.set_section("storage", storage)
-        emit_event({"module": "storage", "action": "pool_created", "name": name})
-    return {"ok": ok}
-
-
-def import_pool_api(name: str) -> Dict[str, bool]:
-    """Import existing ZFS pool."""
-    if not name:
-        raise HTTPException(status_code=400, detail="Pool name required")
-
-    ok = import_pool(name)
-    if ok:
-        emit_event({"module": "storage", "action": "pool_imported", "name": name})
-    return {"ok": ok}
-
-
-def destroy_pool_api(name: str) -> Dict[str, bool]:
-    """Destroy pool and update config.json."""
-    if not name:
-        raise HTTPException(status_code=400, detail="Pool name required")
-
-    ok = destroy_pool(name)
-    if ok:
-        storage = cfg.get_section("storage") or {}
-        pools = [p for p in storage.get("pools", []) if p.get("name") != name]
-        storage["pools"] = pools
-        cfg.set_section("storage", storage)
-        emit_event({"module": "storage", "action": "pool_deleted", "name": name})
-    return {"ok": ok}

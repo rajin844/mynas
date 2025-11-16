@@ -2,165 +2,179 @@
 backend/app/main.py
 -------------------
 Main FastAPI entrypoint for the MyNAS backend.
+
 Integrates:
  - REST API routes
- - RPC handlers
+ - RPC handlers (auto-loaded)
  - WebSocket realtime system
+ - Disk detection / ZFS init
+ - Storage / Snapshot / Alerts bootstrap
  - Monitoring broadcaster
- - Plugin auto-loader
 """
+
 import uvicorn
 import asyncio
 import logging
-from fastapi import FastAPI , WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
-# --- Import backend modules ---
-
+# Core config + base services
 from backend.app.config_manager import ConfigManager
-from backend.api.zfs import list_pools,create_dataset_api,list_datasets_api
-from backend.api import storage, shares, backup, network, monitoring, compat
-#from backend.app.plugin_manager import PluginManager
 from backend.realtime.websocket_server import WSManager, WSManagerProxy
-from backend.storage.storage_manager import detect_disks, list_filesystems, list_pools , disk_info
-from backend.storage.zfs_manager import list_datasets_api
-from backend.storage.share_manager import load_shares
-#from backend.app.monitoring import periodic_broadcast
+from backend.app.monitor_broadcaster import periodic_monitor
+from backend.api import monitoring
+from backend.api import zfs
 
-# --- REST API routers ---
+# Storage boot systems
+from backend.storage.storage_manager import detect_disks, list_disks
+from backend.storage.zfs_manager import list_pools, list_datasets
+from backend.storage.share_manager import load_shares
+
+# REST Routers
 from backend.api import (
+    #zfs,
     storage,
-    shares,
     users,
     acl,
-    zfs,
+    shares,
     backup,
-    #monitoring,
     network,
+    compat,
+    raidz,
+    smart,
+    system,
 )
 
-# --- RPC Dispatcher ---
+# RPC auto-loader
 from backend.rpc_handlers.rpc_server import (
     router as rpc_router,
-    auto_register as load_rpc_modules,
+    auto_register as rpc_auto_register,
 )
 
 logger = logging.getLogger("mynas.main")
 logger.setLevel(logging.INFO)
 
-app = FastAPI(title="MyNAS")
+# =====================================================================
+# FASTAPI APP INIT
+# =====================================================================
+app = FastAPI(title="MyNAS Backend API", version="1.0.0")
 
-# CORS - allow local dev; lock down for production
+# CORS (anywhere allowed for dev)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    allow_credentials=True,
 )
 
-# Load config manager & global ws manager
-
+# Global WebSocket manager
 ws_manager = WSManager()
 WSManagerProxy.register(ws_manager)
 
-
-
-
-
-# Include API router
-app.include_router(zfs.router, prefix="/api/zfs", tags=["ZFS"])
+# =====================================================================
+# REST API ROUTES
+# =====================================================================
+app.include_router(zfs.router,     prefix="/api/zfs",     tags=["ZFS"])
 app.include_router(storage.router, prefix="/api/storage", tags=["Storage"])
-app.include_router(users.router, prefix="/api/users", tags=["Users"])
-app.include_router(acl.router, prefix="/api/acl", tags=["Acl"])
-app.include_router(shares.router, prefix="/api/shares", tags=["Shares"])
-app.include_router(backup.router, prefix="/api/backup", tags=["Backup"])
+app.include_router(users.router,   prefix="/api/users",   tags=["Users"])
+app.include_router(acl.router,     prefix="/api/acl",     tags=["ACL"])
+app.include_router(shares.router,  prefix="/api/shares",  tags=["Shares"])
+app.include_router(backup.router,  prefix="/api/backup",  tags=["Backup"])
 app.include_router(network.router, prefix="/api/network", tags=["Network"])
-#app.include_router(monitoring.router, prefix="/api/monitoring", tags=["Monitoring"])
-app.include_router(compat.router, prefix="/api", tags=["CompatRPC"])
-app.include_router(rpc_router, prefix="/api", tags=["RPC"])
+app.include_router(monitoring.router, prefix="/api/monitor", tags=["Monitoring"])
 
+# NEW APIs
+app.include_router(raidz.router,   prefix="/api/raidz",   tags=["RAIDZ"])
+app.include_router(smart.router,   prefix="/api/smart",   tags=["SMART"])
+app.include_router(system.router,  prefix="/api/system",  tags=["System"])
 
+# RPC + Compat
+app.include_router(compat.router,  prefix="/api",         tags=["Compat"])
+app.include_router(rpc_router,     prefix="/api/rpc",     tags=["RPC"])
 
-
-
-
-# --- Include RPC router ---
-
-
+# =====================================================================
+# WEBSOCKET ENDPOINT
+# =====================================================================
 @app.websocket("/ws")
-async def websocket_endpoint(ws: WebSocket):
-    """WebSocket endpoint for realtime events to Flutter/UI clients."""
+async def ws_endpoint(ws: WebSocket):
     await ws_manager.connect(ws)
-    logger.info(f"WebSocket connected: {ws.client}")
+    logger.info(f"WS connected: {ws.client}")
+
     try:
         while True:
-            data = await ws.receive_text()
-            # Optional: handle incoming WS commands (e.g., ping)
-            if data == "ping":
+            msg = await ws.receive_text()
+            if msg == "ping":
                 await ws.send_text("pong")
     except WebSocketDisconnect:
         await ws_manager.disconnect(ws)
-        logger.info(f"WebSocket disconnected: {ws.client}")
+        logger.info(f"WS disconnected: {ws.client}")
 
-# --- Root route ---
+# =====================================================================
+# ROOT
+# =====================================================================
 @app.get("/")
 async def root():
-    """Basic status check."""
-    return JSONResponse(
-        {
-            "status": "running",
-            "version": app.version,
-            "message": "MyNAS backend API operational",
-        }
-    )        
+    return JSONResponse({
+        "status": "running",
+        "version": app.version,
+        "message": "MyNAS backend operational",
+    })
 
-# ------------------------------------------------------------------------------
-# 🧩 Startup & Shutdown Events
-# ------------------------------------------------------------------------------
+# =====================================================================
+# STARTUP EVENT
+# =====================================================================
 @app.on_event("startup")
 async def on_startup():
-    logger.info("=== Starting MyNAS backend services ===")
+    logger.info("=== MyNAS Backend Startup ===")
+
+    # 1) Start monitoring broadcaster
+    loop = asyncio.get_event_loop()
+    loop.create_task(periodic_monitor())
+    logger.info("✓ Monitoring broadcaster running")
+
+    # 2) Config
     cfg = ConfigManager()
     cfg.ensure_initialized()
+    logger.info("✓ Config ready")
 
-       # 2️⃣ Initialize core storage system
+    # 3) Disk detection
     detect_disks()
+    disks = list_disks()
+    logger.info(f"✓ Disks detected: {len(disks)}")
+
+    # 4) ZFS detection
     pools = list_pools()
-    dataset = list_datasets_api()
-    logger.info(f"✅ Detected ZFS pools: {pools}")
+    datasets = list_datasets()
+    logger.info(f"✓ ZFS Loaded: Pools={len(pools)} | Datasets={len(datasets)}")
 
-    # 3️⃣ Load existing shares (SMB/NFS)
+    # 5) Load SMB/NFS shares
     load_shares()
-    logger.info("✅ Shares loaded successfully.")
+    logger.info("✓ Shares loaded")
 
-    # 1️⃣ Load backend plugins
-    #load_plugins()
-    #logger.info("✅ Plugins loaded")
-    
+    # 6) Auto-load all RPC handlers
+    try:
+        rpc_auto_register()
+        logger.info("✓ RPC handlers auto-loaded")
+    except Exception as e:
+        logger.exception("RPC auto-register failed: %s", e)
 
-    # 2️⃣ Load RPC handler modules
-    load_rpc_modules()
-    logger.info("✅ RPC handlers registered")
-
-    # 3️⃣ Register WebSocket manager globally
+    # 7) WebSocket system ready
     WSManagerProxy.register(ws_manager)
-    logger.info("✅ WebSocket manager configured")
-
-    # 4️⃣ Start monitoring broadcast loop
-    #loop = asyncio.get_event_loop()
-    #periodic_broadcast(loop)
-    #logger.info("✅ Monitoring started (5s interval)")
+    logger.info("✓ WebSocket manager registered")
 
     logger.info("=== Backend startup complete ===")
 
-
+# =====================================================================
+# SHUTDOWN
+# =====================================================================
 @app.on_event("shutdown")
-async def shutdown_event():
-    logger.info("🛑 MyNAS Backend Shutting down...")
+async def on_shutdown():
+    logger.info("🛑 Backend shutting down...")
 
-# --- Run server (if directly executed) ---
+# =====================================================================
+# RUN (DIRECT)
+# =====================================================================
 if __name__ == "__main__":
-     uvicorn.run("backend.app.main:app", host="0.0.0.0", port=8000, reload=False)
-    
+    uvicorn.run("backend.app.main:app", host="0.0.0.0", port=8000, reload=False)
