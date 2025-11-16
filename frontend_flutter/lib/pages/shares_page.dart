@@ -12,9 +12,9 @@ class _SharesPageState extends State<SharesPage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
-      context.read<SharesProvider>().loadShares();
+      await context.read<SharesProvider>().loadShares();
     });
   }
 

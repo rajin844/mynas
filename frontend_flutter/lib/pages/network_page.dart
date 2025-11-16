@@ -12,9 +12,9 @@ class _NetworkPageState extends State<NetworkPage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
-      context.read<NetworkProvider>().loadInterfaces();
+      await context.read<NetworkProvider>().loadInterfaces();
     });
   }
 
