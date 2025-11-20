@@ -1,0 +1,50 @@
+name: frontend_flutter
+description: MyNAS Flutter frontend (placeholder)
+version: 0.1.0
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # --- Your main packages ---
+  http: ^1.5.0
+  web_socket_channel: ^3.0.3
+  provider: ^6.0.0
+  fluttertoast: ^9.0.0
+  intl: ^0.20.2
+  meta: ^1.17.0
+
+  # --- Already included in Flutter SDK (DO NOT ADD MANUALLY) ---
+  # characters  ❌ remove
+  # material_color_utilities ❌ remove
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+
+  # ---------- ASSETS ----------
+  assets:
+    - assets/fonts/
+
+  # ---------- FONTS ----------
+  fonts:
+    - family: RobotoLocal
+      fonts:
+        - asset: assets/fonts/Roboto-Regular.ttf
+
+    - family: NotoSansLocal
+      fonts:
+        - asset: assets/fonts/NotoSans-Regular.ttf
+
+    - family: NotoSymbolsLocal
+      fonts:
+        - asset: assets/fonts/NotoSansSymbols2-Regular.ttf
+
+    - family: MaterialIconsLocal
+      fonts:
+        - asset: assets/fonts/MaterialIcons-Regular.ttf
