@@ -291,9 +291,11 @@ class _PoolsPageState extends State<PoolsPage> {
                     value: raidLevel,
                     items: const [
                       DropdownMenuItem(
+                          value: "single", child: Text("Single Disk")),
+                      DropdownMenuItem(
                           value: "stripe", child: Text("Stripe (RAID 0)")),
                       DropdownMenuItem(
-                          value: "mirror", child: Text("Mirror (RAID 1)")),
+                          value: "mirror", child: Text("Mirror RAID 1")),
                       DropdownMenuItem(value: "raidz1", child: Text("RAIDZ1")),
                       DropdownMenuItem(value: "raidz2", child: Text("RAIDZ2")),
                       DropdownMenuItem(value: "raidz3", child: Text("RAIDZ3")),

@@ -30,3 +30,33 @@ async def compat_handler(service: str, method: str, request: Request):
         result = func(params)
 
     return {"response": result, "error": None}
+
+
+from fastapi import APIRouter, Request, HTTPException
+from backend.rpc_handlers.rpc_server import get_services
+
+router = APIRouter()
+
+@router.post("/{service}/{method}")
+async def compat(service: str, method: str, request: Request):
+    services = get_services()
+
+    if service not in services:
+        raise HTTPException(404, f"Service '{service}' not found")
+
+    if method not in services[service]:
+        raise HTTPException(404, f"Method '{method}' not found")
+
+    func = services[service][method]
+
+    try:
+        body = await request.json()
+    except:
+        body = {}
+
+    try:
+        if body:
+            return {"response": func(**body), "error": None}
+        return {"response": func(), "error": None}
+    except Exception as e:
+        raise HTTPException(500, str(e))

@@ -83,7 +83,45 @@ class MyNASApp extends StatelessWidget {
       ],
       child: MaterialApp(
           title: 'MyNAS',
-          theme: ThemeData.dark(useMaterial3: true),
+          debugShowCheckedModeBanner: false,
+          theme: ThemeData(
+            useMaterial3: true,
+            colorSchemeSeed: Colors.blueAccent,
+            brightness: Brightness.dark,
+
+            // ---- PRIMARY FONT ----
+            fontFamily: 'Roboto', // Google CDN (HTML Renderer)
+
+            // ---- FALLBACKS (LOCAL) ----
+            fontFamilyFallback: [
+              'RobotoLocal',
+              'NotoSansLocal',
+              'NotoSymbolsLocal',
+              'MaterialIconsLocal',
+            ],
+
+            iconTheme: const IconThemeData(size: 22),
+            visualDensity: VisualDensity.adaptivePlatformDensity,
+          ),
+          darkTheme: ThemeData(
+            useMaterial3: true,
+            brightness: Brightness.light,
+            colorSchemeSeed: Colors.blueGrey,
+
+            // --- Primary font ---
+            fontFamily: 'Roboto',
+
+            // --- Local fallback fonts ---
+            fontFamilyFallback: [
+              'RobotoLocal',
+              'NotoSansLocal',
+              'NotoSymbolsLocal',
+              'MaterialIconsLocal',
+            ],
+          ),
+          // Auto-switch based on system theme
+          //themeMode: ThemeMode.system,
+          themeMode: ThemeMode.system,
           initialRoute: '/',
           routes: {
             "/": (ctx) => const DashboardPage(),

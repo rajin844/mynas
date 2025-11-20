@@ -1,0 +1,8 @@
+# backend/tasks/task_manager.py
+
+from backend.app.task_queue import enqueue
+
+def run_long_task(func, *args, **kwargs):
+    def job():
+        return func(*args, **kwargs)
+    return enqueue(job)

@@ -12,5 +12,16 @@ def rpc_hardware():
     except Exception as e:
         logger.exception(e); return {"error": str(e)}
 
+def rpc_info():
+    return system_info()
+
+def rpc_reboot():
+    return reboot()
+
+def rpc_shutdown():
+    return shutdown()
+def register_rpc(register):
+    register("system", {"info": rpc_info, "reboot": rpc_reboot, "shutdown": rpc_shutdown})
+
 def register_rpc(register):
     register("system", {"info": rpc_info, "hardware": rpc_hardware})

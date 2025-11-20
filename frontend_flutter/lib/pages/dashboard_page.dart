@@ -1,53 +1,61 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:frontend_flutter/providers/storage_provider.dart';
-import 'package:frontend_flutter/widgets/drawer.dart';
+
 import 'package:provider/provider.dart';
 import '../providers/monitoring_provider.dart';
 import '../providers/zfs_provider.dart';
+import '../providers/storage_provider.dart';
 import '../providers/shares_provider.dart';
 import '../services/websocket_service.dart';
+import 'package:frontend_flutter/widgets/drawer.dart';
+import '../widgets/metric_card.dart';
+import '../widgets/glass_card.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
+
   @override
   State<DashboardPage> createState() => _DashboardPageState();
 }
 
-class _DashboardPageState extends State<DashboardPage> {
+class _DashboardPageState extends State<DashboardPage>
+    with SingleTickerProviderStateMixin {
+  late AnimationController fadeCtrl;
+  late AnimationController animCtrl;
+  late Animation<double> fadeAnim;
+  late Animation<Offset> slideAnim;
   @override
   void initState() {
     super.initState();
+
+    fadeCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    )..forward();
+
     final ws = context.read<WebSocketService>();
     final monitor = context.read<MonitoringProvider>();
-    final zfs = context.read<ZfsProvider>();
-    final shares = context.read<SharesProvider>();
     final storage = context.read<StorageProvider>();
+    final pools = context.read<ZfsProvider>();
+    final shares = context.read<SharesProvider>();
 
     Future.microtask(() async {
       await monitor.refresh();
-      await zfs.loadPools();
+      await storage.loadSummary();
+      await pools.loadPools();
+      await pools.loadAllDatasets();
       await shares.loadShares();
     });
 
-    ws.stream.listen((raw) {
+    ws.stream.listen((msg) {
       if (!mounted) return;
 
-      dynamic msg;
-      try {
-        msg = jsonDecode(raw);
-      } catch (e) {
-        debugPrint("WS decode error: $e");
-        return;
-      }
-
       if (msg is Map && msg['module'] == 'monitor') {
-        monitor.updateFromWs(msg['data']);
-      } else if (msg is Map && msg['module'] == 'zfs') {
-        zfs.loadPools();
+        monitor.updateFromWs(msg);
       } else if (msg is Map && msg['module'] == 'storage') {
         storage.loadSummary();
+      } else if (msg is Map && msg['module'] == 'zfs') {
+        pools.loadPools();
       } else if (msg is Map && msg['module'] == 'shares') {
         shares.loadShares();
       }
@@ -58,175 +66,234 @@ class _DashboardPageState extends State<DashboardPage> {
   Widget build(BuildContext context) {
     final monitor = context.watch<MonitoringProvider>();
     final storage = context.watch<StorageProvider>();
-    final zfs = context.watch<ZfsProvider>();
+    final pools = context.watch<ZfsProvider>();
     final ws = context.watch<WebSocketService>();
+    final zfs = context.watch<ZfsProvider>();
+    final shares = context.watch<SharesProvider>();
 
     return Scaffold(
-      appBar: AppBar(title: const Text("MyNAS Dashboard")),
-      drawer: AppDrawer(
-        onSelect: (route) {
-          Navigator.pop(context);
-          Navigator.pushNamed(context, route);
-        },
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(children: [
-          // CONNECTION + REFRESH
-          Row(children: [
-            Chip(
-                avatar: Icon(ws.connected ? Icons.check_circle : Icons.error,
-                    color: ws.connected ? Colors.green : Colors.red),
-                label: Text(ws.connected ? "Connected" : "Disconnected")),
-            const SizedBox(width: 16),
-            ElevatedButton(
-                onPressed: () => monitor.refresh(),
-                child: const Text("Refresh Metrics"))
-          ]),
-
-          const SizedBox(height: 16),
-
-          // MONITORING METRICS
-          Row(children: [
-            _metricCard("CPU", "${monitor.cpu.toStringAsFixed(1)}%"),
-            const SizedBox(width: 12),
-            _metricCard("RAM", "${monitor.ram.toStringAsFixed(1)}%"),
-            const SizedBox(width: 12),
-            _metricCard("Disk", "${monitor.disk.toStringAsFixed(1)}%"),
-          ]),
-
-          const SizedBox(height: 20),
-
-          // -------------------------------
-          // STORAGE SUMMARY TILE
-          // -------------------------------
-          _storageSummaryTile(storage),
-
-          const SizedBox(height: 15),
-
-          // -------------------------------
-          // OVERVIEW WIDGETS (Storage + Pools)
-          // -------------------------------
-          Expanded(
-            child: Row(
+        appBar: AppBar(
+          title: const Text("MyNAS Dashboard"),
+          elevation: 0,
+          centerTitle: true,
+        ),
+        drawer: AppDrawer(
+          onSelect: (route) {
+            Navigator.pop(context);
+            Navigator.pushNamed(context, route);
+          },
+          currentRoute: ModalRoute.of(context)?.settings.name,
+          counts: {
+            '/pools': zfs.pools.length,
+            '/storage': storage.summary?['disks']?.length ?? 0,
+            '/datasets': zfs.datasets.length,
+            '/pools2': zfs.pools.length,
+            ' /shares': shares.shares.length,
+          },
+          username: 'admin',
+          hostname: 'mynas',
+          version: '1.0.0',
+        ),
+        body: FadeTransition(
+          opacity: fadeCtrl,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
               children: [
-                Expanded(child: _storageOverview(storage)),
-                const SizedBox(width: 12),
-                Expanded(child: _poolsOverviewWidget(zfs)),
+                _buildHeader(ws, monitor),
+                const SizedBox(height: 20),
+                _buildMetricsRow(monitor),
+                const SizedBox(height: 20),
+                //_buildDisksCard(storage),
+                //const SizedBox(height: 20),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // LEFT SIDE → Storage + Pools (stacked)
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildStorageCard(storage),
+                          const SizedBox(height: 16),
+                          _buildPoolsCard(pools),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(child: _buildDataSetsCard(zfs)),
+                    const SizedBox(width: 16),
+                    Expanded(child: _buildDisksCard(storage)),
+                    // RIGHT SIDE — Pools + Disks (STACKED)
+                  ],
+                ),
               ],
             ),
-          )
-        ]),
-      ),
-    );
-  }
-
-  // ------------------------- Drawer -------------------------
-
-  // ------------------------- Widgets -------------------------
-  Widget _metricCard(String label, String value) {
-    return Expanded(
-      child: Card(
-        elevation: 1,
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            children: [
-              Text(label),
-              const SizedBox(height: 8),
-              Text(value,
-                  style: const TextStyle(
-                      fontSize: 22, fontWeight: FontWeight.bold)),
-            ],
           ),
-        ),
-      ),
-    );
+        ));
   }
 
-  // STORAGE SUMMARY TILE
-  Widget _storageSummaryTile(StorageProvider storage) {
-    final s = storage.summary ?? {};
-
-    return Card(
-      elevation: 1,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(children: [
-          _miniStat("Disks", s["disks"] ?? 0),
-          const SizedBox(width: 20),
-          _miniStat("Pools", s["pools"] ?? 0),
-          const SizedBox(width: 20),
-          _miniStat("Datasets", s["datasets"] ?? 0),
-        ]),
-      ),
-    );
-  }
-
-  Widget _miniStat(String label, int value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  // ---------------------------------------------------------
+  // CONNECTION + REFRESH
+  // ---------------------------------------------------------
+  Widget _buildHeader(WebSocketService ws, MonitoringProvider monitor) {
+    return Row(
       children: [
-        Text(label,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-        const SizedBox(height: 4),
-        Text(
-          value.toString(),
-          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+        Chip(
+          backgroundColor: ws.connected ? Colors.green[200] : Colors.red[200],
+          avatar: Icon(
+            ws.connected ? Icons.check_circle : Icons.error,
+            color: ws.connected ? Colors.green : Colors.red,
+          ),
+          label: Text(ws.connected ? "Connected" : "Disconnected"),
+        ),
+        const SizedBox(width: 16),
+        ElevatedButton.icon(
+          onPressed: () => monitor.refresh(),
+          icon: const Icon(Icons.refresh),
+          label: const Text("Refresh Metrics"),
         ),
       ],
     );
   }
 
-  // STORAGE OVERVIEW
-  // ------------------ STORAGE OVERVIEW ------------------
-  Widget _storageOverview(StorageProvider storage) {
-    return Card(
-      elevation: 1,
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text("Storage Overview",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const Divider(),
-            Text("Total Disks: ${storage.summary?["disks"] ?? 0}"),
-            Text("Total Pools: ${storage.summary?["pools"] ?? 0}"),
-            Text("Total Datasets: ${storage.summary?["datasets"] ?? 0}"),
-          ],
-        ),
+  // ---------------------------------------------------------
+  // METRIC CARDS
+  // ---------------------------------------------------------
+  Widget _buildMetricsRow(MonitoringProvider m) {
+    return Row(
+      children: [
+        Expanded(child: MetricCard(label: "CPU", value: m.cpu)),
+        const SizedBox(width: 12),
+        Expanded(child: MetricCard(label: "RAM", value: m.ram)),
+        const SizedBox(width: 12),
+        Expanded(child: MetricCard(label: "Disk", value: m.disk)),
+      ],
+    );
+  }
+
+  // ---------------------------------------------------------
+  // DISKS LIST SSD+HDD CARD
+  // ---------------------------------------------------------
+  Widget _buildDisksCard(StorageProvider s) {
+    final disks = s.summary?['disks'] ?? [];
+
+    return GlassCard(
+      title: "Disks",
+      icon: Icons.store_rounded,
+      child: disks.isEmpty
+          ? const Padding(
+              padding: EdgeInsets.all(12),
+              child: Text(
+                "No disks detected",
+                style: TextStyle(color: Colors.grey),
+              ),
+            )
+          : Column(
+              children: disks.map<Widget>((d) {
+                final isSSD =
+                    d["rotational"] == false; // true = HDD, false = SSD
+                final typeLabel = isSSD ? "SSD" : "HDD";
+
+                return ListTile(
+                  leading: Icon(
+                    isSSD ? Icons.memory : Icons.sd_storage,
+                    color: isSSD ? Colors.purple : Colors.blueGrey,
+                  ),
+                  title: Text("${d['model']} (${d['size']})"),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(d['devpath']),
+                      Text(
+                        typeLabel,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isSSD ? Colors.purple : Colors.blueGrey,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+            ),
+    );
+  }
+
+  // ---------------------------------------------------------
+  // STORAGE OVERVIEW CLEAN UI
+  // ---------------------------------------------------------
+  Widget _buildStorageCard(StorageProvider s) {
+    return GlassCard(
+      title: "Storage Overview",
+      icon: Icons.storage_rounded,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text("Total Disks: ${s.summary?['disks']?.length ?? 0}",
+              style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 8),
+          Text("Total Capacity: ${s.summary?['capacity'] ?? '--'}"),
+        ],
       ),
     );
   }
 
-  // POOLS OVERVIEW
-  Widget _poolsOverviewWidget(ZfsProvider zfs) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text("Pools Overview",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const Divider(),
-            Expanded(
-              child: ListView.builder(
-                itemCount: zfs.pools.length,
-                itemBuilder: (context, i) {
-                  final p = zfs.pools[i];
-                  return ListTile(
-                    leading: const Icon(Icons.storage),
-                    title: Text(p["name"]),
-                    subtitle: Text("Health: ${p["health"]}"),
-                  );
-                },
+  Widget _buildDataSetsCard(ZfsProvider zfs) {
+    return GlassCard(
+      title: "ZFS Datasets",
+      icon: Icons.folder,
+      child: Column(
+        children: zfs.datasets.map((p) {
+          final used = p["used"] ?? "-";
+          final avail = p["available"] ?? "-";
+          return ListTile(
+            leading: Icon(Icons.folder_open, color: Colors.black),
+            title: Text(p["name"] ?? "Unknown dataset"),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("Mount: ${p["mountpoint"] ?? "N/A"}"),
+                Text("Used: $used  •  Free: $avail",
+                    style: TextStyle(fontSize: 12, color: Colors.grey)),
+              ],
+            ),
+            trailing: Icon(Icons.chevron_right),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------
+  // POOLS OVERVIEW -- pools ---
+  // ---------------------------------------------------------
+  Widget _buildPoolsCard(ZfsProvider zfs) {
+    final pools = zfs.pools; // easy local reference
+
+    return GlassCard(
+      title: "ZFS Pools",
+      icon: Icons.pool,
+      child: pools.isEmpty
+          ? const Padding(
+              padding: EdgeInsets.all(12),
+              child: Text(
+                "No pools found",
+                style: TextStyle(fontSize: 14, color: Colors.grey),
               ),
             )
-          ],
-        ),
-      ),
+          : Column(
+              children: pools.map((p) {
+                final pct = p["capacity"] ?? 0;
+
+                return ListTile(
+                  leading: const Icon(Icons.layers, color: Colors.teal),
+                  title: Text(p["name"] ?? "Unknown"),
+                  subtitle: Text("Health: ${p["health"] ?? "UNKNOWN"}"),
+                  trailing: Text("$pct%"),
+                );
+              }).toList(),
+            ),
     );
   }
 }

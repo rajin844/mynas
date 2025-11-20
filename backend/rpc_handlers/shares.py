@@ -36,7 +36,7 @@ def rpc_nfs_status():
 
 
 def register_rpc(register):
-    register("shares", {
+    register("share", {
         "list": rpc_list,
         "smb_create": rpc_smb_create,
         "nfs_create": rpc_nfs_create,

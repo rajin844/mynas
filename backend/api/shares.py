@@ -1,60 +1,22 @@
 # backend/api/shares.py
-from fastapi import APIRouter, HTTPException, Body
-from backend.storage.share_manager import (
-    list_shares,
-    create_smb_share,
-    create_nfs_share,
-    remove_share,
-    smb_status,
-    nfs_status,
-)
+from fastapi import APIRouter, Body, HTTPException
+from backend.storage.share_manager import list_shares, create_share, delete_share
 
 router = APIRouter()
 
-
 @router.post("/list")
-def api_list_shares():
-    try:
-        return {"response": list_shares(), "error": None}
-    except Exception as e:
-        raise HTTPException(500, str(e))
+def api_list():
+    return {"response": list_shares(), "error": None}
 
-
-@router.post("/smb/create")
-def api_smb_create(payload: dict = Body(...)):
-    try:
-        return {"response": create_smb_share(**payload), "error": None}
-    except Exception as e:
-        raise HTTPException(500, str(e))
-
-
-@router.post("/nfs/create")
-def api_nfs_create(payload: dict = Body(...)):
-    try:
-        return {"response": create_nfs_share(**payload), "error": None}
-    except Exception as e:
-        raise HTTPException(500, str(e))
-
+@router.post("/create")
+def api_create(payload: dict = Body(...)):
+    if "name" not in payload or "path" not in payload:
+        raise HTTPException(400, "name and path required")
+    return {"response": create_share(payload), "error": None}
 
 @router.post("/delete")
-def api_delete_share(uuid: str):
-    try:
-        return {"response": remove_share(uuid), "error": None}
-    except Exception as e:
-        raise HTTPException(500, str(e))
-
-
-@router.post("/smb/status")
-def api_smb_status():
-    try:
-        return {"response": smb_status(), "error": None}
-    except Exception as e:
-        raise HTTPException(500, str(e))
-
-
-@router.post("/nfs/status")
-def api_nfs_status():
-    try:
-        return {"response": nfs_status(), "error": None}
-    except Exception as e:
-        raise HTTPException(500, str(e))
+def api_delete(payload: dict = Body(...)):
+    name = payload.get("name")
+    if not name:
+        raise HTTPException(400, "name required")
+    return {"response": delete_share(name), "error": None}

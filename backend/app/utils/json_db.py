@@ -25,7 +25,7 @@ def read_config():
                 "system": {"hostname": "mynas"},
                 "users": [],
                 "storage": {"pools": [], "datasets": []},
-                "shares": [],
+                "share": [],
                 "acl": [],
                 "backups": []
             }

@@ -1,44 +1,44 @@
 # backend/rpc_handlers/zfs.py
-from typing import Any, Dict, List
-import logging
-from backend.storage.zfs_manager import (
-    list_pools,
-    list_datasets,
-    create_pool,
-    create_dataset,
-    destroy_pool,
-    destroy_dataset,
-)
+from typing import Any, Dict
+from backend.storage.zfs_manager import list_pools, list_datasets, create_pool, destroy_pool
+from backend.storage.zfs_manager import create_dataset, destroy_dataset, list_datasets
 
-logger = logging.getLogger("mynas.rpc.zfs")
+def rpc_listdatasets(pool: str = None):
+    return list_datasets(pool=pool)
 
-def rpc_listpools() -> List[Dict[str, Any]]:
-    return list_pools()
-
-def rpc_listdatasets(pool: str = None) -> List[Dict[str, Any]]:
-    return list_datasets(pool)
-
-def rpc_createpool(name: str, devices: list, raidz: str = None, dry_run: bool = True) -> Dict[str, Any]:
+def rpc_createpool(name: str, devices: list, raidz: str = None, dry_run: bool = True):
     return create_pool(name, devices, raidz=raidz, dry_run=dry_run)
 
-def rpc_createdataset(pool: str, name: str, mountpoint: str = None) -> Dict[str, Any]:
-    ok = create_dataset(pool, name, mountpoint)
-    return {"created": bool(ok)}
+def rpc_listpools():
+    return list_pools()
 
-def rpc_destroypool(name: str) -> Dict[str, Any]:
-    ok = destroy_pool(name)
-    return {"deleted": bool(ok)}
+def rpc_list_datasets(pool: str=None):
+    return list_datasets(pool)
 
-def rpc_destroydataset(pool: str, name: str) -> Dict[str, Any]:
-    ok = destroy_dataset(pool, name)
-    return {"deleted": bool(ok)}
+def rpc_create_dataset(pool: str, name: str, mountpoint: str=None):
+    return create_dataset(pool, name, mountpoint)
+
+def rpc_destroy_dataset(pool: str, name: str):
+    return destroy_dataset(pool, name)
 
 def register_rpc(register):
     register("zfs", {
-        "listpools": rpc_listpools,
-        "listdatasets": rpc_listdatasets,
-        "createpool": rpc_createpool,
-        "createdataset": rpc_createdataset,
-        "destroypool": rpc_destroypool,
-        "destroydataset": rpc_destroydataset,
+        "listpools"   : rpc_listpools,
+        "listdatasets": rpc_list_datasets,
+        "createdataset": rpc_create_dataset,
+        "destroydataset": rpc_destroy_dataset,
     })
+
+from backend.storage.storage_manager import *
+
+def register_rpc(register):
+         register("zfs", {
+        "listPools": list_pools,
+        "createPool": create_pool,
+        "destroyPool": destroy_pool,
+        "listDatasets": list_datasets,
+        "createDataset": create_dataset,
+        "destroyDataset": destroy_dataset,
+         })  
+
+         

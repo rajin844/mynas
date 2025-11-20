@@ -52,14 +52,14 @@ class ApiService {
     List<String> devices, {
     String? raidz,
     bool force = false,
-    required bool dryRun,
+    bool dryRun = true,
   }) async {
     return await callRpc("ZFS", "createPool", {
       "name": name,
       "devices": devices,
       "raidz": raidz,
       "force": force,
-      "dryRun": dryRun,
+      "dry_run": dryRun,
     });
   }
 
@@ -67,7 +67,7 @@ class ApiService {
       await callRpc("ZFS", "destroyPool", {"name": name, "force": force});
 
   Future<List<dynamic>> listDatasets({String? pool}) async =>
-      List.from(await callRpc("zfs", "listdatasets", {"pool": pool}));
+      List.from(await callRpc("ZFS", "listdatasets", {"pool": pool}));
 
   Future<dynamic> createDataset(String pool, String name,
           {String? mountpoint}) async =>
@@ -86,15 +86,16 @@ class ApiService {
 
   Future<dynamic> scrubPool(String name) async =>
       await callRpc("ZFS", "scrubPool", {"name": name});
+
   Future<List<dynamic>> listShares() async =>
       List.from(await callRpc("share", "list", {}));
-
   Future<dynamic> createShare(
           String name, String path, String protocol) async =>
       await callRpc("SHARE", "createShare",
           {"name": name, "path": path, "protocol": protocol});
   Future<dynamic> deleteShare(String uuid) async =>
       await callRpc("SHARE", "deleteShare", {"uuid": uuid});
+
   Future<List<dynamic>> listBackups() async =>
       List.from(await callRpc("BACKUP", "list", {}));
   Future<dynamic> createBackup() async => await callRpc("BACKUP", "create", {});
@@ -116,4 +117,16 @@ class ApiService {
 
   Future<List<dynamic>> listUsers() async =>
       List.from(await callRpc("USERS", "listUsers", {}));
+
+  // inside ApiService class
+
+// Raidz builder endpoints via RPC (or REST fallback)
+  Future<List<dynamic>> listAvailableDisks() async =>
+      List.from(await callRpc("storage", "listdisks", {}));
+
+  Future<dynamic> buildRaidzPreview(Map<String, dynamic> params) async =>
+      await callRpc("raidz", "preview", params);
+
+  Future<dynamic> createPoolFromRaidz(Map<String, dynamic> params) async =>
+      await callRpc("raidz", "create", params);
 }

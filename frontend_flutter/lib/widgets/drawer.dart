@@ -1,190 +1,291 @@
+// lib/widgets/app_drawer.dart
 import 'package:flutter/material.dart';
 
-class AppDrawer extends StatefulWidget {
-  final Function(String) onSelect;
+typedef OnSelectRoute = void Function(String route);
 
-  const AppDrawer({super.key, required this.onSelect});
+class AppDrawer extends StatelessWidget {
+  final OnSelectRoute onSelect;
+  final String? currentRoute;
+  final Map<String, int>? counts;
+  final String? username;
+  final String? hostname;
+  final String? version;
 
-  @override
-  State<AppDrawer> createState() => _AppDrawerState();
-}
+  const AppDrawer({
+    super.key,
+    required this.onSelect,
+    this.currentRoute,
+    this.counts,
+    this.username,
+    this.hostname,
+    this.version,
+  });
 
-class _AppDrawerState extends State<AppDrawer> {
-  String currentRoute = "/dashboard";
+  // Helper to build a tile; shows optional badge if counts contains routeKey
+  Widget _tile(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String route,
+    String? subtitle,
+    Color? iconColor,
+    bool selected = false,
+    bool dense = false,
+  }) {
+    final count = counts != null ? counts![route] : null;
 
-  // Expansion states
-  bool storageOpen = false;
-  bool sharingOpen = false;
-  bool systemOpen = false;
-  bool advancedOpen = false;
+    return ListTile(
+      dense: dense,
+      leading:
+          Icon(icon, color: iconColor ?? Theme.of(context).iconTheme.color),
+      title: Text(title),
+      subtitle: subtitle != null ? Text(subtitle) : null,
+      trailing: count != null
+          ? CircleAvatar(
+              radius: 12,
+              backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+              child: Text(
+                count.toString(),
+                style: TextStyle(
+                    fontSize: 12,
+                    color: Theme.of(context).colorScheme.onSecondaryContainer),
+              ),
+            )
+          : null,
+      selected: selected,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      onTap: () => onSelect(route),
+    );
+  }
+
+  Widget _sectionHeader(String text) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+      child: Text(
+        text.toUpperCase(),
+        style: const TextStyle(
+            fontSize: 12, color: Colors.grey, fontWeight: FontWeight.w600),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
+
     return Drawer(
       child: SafeArea(
-        child: ListView(
-          padding: EdgeInsets.zero,
+        child: Column(
           children: [
-            // ---------------------------------------------------
-            // HEADER
-            // ---------------------------------------------------
-            DrawerHeader(
-              decoration: const BoxDecoration(
-                color: Color(0xFF1565C0),
-              ),
-              child: const Align(
-                alignment: Alignment.bottomLeft,
-                child: Text(
-                  "MyNAS",
-                  style: TextStyle(
-                    fontSize: 28,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
+            _buildHeader(context),
+            Expanded(
+              child: Scrollbar(
+                child: ListView(
+                  padding: EdgeInsets.zero,
+                  children: [
+                    // MAIN
+                    _sectionHeader("Main"),
+                    _tile(
+                      context,
+                      icon: Icons.dashboard,
+                      title: "Dashboard",
+                      route: '/dashboard',
+                      selected: currentRoute == '/dashboard',
+                    ),
+
+                    // STORAGE group
+                    _sectionHeader("Storage"),
+                    ExpansionTile(
+                      initiallyExpanded:
+                          currentRoute?.startsWith('/storage') ?? false,
+                      leading: Icon(Icons.storage_rounded),
+                      title: const Text("Storage"),
+                      childrenPadding:
+                          const EdgeInsets.only(left: 12, right: 12, bottom: 8),
+                      children: [
+                        _tile(
+                          context,
+                          icon: Icons.storage,
+                          title: "Disks",
+                          route: '/storage',
+                          dense: true,
+                          selected: currentRoute == '/storage',
+                        ),
+                        _tile(
+                          context,
+                          icon: Icons.sd_storage_outlined,
+                          title: "Pools",
+                          route: '/pools',
+                          dense: true,
+                          selected: currentRoute == '/pools',
+                          iconColor: Colors.teal,
+                        ),
+                        _tile(
+                          context,
+                          icon: Icons.dataset,
+                          title: "Datasets",
+                          route: '/datasets',
+                          dense: true,
+                          selected: currentRoute == '/datasets',
+                        ),
+                        _tile(
+                          context,
+                          icon: Icons.settings_suggest,
+                          title: "ZFS Manager",
+                          route: '/zfsmanager',
+                          dense: true,
+                          selected: currentRoute == '/zfsmanager',
+                        ),
+                      ],
+                    ),
+
+                    // SHARING group
+                    _sectionHeader("Sharing"),
+                    ExpansionTile(
+                      initiallyExpanded:
+                          currentRoute?.startsWith('/shares') ?? false,
+                      leading: const Icon(Icons.folder_shared),
+                      title: const Text("Shares"),
+                      childrenPadding:
+                          const EdgeInsets.only(left: 12, right: 12, bottom: 8),
+                      children: [
+                        _tile(
+                          context,
+                          icon: Icons.folder,
+                          title: "SMB/NFS Shares",
+                          route: '/shares',
+                          dense: true,
+                          selected: currentRoute == '/shares',
+                        ),
+                        _tile(
+                          context,
+                          icon: Icons.backup,
+                          title: "Snapshot / Backup",
+                          route: '/backup',
+                          dense: true,
+                          selected: currentRoute == '/backup',
+                        ),
+                      ],
+                    ),
+
+                    // SYSTEM group
+                    _sectionHeader("System"),
+                    ExpansionTile(
+                      initiallyExpanded:
+                          currentRoute?.startsWith('/system') ?? false,
+                      leading: const Icon(Icons.settings),
+                      title: const Text("System"),
+                      childrenPadding:
+                          const EdgeInsets.only(left: 12, right: 12, bottom: 8),
+                      children: [
+                        _tile(
+                          context,
+                          icon: Icons.person,
+                          title: "Users",
+                          route: '/users',
+                          dense: true,
+                          selected: currentRoute == '/users',
+                        ),
+                        _tile(
+                          context,
+                          icon: Icons.lock,
+                          title: "ACL",
+                          route: '/acl',
+                          dense: true,
+                          selected: currentRoute == '/acl',
+                        ),
+                        _tile(
+                          context,
+                          icon: Icons.network_check,
+                          title: "Network",
+                          route: '/network',
+                          dense: true,
+                          selected: currentRoute == '/network',
+                        ),
+                        _tile(
+                          context,
+                          icon: Icons.settings_suggest,
+                          title: "System Settings",
+                          route: '/system',
+                          dense: true,
+                          selected: currentRoute == '/system',
+                        ),
+                      ],
+                    ),
+
+                    // ADVANCED group
+                    _sectionHeader("Advanced"),
+                    ExpansionTile(
+                      initiallyExpanded:
+                          currentRoute?.startsWith('/advanced') ?? false,
+                      leading: const Icon(Icons.build),
+                      title: const Text("Advanced"),
+                      childrenPadding:
+                          const EdgeInsets.only(left: 12, right: 12, bottom: 8),
+                      children: [
+                        _tile(
+                          context,
+                          icon: Icons.monitor,
+                          title: "Monitoring",
+                          route: '/monitoring',
+                          dense: true,
+                          selected: currentRoute == '/monitoring',
+                        ),
+                        _tile(
+                          context,
+                          icon: Icons.backup,
+                          title: "Backups",
+                          route: '/backup',
+                          dense: true,
+                          selected: currentRoute == '/backup',
+                        ),
+                        _tile(
+                          context,
+                          icon: Icons.bug_report,
+                          title: "System Logs",
+                          route: '/logs',
+                          dense: true,
+                          selected: currentRoute == '/logs',
+                        ),
+                        _tile(
+                          context,
+                          icon: Icons.developer_mode,
+                          title: "Developer Tools",
+                          route: '/developer',
+                          dense: true,
+                          selected: currentRoute == '/developer',
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 12),
+                  ],
                 ),
               ),
             ),
 
-            // ---------------------------------------------------
-            // Dashboard (top-level)
-            // ---------------------------------------------------
-            _navItem(
-              icon: Icons.dashboard,
-              label: "Dashboard",
-              route: "/dashboard",
-            ),
-
-            // ---------------------------------------------------
-            // STORAGE (Expandable Section)
-            // ---------------------------------------------------
-            _sectionHeader(
-              "Storage",
-              storageOpen,
-              () => setState(() => storageOpen = !storageOpen),
-            ),
-            if (storageOpen) ...[
-              _navItem(
-                icon: Icons.storage_rounded,
-                label: "Disks",
-                route: "/storage",
-                indent: true,
+            // footer - small info and sign out
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: Column(
+                children: [
+                  const Divider(),
+                  ListTile(
+                    dense: true,
+                    leading: const Icon(Icons.info_outline),
+                    title: Text(hostname ?? "mynas"),
+                    subtitle: Text("v${version ?? "1.0.0"}"),
+                    onTap: () {},
+                  ),
+                  ListTile(
+                    dense: true,
+                    leading: const Icon(Icons.logout),
+                    title: const Text("Sign out"),
+                    onTap: () => onSelect('/logout'),
+                  ),
+                ],
               ),
-              _navItem(
-                icon: Icons.pool,
-                label: "Pools",
-                route: "/pools",
-                indent: true,
-              ),
-              _navItem(
-                icon: Icons.layers,
-                label: "Datasets",
-                route: "/datasets",
-                indent: true,
-              ),
-              _navItem(
-                icon: Icons.account_tree,
-                label: "ZFS Manager",
-                route: "/zfs",
-                indent: true,
-              ),
-            ],
-
-            // ---------------------------------------------------
-            // SHARING
-            // ---------------------------------------------------
-            _sectionHeader(
-              "Sharing",
-              sharingOpen,
-              () => setState(() => sharingOpen = !sharingOpen),
-            ),
-            if (sharingOpen) ...[
-              _navItem(
-                icon: Icons.share,
-                label: "Shares",
-                route: "/shares",
-                indent: true,
-              ),
-              _navItem(
-                icon: Icons.security,
-                label: "ACL Manager",
-                route: "/acl",
-                indent: true,
-              ),
-            ],
-
-            // ---------------------------------------------------
-            // SYSTEM
-            // ---------------------------------------------------
-            _sectionHeader(
-              "System",
-              systemOpen,
-              () => setState(() => systemOpen = !systemOpen),
-            ),
-            if (systemOpen) ...[
-              _navItem(
-                icon: Icons.network_check,
-                label: "Network",
-                route: "/network",
-                indent: true,
-              ),
-              _navItem(
-                icon: Icons.task,
-                label: "Tasks",
-                route: "/tasks",
-                indent: true,
-              ),
-              _navItem(
-                icon: Icons.group,
-                label: "Users & Groups",
-                route: "/users",
-                indent: true,
-              ),
-              _navItem(
-                icon: Icons.monitor_heart,
-                label: "Metrics",
-                route: "/monitoring",
-                indent: true,
-              ),
-              _navItem(
-                icon: Icons.notifications,
-                label: "Alerts & Events",
-                route: "/alerts",
-                indent: true,
-              ),
-            ],
-
-            // ---------------------------------------------------
-            // ADVANCED
-            // ---------------------------------------------------
-            _sectionHeader(
-              "Advanced",
-              advancedOpen,
-              () => setState(() => advancedOpen = !advancedOpen),
-            ),
-            if (advancedOpen) ...[
-              _navItem(
-                icon: Icons.construction,
-                label: "RAIDZ Builder",
-                route: "/raidz",
-                indent: true,
-              ),
-              _navItem(
-                icon: Icons.engineering,
-                label: "Maintenance Tools",
-                route: "/maint",
-                indent: true,
-              ),
-            ],
-
-            const Divider(),
-
-            // ---------------------------------------------------
-            // SETTINGS
-            // ---------------------------------------------------
-            _navItem(
-              icon: Icons.settings,
-              label: "Settings",
-              route: "/settings",
             ),
           ],
         ),
@@ -192,59 +293,48 @@ class _AppDrawerState extends State<AppDrawer> {
     );
   }
 
-  // ----------------------------------------------------------
-  // NAV ITEM (WITH ACTIVE HIGHLIGHT)
-  // ----------------------------------------------------------
-  Widget _navItem({
-    required IconData icon,
-    required String label,
-    required String route,
-    bool indent = false,
-  }) {
-    final bool active = (route == currentRoute);
-
-    return Material(
-      color: active ? Colors.blue.shade50 : Colors.transparent,
-      child: ListTile(
-        contentPadding: EdgeInsets.only(
-          left: indent ? 40 : 20,
-          right: 20,
-        ),
-        leading: Icon(
-          icon,
-          color: active ? Colors.blue : Colors.black87,
-        ),
-        title: Text(
-          label,
-          style: TextStyle(
-            fontWeight: active ? FontWeight.bold : FontWeight.normal,
-            color: active ? Colors.blue : Colors.black,
-          ),
-        ),
-        onTap: () {
-          setState(() => currentRoute = route);
-          widget.onSelect(route);
-        },
+  Widget _buildHeader(BuildContext context) {
+    final avatar = CircleAvatar(
+      radius: 28,
+      backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+      child: Text(
+        username != null && username!.isNotEmpty
+            ? username![0].toUpperCase()
+            : "A",
+        style: const TextStyle(fontSize: 24),
       ),
     );
-  }
 
-  // ----------------------------------------------------------
-  // EXPANDABLE SECTION HEADER
-  // ----------------------------------------------------------
-  Widget _sectionHeader(
-      String title, bool expanded, VoidCallback toggleExpand) {
-    return ListTile(
-      title: Text(
-        title,
-        style: const TextStyle(
-            fontSize: 13, fontWeight: FontWeight.bold, color: Colors.grey),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      child: Row(
+        children: [
+          avatar,
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  username ?? "Admin",
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w700, fontSize: 16),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  hostname ?? "mynas",
+                  style: const TextStyle(color: Colors.grey, fontSize: 12),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            onPressed: () => onSelect('/settings'),
+            icon: const Icon(Icons.settings),
+            tooltip: "Settings",
+          )
+        ],
       ),
-      trailing: Icon(
-        expanded ? Icons.expand_less : Icons.expand_more,
-        size: 20,
-      ),
-      onTap: toggleExpand,
     );
   }
 }

@@ -21,7 +21,7 @@
     ],
     "datasets": []
   },
-  "shares": [],
+  "share": [],
   "acl": [],
   "network": {
     "interfaces": [],

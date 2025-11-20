@@ -1,24 +1,14 @@
 # backend/rpc_handlers/users.py
-import logging
-logger = logging.getLogger("mynas.rpc.users")
-
-from backend.app.config_manager import cfg
+from backend.system.user_manager import list_users, create_user, delete_user
 
 def rpc_list():
-    return cfg.list_users()
+    return list_users()
 
-def rpc_add(username: str, role: str, password: str):
-    cfg.add_user({"username": username, "role": role, "password": password})
-    return {"status": "added", "user": username}
+def rpc_create(meta):
+    return create_user(meta)
 
-def rpc_delete(username: str):
-    cfg.remove_user(username)
-    return {"status": "deleted", "user": username}
-
+def rpc_delete(username):
+    return delete_user(username)
 
 def register_rpc(register):
-    register("users", {
-        "list": rpc_list,
-        "add": rpc_add,
-        "delete": rpc_delete,
-    })
+    register("users", {"list": rpc_list, "create": rpc_create, "delete": rpc_delete})

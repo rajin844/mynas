@@ -1,0 +1,72 @@
+backend/
+│
+├── drivers/                 ← NEW StorageDriver based system
+│   ├── base.py
+│   ├── zfs_driver.py
+│   ├── ext4_driver.py
+│   ├── btrfs_driver.py
+│   ├── cloud_driver.py
+│   └── driver_loader.py
+│
+├── storage/
+│   ├── storage_manager.py   ← Calls driver.* not shell commands
+│   ├── zfs_manager.py       ← removed direct zpool command
+│   ├── raid_builder.py
+│   ├── disk_manager.py
+│   ├── share_manager.py
+│   ├── snapshot_manager.py
+│   ├── smart_manager.py
+│   └── pool_manager.py
+│
+├── system/
+│   ├── system_manager.py
+│   ├── tasks_manager.py
+│   ├── alerts_manager.py
+│   └── user_manager.py
+│
+├── api/ (REST API only for UI)
+│   ├── storage.py
+│   ├── zfs.py
+│   ├── shares.py
+│   ├── snapshot.py
+│   ├── smart.py
+│   ├── raidz.py
+│   ├── system.py
+│   ├── tasks.py
+│   ├── users.py
+│   ├── monitoring.py
+│   └── compat.py            ← OPTIONAL: REST to RPC fallback
+│
+├── rpc_handlers/
+│   ├── storage.py
+│   ├── zfs.py
+│   ├── shares.py
+│   ├── snapshot.py
+│   ├── smart.py
+│   ├── raidz.py
+│   ├── tasks.py
+│   ├── users.py
+│   ├── network.py
+│   └── system.py
+│
+└── app/
+    ├── main.py              ← REST + RPC mount
+    ├── monitoring_manager.py
+    ├── config_manager.py    ← also migrated to driver
+    └── monitor_broadcaster.py
+
+DRIVER BASED DESIGN
+
+----   
+driver = driver_loader.get_driver()
+driver.list_pools()
+driver.create_pool()
+driver.destroy_pool()
+driver.list_datasets()
+driver.create_dataset()
+driver.take_snapshot()
+driver.list_snapshots()
+driver.mount_share()
+driver.apply_acl()
+...
+

@@ -61,8 +61,8 @@
   "shares": {
     "samba": [
       {
-        "name": "Public",
-        "path": "/mnt/data/os",
+        "name": "allos",
+        "path": "/main/all/os",
         "guest_ok": true
       }
     ],

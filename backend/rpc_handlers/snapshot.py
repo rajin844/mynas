@@ -1,41 +1,18 @@
-# backend/rpc_handlers/shares.py
-import logging
-logger = logging.getLogger("mynas.rpc.shares")
+# backend/api/snapshot.py
+from fastapi import APIRouter, Body, HTTPException
+from backend.storage.snapshot_manager import list_snapshots, create_snapshot, destroy_snapshot
 
-from backend.storage.share_manager import (
-    list_shares,
-    create_smb_share,
-    create_nfs_share,
-    remove_share,
-    smb_status,
-    nfs_status,
-)
 
-def rpc_list():
-    return list_shares()
+router = APIRouter()
 
-def rpc_smb_create(name: str, path: str, options: dict = None):
-    return create_smb_share(name, path, options or {})
+def rpc_list(pool=None):
+    return list_snapshots(pool)
 
-def rpc_nfs_create(name: str, path: str, options: dict = None):
-    return create_nfs_share(name, path, options or {})
+def rpc_create(dataset, snapshot):
+    return create_snapshot(dataset, snapshot)
 
-def rpc_delete(uuid: str):
-    return remove_share(uuid)
-
-def rpc_smb_status():
-    return smb_status()
-
-def rpc_nfs_status():
-    return nfs_status()
-
+def rpc_destroy(snapshot):
+    return destroy_snapshot(snapshot)
 
 def register_rpc(register):
-    register("shares", {
-        "list": rpc_list,
-        "smb_create": rpc_smb_create,
-        "nfs_create": rpc_nfs_create,
-        "delete": rpc_delete,
-        "smb_status": rpc_smb_status,
-        "nfs_status": rpc_nfs_status,
-    })
+    register("snapshot", {"list": rpc_list, "create": rpc_create, "destroy": rpc_destroy})    

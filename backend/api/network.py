@@ -18,6 +18,10 @@ def api_update(payload: dict = Body(...)):
         return {"response": update_network(payload), "error": None}
     except Exception as e:
         raise HTTPException(500, str(e))
+ 
+@router.post("/apply")
+def api_apply(payload: dict = Body(...)):
+    return {"response": apply_network_settings(payload), "error": None}       
 
 @router.post("/restart")
 def api_restart():

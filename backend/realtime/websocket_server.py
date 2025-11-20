@@ -87,6 +87,8 @@ class WSManagerProxy:
             # no running loop; best-effort: spawn a new loop in a thread (rare)
             asyncio.run(mgr.broadcast(obj))
 
+            
+
 
 # ---------------------------------------------------------------------------
 # WebSocket handler
@@ -153,3 +155,45 @@ def start_ws_server(loop: asyncio.AbstractEventLoop,
     # schedule the server onto the loop
     server = loop.run_until_complete(coro) if not loop.is_running() else loop.create_task(coro)
     return server
+# backend/app/ws_server.py
+import asyncio
+import json
+import logging
+from fastapi import WebSocket
+from typing import List
+
+logger = logging.getLogger("mynas.ws")
+
+class WSManager:
+    def __init__(self):
+        self._conns: List[WebSocket] = []
+
+    async def connect(self, ws: WebSocket):
+        await ws.accept()
+        self._conns.append(ws)
+        logger.info("ws connected")
+
+    async def disconnect(self, ws: WebSocket):
+        if ws in self._conns:
+            self._conns.remove(ws)
+
+    async def broadcast(self, data):
+        text = json.dumps(data)
+        for ws in list(self._conns):
+            try:
+                await ws.send_text(text)
+            except Exception:
+                await self.disconnect(ws)
+
+# simple proxy for modules
+_proxy: WSManager = None
+def register(manager: WSManager):
+    global _proxy
+    _proxy = manager
+
+class WSManagerProxy:
+    @staticmethod
+    async def broadcast(obj):
+        if _proxy:
+            await _proxy.broadcast(obj)
+ 
