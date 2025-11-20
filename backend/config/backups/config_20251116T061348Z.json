@@ -1,0 +1,331 @@
+{
+  "system": {
+    "hostname": "mynas",
+    "version": "1.0.0",
+    "timezone": "Asia/Kolkata"
+  },
+  "users": [
+    {
+      "username": "admin",
+      "role": "admin",
+      "password": "admin"
+    }
+  ],
+  "storage": {
+    "pools": [
+      {
+        "name": "main",
+        "type": "zfs",
+        "devices": [
+          "/dev/sdb"
+        ]
+      }
+    ],
+    "datasets": [
+      {
+        "pool": "main",
+        "name": "allos",
+        "mountpoint": "/main/allos"
+      }
+    ],
+    "disks": [
+      {
+        "name": "sda",
+        "devpath": "/dev/sda",
+        "size": "200G",
+        "mountpoint": null,
+        "model": "QEMU HARDDISK",
+        "vendor": "QEMU    ",
+        "rotational": false
+      },
+      {
+        "name": "sdb",
+        "devpath": "/dev/sdb",
+        "size": "100G",
+        "mountpoint": null,
+        "model": "QEMU HARDDISK",
+        "vendor": "QEMU    ",
+        "rotational": true
+      },
+      {
+        "name": "sdc",
+        "devpath": "/dev/sdc",
+        "size": "60G",
+        "mountpoint": null,
+        "model": "QEMU HARDDISK",
+        "vendor": "QEMU    ",
+        "rotational": true
+      }
+    ]
+  },
+  "shares": {
+    "samba": [
+      {
+        "name": "Public",
+        "path": "/mnt/data/os",
+        "guest_ok": true
+      }
+    ],
+    "nfs": [
+      {
+        "name": "Backup",
+        "path": "/mnt/data/nfsdata",
+        "network": "192.168.1.0/24"
+      }
+    ]
+  },
+  "acl": [],
+  "network": {
+    "interfaces": [
+      {
+        "name": "eth0",
+        "ip": "192.168.1.2",
+        "dhcp": false
+      }
+    ]
+  },
+  "backups": [
+    {
+      "name": "daily_backup",
+      "schedule": "02:00",
+      "target": "/mnt/data/backups"
+    }
+  ],
+  "dirty_modules": [],
+  "tasks": [],
+  "snapshots": [],
+  "disks": [
+    {
+      "name": "loop0",
+      "size": "4K",
+      "type": "loop",
+      "mountpoint": "/snap/bare/5",
+      "model": null,
+      "vendor": null
+    },
+    {
+      "name": "loop1",
+      "size": "988K",
+      "type": "loop",
+      "mountpoint": "/snap/bcrypt-tool/2",
+      "model": null,
+      "vendor": null
+    },
+    {
+      "name": "loop2",
+      "size": "183.4M",
+      "type": "loop",
+      "mountpoint": "/snap/chromium/3293",
+      "model": null,
+      "vendor": null
+    },
+    {
+      "name": "loop3",
+      "size": "55.5M",
+      "type": "loop",
+      "mountpoint": "/snap/core18/2959",
+      "model": null,
+      "vendor": null
+    },
+    {
+      "name": "loop4",
+      "size": "63.8M",
+      "type": "loop",
+      "mountpoint": "/snap/core20/2669",
+      "model": null,
+      "vendor": null
+    },
+    {
+      "name": "loop5",
+      "size": "63.8M",
+      "type": "loop",
+      "mountpoint": "/snap/core20/2682",
+      "model": null,
+      "vendor": null
+    },
+    {
+      "name": "loop6",
+      "size": "73.9M",
+      "type": "loop",
+      "mountpoint": "/snap/core22/2139",
+      "model": null,
+      "vendor": null
+    },
+    {
+      "name": "loop7",
+      "size": "66.8M",
+      "type": "loop",
+      "mountpoint": "/snap/core24/1225",
+      "model": null,
+      "vendor": null
+    },
+    {
+      "name": "loop8",
+      "size": "48.8M",
+      "type": "loop",
+      "mountpoint": "/snap/cups/1116",
+      "model": null,
+      "vendor": null
+    },
+    {
+      "name": "loop9",
+      "size": "48.8M",
+      "type": "loop",
+      "mountpoint": "/snap/cups/1127",
+      "model": null,
+      "vendor": null
+    },
+    {
+      "name": "loop10",
+      "size": "249.1M",
+      "type": "loop",
+      "mountpoint": "/snap/firefox/7177",
+      "model": null,
+      "vendor": null
+    },
+    {
+      "name": "loop11",
+      "size": "250.1M",
+      "type": "loop",
+      "mountpoint": "/snap/firefox/7298",
+      "model": null,
+      "vendor": null
+    },
+    {
+      "name": "loop12",
+      "size": "516.2M",
+      "type": "loop",
+      "mountpoint": "/snap/gnome-42-2204/226",
+      "model": null,
+      "vendor": null
+    },
+    {
+      "name": "loop13",
+      "size": "453.9M",
+      "type": "loop",
+      "mountpoint": "/snap/google-cloud-sdk/622",
+      "model": null,
+      "vendor": null
+    },
+    {
+      "name": "loop14",
+      "size": "452.6M",
+      "type": "loop",
+      "mountpoint": "/snap/google-cloud-sdk/624",
+      "model": null,
+      "vendor": null
+    },
+    {
+      "name": "loop15",
+      "size": "91.7M",
+      "type": "loop",
+      "mountpoint": "/snap/gtk-common-themes/1535",
+      "model": null,
+      "vendor": null
+    },
+    {
+      "name": "loop16",
+      "size": "22.7M",
+      "type": "loop",
+      "mountpoint": "/snap/keepalived/3093",
+      "model": null,
+      "vendor": null
+    },
+    {
+      "name": "loop17",
+      "size": "22.7M",
+      "type": "loop",
+      "mountpoint": "/snap/mega-cmd/9",
+      "model": null,
+      "vendor": null
+    },
+    {
+      "name": "loop18",
+      "size": "164.3M",
+      "type": "loop",
+      "mountpoint": "/snap/microk8s/8511",
+      "model": null,
+      "vendor": null
+    },
+    {
+      "name": "loop19",
+      "size": "118.4M",
+      "type": "loop",
+      "mountpoint": "/snap/lxd/36153",
+      "model": null,
+      "vendor": null
+    },
+    {
+      "name": "loop20",
+      "size": "71M",
+      "type": "loop",
+      "mountpoint": "/snap/prometheus/86",
+      "model": null,
+      "vendor": null
+    },
+    {
+      "name": "loop21",
+      "size": "76.6M",
+      "type": "loop",
+      "mountpoint": "/snap/powershell/316",
+      "model": null,
+      "vendor": null
+    },
+    {
+      "name": "loop22",
+      "size": "27.5M",
+      "type": "loop",
+      "mountpoint": "/snap/sabnzbd/6410",
+      "model": null,
+      "vendor": null
+    },
+    {
+      "name": "loop23",
+      "size": "50.9M",
+      "type": "loop",
+      "mountpoint": "/snap/snapd/25577",
+      "model": null,
+      "vendor": null
+    },
+    {
+      "name": "loop24",
+      "size": "13.9M",
+      "type": "loop",
+      "mountpoint": "/snap/slcli/2957",
+      "model": null,
+      "vendor": null
+    },
+    {
+      "name": "sda",
+      "size": "200G",
+      "type": "disk",
+      "mountpoint": null,
+      "model": "QEMU HARDDISK",
+      "vendor": "QEMU    "
+    },
+    {
+      "name": "sdb",
+      "size": "100G",
+      "type": "disk",
+      "mountpoint": null,
+      "model": "QEMU HARDDISK",
+      "vendor": "QEMU    "
+    },
+    {
+      "name": "sdc",
+      "size": "60G",
+      "type": "disk",
+      "mountpoint": null,
+      "model": "QEMU HARDDISK",
+      "vendor": "QEMU    "
+    },
+    {
+      "name": "sr0",
+      "size": "3.1G",
+      "type": "rom",
+      "mountpoint": null,
+      "model": "QEMU DVD-ROM",
+      "vendor": "QEMU    "
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+    "version": 1,
+    "shares": [
+        {
+            "name": "sf1",
+            "path": "/mnt/data/sf1",
+            "readonly": true,
+            "guest": false
+        }
+    ],
+    "users": [
+        {
+            "username": "admin",
+            "roles": [
+                "admin"
+            ]
+        }
+    ],
+    "pools": [],
+    "services": {
+        "samba": {
+            "enabled": true,
+            "workgroup": "MYGROUP",
+            "loglevel": 0
+        },
+        "nfs": {
+            "enabled": true
+        }
+    },
+    "dirty_modules": [
+        "nfs"
+    ]
+}

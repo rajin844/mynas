@@ -1,0 +1,54 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start Backend",
+      "type": "shell",
+      "command": "python3",
+      "args": ["backend/run_backend.py"],
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Build Flutter Release",
+      "type": "shell",
+      "command": "flutter",
+      "args": ["build", "web", "--release", "--web-renderer", "html"],
+      "options": {
+        "cwd": "${workspaceFolder}/frontend_flutter"
+      }
+    },
+    {
+      "label": "Open UI",
+      "type": "shell",
+      "command": "xdg-open",
+      "args": ["http://127.0.0.1:8000/ui"]
+    },
+    {
+      "label": "Open API Docs",
+      "type": "shell",
+      "command": "xdg-open",
+      "args": ["http://127.0.0.1:8000/api/docs"]
+    },
+    {
+      "label": "Tail Backend Log",
+      "type": "shell",
+      "command": "tail",
+      "args": ["-f", "backend/config/logs/backend.log"]
+    },
+    {
+      "label": "Open WS Debug",
+      "type": "shell",
+      "command": "xdg-open",
+      "args": ["http://127.0.0.1:8000/api/debug/rpc"]
+    },
+    {
+      "label": "Rebuild + Restart Backend",
+      "dependsOn": [
+        "Build Flutter Release",
+        "Start Backend"
+      ],
+      "dependsOrder": "sequence"
+    }
+  ]
+}

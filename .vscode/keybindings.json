@@ -1,0 +1,50 @@
+[
+  {
+    "key": "f5",
+    "command": "dart.hotRestart",
+    "when": "editorLangId == 'dart'"
+  },
+  {
+    "key": "f6",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Start Backend"
+  },
+  {
+    "key": "f7",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Build Flutter Release"
+  },
+  {
+    "key": "f8",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Open UI"
+  },
+  {
+    "key": "f9",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Open API Docs"
+  },
+  {
+    "key": "f10",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Tail Backend Log"
+  },
+  {
+    "key": "ctrl+alt+r",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Rebuild + Restart Backend"
+  },
+  {
+    "key": "ctrl+alt+w",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Open WS Debug"
+  },
+  {
+    "key": "ctrl+alt+p",
+    "command": "workbench.action.debug.start"
+  },
+  {
+    "key": "shift+f5",
+    "command": "workbench.action.debug.stop"
+  }
+]
