@@ -55,6 +55,15 @@
         "model": "QEMU HARDDISK",
         "vendor": "QEMU    ",
         "rotational": true
+      },
+      {
+        "name": "sdd",
+        "devpath": "/dev/sdd",
+        "size": "50G",
+        "mountpoint": null,
+        "model": "QEMU HARDDISK",
+        "vendor": "QEMU    ",
+        "rotational": true
       }
     ]
   },
@@ -62,8 +71,7 @@
     "samba": [
       {
         "name": "Public",
-        "path": "/mnt/data/os",
-        "guest_ok": true
+        "path": "/mnt/data/os"
       }
     ],
     "nfs": [
@@ -79,7 +87,7 @@
     "interfaces": [
       {
         "name": "eth0",
-        "ip": "192.168.1.2",
+        "ip": "192.168.1.7",
         "dhcp": false
       }
     ]

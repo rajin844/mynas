@@ -37,19 +37,9 @@ from backend.realtime.websocket_server import WSManagerProxy
 # Logging Setup
 # =====================================================================================
 BASE_DIR = Path(__file__).resolve().parent
-LOG_DIR = BASE_DIR / "config" / "logs"
-LOG_DIR.mkdir(parents=True, exist_ok=True)
-LOG_FILE = LOG_DIR / "backend.log"
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    handlers=[
-        logging.FileHandler(LOG_FILE, encoding="utf-8"),
-        logging.StreamHandler(sys.stdout),
-    ],
-)
 logger = logging.getLogger("mynas.run_backend")
+logging.basicConfig(level=logging.INFO)
 
 
 # =====================================================================================
@@ -273,7 +263,6 @@ def main():
     print("=" * 60)
     print("🚀 Starting MyNAS (Backend + Flutter Web)")
     print(f"→ Backend    : http://{args.host}:{args.port}")
-    print(f"→ Log file   : {LOG_FILE}")
     if not args.no_flutter:
         print(f"→ Flutter    : port {args.flutter_port}")
     print("=" * 60)

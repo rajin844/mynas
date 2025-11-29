@@ -55,6 +55,15 @@
         "model": "QEMU HARDDISK",
         "vendor": "QEMU    ",
         "rotational": true
+      },
+      {
+        "name": "sdd",
+        "devpath": "/dev/sdd",
+        "size": "50G",
+        "mountpoint": null,
+        "model": "QEMU HARDDISK",
+        "vendor": "QEMU    ",
+        "rotational": true
       }
     ]
   },

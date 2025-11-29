@@ -1,133 +1,182 @@
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      # backend/storage/storage_manager.py
-"""
-Storage manager: disk enumeration, SMART, disk usage, storage summary.
-
-Functions:
- - list_disks()
- - detect_disks()
- - smart_health(dev)
- - smart_test(dev, test_type="short")
- - disk_usage(dev)
- - get_storage_summary()
-"""
-import shutil
-import subprocess
-import json
+# backend/storage/storage_manager.py
+from typing import List, Dict, Any, Optional
 import logging
-from pathlib import Path
-from typing import List, Dict, Any
+import asyncio
+import json
+import shutil
 
-from backend.app.config_manager import cfg
-try:
-    from backend.realtime.websocket_server import WSManagerProxy
-except Exception:
-    WSManagerProxy = None
+#from backend.drivers import db
+from backend.drivers.storage_driver_mysql import (
+    list_disks_db,
+    add_or_update_disk,
+    get_disk_by_devpath,
+    get_disk_by_name,
+    list_datasets_db,
+    create_pool_record,
+    add_pool_device,
+    create_dataset_record,
+    remove_pool_record,
+)
+from backend.drivers import zfs_driver_mysql
+from backend.app.safe_exec import safe_exec
+from backend.storage.raidz_manager import build_raidz_layout
+from backend.realtime.websocket_server import WSManagerProxy
 
-logger = logging.getLogger("mynas.storage")
+logger = logging.getLogger("mynas.storage_manager")
 
-def _has_cmd(name: str) -> bool:
-    return shutil.which(name) is not None
 
-def list_disks() -> List[Dict[str, Any]]:
-    """Return list of block devices. Uses lsblk -J when available, else config fallback."""
-    if _has_cmd("lsblk"):
-        try:
-            out = subprocess.check_output(["lsblk", "-J", "-o", "NAME,SIZE,TYPE,MOUNTPOINT,MODEL,VENDOR,ROTA"], text=True)
-            data = json.loads(out)
-            disks = []
-            for d in data.get("blockdevices", []):
-                if d.get("type") in ("disk",):
-                    disks.append({
-                        "name": d.get("name"),
-                        "devpath": f"/dev/{d.get('name')}",
-                        "size": d.get("size"),
-                        "mountpoint": d.get("mountpoint"),
-                        "model": d.get("model"),
-                        "vendor": d.get("vendor"),
-                        "rotational": d.get("rota"),
-                    })
-            # persist candidate disk inventory
-            cfg.data.setdefault("storage", {})["disks"] = disks
-            cfg.save(cfg.data)
-            return disks
-        except Exception as e:
-            logger.exception("lsblk failed: %s", e)
+def human_size(num: int) -> str:
+    for unit in ["B", "K", "M", "G", "T", "P"]:
+        if num < 1024:
+            return f"{num:.1f}{unit}"
+        num /= 1024
+    return f"{num:.1f}E"
 
-    # fallback to saved config
-    return cfg.get("storage", {}).get("disks", [])
 
-def detect_disks() -> Dict[str, Any]:
-    """Run disk detection and broadcast result."""
-    disks = list_disks()
-    result = {"count": len(disks), "disks": disks}
-    try:
-        if WSManagerProxy:
-            WSManagerProxy.broadcast({"module": "storage", "event": "disks_detected", "count": len(disks)})
-    except Exception:
-        pass
-    return result
-
-def disk_usage(dev: str) -> Dict[str, Any]:
-    """Return filesystem usage for a device (best-effort)."""
-    # Try lsblk for FSUSED/FSUSE%; fallback to zeroes
-    if _has_cmd("lsblk"):
-        try:
-            out = subprocess.check_output(["lsblk", "-b", "-o", "NAME,SIZE,TYPE,MOUNTPOINT,MODEL,VENDOR,FSTYPE,FSUSED,FSUSE%", dev], text=True)
-            # parse lines
-            lines = [l for l in out.strip().splitlines() if l.strip()]
-            if len(lines) >= 2:
-                parts = lines[1].split()
-                # best-effort mapping
-                size = parts[1] if len(parts) > 1 else "0"
-                used = parts[-2] if len(parts) > 2 else "0"
-                pct = parts[-1] if len(parts) > 2 else "0%"
-                return {"device": dev, "size": int(size) if size.isdigit() else size, "used": int(used) if str(used).isdigit() else used, "percent": pct}
-        except Exception as e:
-            logger.debug("lsblk disk_usage parse failed: %s", e)
-
-    return {"device": dev, "size": 0, "used": 0, "percent": "0%"}
-
-def smart_health(dev: str) -> Dict[str, Any]:
-    """Return a light summary of SMART health. Requires smartctl."""
-    if not _has_cmd("smartctl"):
-        return {"supported": False, "message": "smartctl not installed"}
-    try:
-        out = subprocess.check_output(["smartctl", "-H", "-i", dev], text=True, stderr=subprocess.STDOUT)
-        return {"supported": True, "output": out}
-    except subprocess.CalledProcessError as e:
-        return {"supported": True, "success": False, "output": getattr(e, "output", str(e))}
-    except Exception as e:
-        logger.exception("smartctl failed: %s", e)
-        return {"supported": False, "error": str(e)}
-
-def smart_test(dev: str, test_type: str = "short") -> Dict[str, Any]:
-    """Start a SMART test (short/long/conveyance) if smartctl present."""
-    if not _has_cmd("smartctl"):
-        return {"supported": False, "message": "smartctl not installed"}
-    try:
-        cmd = ["smartctl", "-t", test_type, dev]
-        out = subprocess.check_output(cmd, text=True, stderr=subprocess.STDOUT)
-        return {"started": True, "cmd": " ".join(cmd), "output": out}
-    except Exception as e:
-        logger.exception("smart test failed: %s", e)
-        return {"started": False, "error": str(e)}
-
-def get_storage_summary() -> Dict[str, Any]:
-    storage = cfg.get_storage()
-    pools = storage.get("pools", [])
-    datasets = storage.get("datasets", [])
-    disks = list_disks()
-    total_used = 0
-    total = 0
+# -------------------------------------------------------
+# LIST DISKS (DB → API READY)
+# -------------------------------------------------------
+async def list_disks_out() -> List[Dict[str, Any]]:
+    disks = await list_disks_db()
     for d in disks:
-        u = d.get("usage", {})
-        if u and u.get("total"):
-            total_used += u.get("used", 0)
-            total += u.get("total", 0)
-    percent = (total_used / total * 100) if total else 0
+        d["size_human"] = human_size(d.get("size_bytes", 0))
+    return disks
+
+
+async def detect_disks() -> List[Dict[str, Any]]:
+    """
+    Detect disks using lsblk -J -b safely and store/update in DB.
+    Returns final DB records.
+    """
+
+    # --------------------------------------------------------
+    # 1) Run lsblk safely
+    # --------------------------------------------------------
+    r = await safe_exec(["lsblk", "-J", "-b", "-o", "NAME,SIZE,TYPE,MODEL,VENDOR,ROTA"], timeout=10)
+
+    if not r.get("ok"):
+        logger.warning("lsblk failed: %s", r.get("stderr"))
+        return await list_disks_out()
+
+    # --------------------------------------------------------
+    # 2) Parse JSON safely
+    # --------------------------------------------------------
+    try:
+        obj = json.loads(r.get("stdout", "{}"))
+        devices = obj.get("blockdevices", [])
+    except Exception as e:
+        logger.error("JSON decode error: %s", e)
+        return await list_disks_out()
+
+    detected = []
+
+    # --------------------------------------------------------
+    # 3) Handle each disk
+    # --------------------------------------------------------
+    for d in devices:
+
+        # Ignore non-disk devices
+        if d.get("type") not in ("disk", "nvme"):
+            continue
+
+        # Safe integer size
+        try:
+            size_bytes = int(d.get("size") or 0)
+        except:
+            size_bytes = 0
+
+        # ROTA may be missing OR string OR boolean
+        rota = d.get("rota")
+        if isinstance(rota, str):
+            rota = rota.lower() in ("1", "true", "yes")
+        elif rota is None:
+            rota = False  # default SSD
+        elif isinstance(rota, int):
+            rota = rota == 1
+
+        rec = {
+            "name": d.get("name"),
+            "devpath": f"/dev/{d.get('name')}",
+            "model": d.get("model") or "Unknown",
+            "vendor": d.get("vendor") or "Unknown",
+            "size_bytes": int(d.get("size") or 0),
+            "rotational": True if d.get("rota") else False,
+            "mountpoint": d.get("mountpoint"),
+        }
+        await add_or_update_disk(rec)
+    
+    return await list_disks_out()
+
+
+async def list_disks() -> List[Dict[str, Any]]:
+    return await list_disks_db()
+
+
+async def get_storage_summary() -> Dict[str, Any]:
+    """
+    Return combined summary: disks, pools, datasets counts.
+    """
+    disks = await list_disks_db()
+    pools = await list_pools_db()
+    datasets = await list_datasets_all()
+    # compute simple capacity metrics if available
     return {
+        "disks": disks,
         "pools": pools,
         "datasets": datasets,
-        "disks": disks,
-        "capacity_percent": round(percent, 2)
+        "total_capacity": None,
     }
+
+
+# Wraps zfs create using raidz builder & zfs driver
+async def create_zfs_pool(name: str, devices: List[str], raidz: Optional[str] = None, dry_run: bool = True, force: bool = False) -> Dict[str, Any]:
+    """
+    devices: list of /dev/sdX or names
+    raidz: 'single'|'mirror'|'raidz1'|'raidz2'|'raidz3'
+    """
+    # Build vdev layout
+    layout = build_raidz_layout(devices, raidz or "single")
+    vdevs = [v["disks"] for v in layout["vdevs"]]
+    # preview via zfs_driver
+    preview = await zfs_driver.zfs_create_pool(name, vdevs, raidz=raidz, force=force, dry_run=dry_run)
+    if dry_run:
+        return {"preview": preview, "layout": layout}
+    # Execute creation
+    res = await zfs_driver.zfs_create_pool(name, vdevs, raidz=raidz, force=force, dry_run=False)
+    if res.get("ok"):
+        # persist pool topology
+        await driver.create_pool_record(name, layout)
+        # broadcast event
+        await WSManagerProxy.broadcast({"module": "storage", "event": "summary_updated"})
+    return res
+
+
+async def destroy_zfs_pool(name: str) -> Dict[str, Any]:
+    from backend.app.safe_exec import safe_exec
+    r = await safe_exec(["zpool", "destroy", name], sudo=True)
+    if r.get("ok"):
+        # Optionally remove DB record
+        await remove_pool(name) if hasattr(driver, "exec_remove_pool") else None
+        await WSManagerProxy.broadcast({"module": "storage", "event": "summary_updated"})
+    return r
+
+
+# Helper functions to list pools and datasets via zfs_driver or DB
+async def list_pools() -> List[Dict[str, Any]]:
+    # prefer zfs discovery then DB
+    try:
+        pools = await zfs_driver.zfs_list_pools()
+        # persist to DB if needed
+        for p in pools:
+            await driver.create_pool_record(p["name"], {"health": p.get("health")})
+        return pools
+    except Exception:
+        return await driver.list_pools_db()
+
+
+async def list_datasets(pool: Optional[str] = None) -> List[Dict[str, Any]]:
+    return await zfs_driver.zfs_list_datasets(pool)
+
+
+async def list_datasets_all() -> List[Dict[str, Any]]:
+    return await zfs_driver.zfs_list_datasets(None)

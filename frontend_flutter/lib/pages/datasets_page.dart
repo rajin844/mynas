@@ -84,6 +84,7 @@ class _DatasetsPageState extends State<DatasetsPage> {
                             mountpoint: mountCtrl.text.trim().isEmpty
                                 ? null
                                 : mountCtrl.text.trim(),
+                            dryRun: false,
                           );
                       Navigator.pop(ctx);
                     },

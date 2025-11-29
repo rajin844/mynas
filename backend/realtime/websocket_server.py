@@ -1,155 +1,129 @@
-# backend/app/ws_server.py
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from fastapi.responses import HTMLResponse
-import asyncio
+# backend/realtime/websocket_server.py
 import json
-import random
 import logging
-from typing import Set, Callable, Any, Optional
-from typing import List, Dict, Any
+from typing import Dict, Any, List
 
-import websockets
-from websockets.server import WebSocketServerProtocol
-
+from fastapi import WebSocket
 
 logger = logging.getLogger("mynas.ws")
 
-# ---------------------------------------------------------------------------
-# WS Manager - keeps connection set and provides broadcast helper
-# ---------------------------------------------------------------------------
 class WSManager:
+    """
+    Instance managing WebSocket connections.
+    Each websocket may have a list of subscribed modules.
+    """
+
     def __init__(self):
-        self._clients: Set[WebSocketServerProtocol] = set()
-        self._lock = asyncio.Lock()
+        self._clients: List[WebSocket] = []
+        self._subscriptions = {}  # WebSocket -> List[str]
 
-    async def register(self, ws: WebSocketServerProtocol):
-        async with self._lock:
-            self._clients.add(ws)
-        logger.info("WS client connected: %s", ws.remote_address)
+    async def connect(self, ws: WebSocket):
+        await ws.accept()
+        self._clients.append(ws)
+        # default subscribe to all modules so clients don't miss anything
+        self._subscriptions[ws] = ["monitor", "zfs", "storage", "shares"]
+        logger.debug("WS connected, subscribers count=%d", len(self._clients))
 
-    async def unregister(self, ws: WebSocketServerProtocol):
-        async with self._lock:
-            self._clients.discard(ws)
-        logger.info("WS client disconnected: %s", ws.remote_address)
-
-    async def send(self, ws: WebSocketServerProtocol, obj: Any):
+    async def disconnect(self, ws: WebSocket):
         try:
-            await ws.send(json.dumps(obj))
+            await ws.close()
+        except Exception:
+            pass
+        if ws in self._clients:
+            self._clients.remove(ws)
+        self._subscriptions.pop(ws, None)
+        logger.debug("WS disconnected, subscribers count=%d", len(self._clients))
+
+    async def handle_message(self, ws: WebSocket, msg: Dict[str, Any]):
+        """
+        Handle incoming messages from a client.
+        Expected commands: {"action":"subscribe","modules":["monitor","zfs"]}
+        """
+        try:
+            action = msg.get("action")
+            if action == "subscribe":
+                modules = msg.get("modules", [])
+                if isinstance(modules, list):
+                    self._subscriptions[ws] = modules
+                    logger.debug("WS subscription updated: %s", modules)
+            # add other client commands here as needed
         except Exception as e:
-            logger.debug("Send failed %s: %s", ws.remote_address, e)
+            logger.exception("handle_message error: %s", e)
 
-    async def broadcast(self, obj: Any):
-        """Send obj to all connected clients (JSON)"""
-        data = json.dumps(obj)
-        to_remove = []
-        async with self._lock:
-            clients = list(self._clients)
-        for ws in clients:
+    async def broadcast(self, module: str, data: Dict[str, Any]):
+        """
+        Broadcast a message to all clients subscribed to `module`.
+        The outgoing message will be JSON: {"module": module, **data}
+        """
+        if not isinstance(data, dict):
+            # normalize
+            data = {"data": data}
+
+        payload = {"module": module}
+        payload.update(data)
+
+        text = json.dumps(payload)
+        dead = []
+
+        for ws in list(self._clients):
             try:
-                await ws.send(data)
+                subs = self._subscriptions.get(ws)
+                # if the client has a subscription list, only send if subscribed
+                if subs is None or module in subs or "*" in subs:
+                    await ws.send_text(text)
             except Exception:
-                logger.debug("Broadcast failed for %s", ws.remote_address)
-                to_remove.append(ws)
-        if to_remove:
-            async with self._lock:
-                for ws in to_remove:
-                    self._clients.discard(ws)
+                dead.append(ws)
 
-    def client_count(self) -> int:
-        return len(self._clients)
+        for ws in dead:
+            await self.disconnect(ws)
 
-# proxy/global holder so other modules can call WSManagerProxy.broadcast(...)
+
+# Proxy to access global manager from other modules
 class WSManagerProxy:
-    _manager: Optional[WSManager] = None
+    _manager: WSManager | None = None
 
     @classmethod
-    def register(cls, manager: WSManager) -> None:
+    def register(cls, manager: WSManager):
         cls._manager = manager
 
     @classmethod
-    async def broadcast(cls, obj: Any) -> None:
-        if cls._manager:
-            await cls._manager.broadcast(obj)
+    async def broadcast(cls, *args, **kwargs):
+        """
+        Flexible broadcast wrapper.
 
-    @classmethod
-    def broadcast_sync(cls, obj: Any) -> None:
+        Accepts either:
+          await WSManagerProxy.broadcast("monitor", {"cpu": 1.2})
+        or:
+          await WSManagerProxy.broadcast({"module": "monitor", "cpu": 1.2, ...})
+
+        or:
+          await WSManagerProxy.broadcast(module="monitor", data={"cpu":...})
         """
-        Convenience synchronous wrapper (fire-and-forget).
-        Use when calling from non-async code. It schedules the broadcast on the running loop.
-        """
-        mgr = cls._manager
-        if not mgr:
+        if cls._manager is None:
+            logger.warning("WSManagerProxy.broadcast called but no manager registered")
             return
-        try:
-            loop = asyncio.get_running_loop()
-            loop.create_task(mgr.broadcast(obj))
-        except RuntimeError:
-            # no running loop; best-effort: spawn a new loop in a thread (rare)
-            asyncio.run(mgr.broadcast(obj))
 
+        # Case: single positional dict
+        if len(args) == 1 and isinstance(args[0], dict) and "module" in args[0]:
+            payload = args[0]
+            module = payload.pop("module")
+            data = payload  # remaining keys
+            await cls._manager.broadcast(module, data)
+            return
 
-# ---------------------------------------------------------------------------
-# WebSocket handler
-# ---------------------------------------------------------------------------
-async def _ws_handler(ws: WebSocketServerProtocol, path: str):
-    """
-    Protocol:
-      - client may send JSON messages (we simply echo back or handle 'ping')
-      - server can broadcast via WSManagerProxy.broadcast(...)
-    """
-    manager = WSManagerProxy._manager
-    if manager is None:
-        manager = WSManager()
-        WSManagerProxy.register(manager)
+        # Case: (module, data)
+        if len(args) == 2:
+            module = args[0]
+            data = args[1]
+            await cls._manager.broadcast(module, data)
+            return
 
-    await manager.register(ws)
-    try:
-        # accept loop: receive messages
-        async for raw in ws:
-            try:
-                # allow string or JSON
-                try:
-                    payload = json.loads(raw)
-                except Exception:
-                    payload = raw
+        # Case: keyword usage: module=..., data=...
+        module = kwargs.get("module")
+        data = kwargs.get("data")
+        if module:
+            await cls._manager.broadcast(module, data or {})
+            return
 
-                # simple ping handler
-                if isinstance(payload, str) and payload.lower() in ("ping", "hello"):
-                    await manager.send(ws, {"type": "pong"})
-                    continue
-
-                # If user sends JSON with type "echo", we echo
-                if isinstance(payload, dict) and payload.get("type") == "echo":
-                    await manager.send(ws, {"type": "echo", "data": payload.get("data")})
-                    continue
-
-                # default: no-op (could route to RPC)
-            except Exception as e:
-                logger.exception("Error processing ws message: %s", e)
-
-    except websockets.ConnectionClosed:
-        pass
-    except Exception as e:
-        logger.exception("WS connection error: %s", e)
-    finally:
-        await manager.unregister(ws)
-
-
-# ---------------------------------------------------------------------------
-# Start server helper (call from main.py startup)
-# ---------------------------------------------------------------------------
-def start_ws_server(loop: asyncio.AbstractEventLoop,
-                    host: str = "0.0.0.0",
-                    port: int = 6789,
-                    origins: Optional[Set[str]] = None) -> websockets.server.serve:
-    """
-    Start the websockets server on provided loop.
-    - origins: set of allowed origin strings (None to allow all)
-    Returns the Serve object (awaitable) — but we schedule create_task() here.
-    """
-    # websockets.serve accepts origins param (list or None)
-    logger.info("Starting WS server on %s:%d (origins=%s)", host, port, origins)
-    coro = websockets.serve(_ws_handler, host, port, origins=origins, ping_interval=20, ping_timeout=20, max_size=2**20)
-    # schedule the server onto the loop
-    server = loop.run_until_complete(coro) if not loop.is_running() else loop.create_task(coro)
-    return server
+        # Unknown call signature
+        logger.error("WSManagerProxy.broadcast called with unsupported args: %r %r", args, kwargs)

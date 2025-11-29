@@ -1,44 +1,45 @@
 # backend/rpc_handlers/zfs.py
-from typing import Any, Dict, List
+"""
+RPC handlers for zfs service (async-aware)
+Registered names: "zfs"
+Methods:
+  - listPools
+  - listDatasets
+  - createPool (dry-run support)
+  - destroyPool
+"""
+
 import logging
-from backend.storage.zfs_manager import (
-    list_pools,
-    list_datasets,
-    create_pool,
-    create_dataset,
-    destroy_pool,
-    destroy_dataset,
-)
+from backend.storage import zfs_manager
 
-logger = logging.getLogger("mynas.rpc.zfs")
+async def rpc_list_pools():
+    return await zfs_manager.list_pools()
 
-def rpc_listpools() -> List[Dict[str, Any]]:
-    return list_pools()
+async def rpc_list_datasets(pool: str = None):
+    return await zfs_manager.list_datasets(pool)
 
-def rpc_listdatasets(pool: str = None) -> List[Dict[str, Any]]:
-    return list_datasets(pool)
+async def rpc_create_pool(name: str, devices: list, raidz: str = None, dryRun: bool = True, force: bool = False):
+    # note: dryRun naming compatibility
+    return await zfs_manager.preview_create_pool(name, devices, raidz) if dryRun else await zfs_manager.create_pool(name, devices, raidz=raidz, force=force)
 
-def rpc_createpool(name: str, devices: list, raidz: str = None, dry_run: bool = True) -> Dict[str, Any]:
-    return create_pool(name, devices, raidz=raidz, dry_run=dry_run)
+async def rpc_destroy_pool(name: str):
+    return await zfs_manager.destroy_pool(name)
+from typing import Any, Optional
 
-def rpc_createdataset(pool: str, name: str, mountpoint: str = None) -> Dict[str, Any]:
-    ok = create_dataset(pool, name, mountpoint)
-    return {"created": bool(ok)}
+async def rpc_import_pool(name: str) -> Any:
+    return await  zfs_manager.import_pool(name)    
 
-def rpc_destroypool(name: str) -> Dict[str, Any]:
-    ok = destroy_pool(name)
-    return {"deleted": bool(ok)}
-
-def rpc_destroydataset(pool: str, name: str) -> Dict[str, Any]:
-    ok = destroy_dataset(pool, name)
-    return {"deleted": bool(ok)}
+#async def rpc_create_pool(name: str, devices: list, raidz: Optional[str] = None, dryRun: bool = True, force: bool = False) -> Any:
+    # keep compatibility with previous naming conventions
+ #   if dryRun:
+  #      return await zfs_manager.preview_create_pool(name, devices, raidz=raidz)
+   # return await zfs_manager.create_pool(name, devices, raidz=raidz, force=force)
 
 def register_rpc(register):
     register("zfs", {
-        "listpools": rpc_listpools,
-        "listdatasets": rpc_listdatasets,
-        "createpool": rpc_createpool,
-        "createdataset": rpc_createdataset,
-        "destroypool": rpc_destroypool,
-        "destroydataset": rpc_destroydataset,
+        "listPools": rpc_list_pools,
+        "listDatasets": rpc_list_datasets,
+        "importpool" : rpc_import_pool,
+        "createPool": rpc_create_pool,
+        "destroyPool": rpc_destroy_pool,
     })

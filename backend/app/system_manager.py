@@ -1,120 +1,167 @@
-# backend/app/system_manager.py
 """
-System-wide utilities for MyNAS
-- Hostname
-- Timezone
-- System info
-- Reboot / shutdown
-- Uptime
+backend/system/system_manager.py
+--------------------------------
+System manager for MyNAS.
+Provides:
+ - Hostname operations
+ - Timezone get/set
+ - System reboot/shutdown
+ - Kernel/system details
+ - Uptime
+ - Load averages
+ - Package update status (Linux)
+ - CPU / RAM info (basic)
 """
 
-import os
-import subprocess
+import asyncio
 import platform
 import psutil
+import socket
+import subprocess
 import time
 from datetime import datetime
-from pathlib import Path
+from backend.app.safe_exec import safe_exec
 
 
-def _run(cmd):
-    """Run system command safely."""
-    return subprocess.check_output(cmd, stderr=subprocess.STDOUT, text=True)
+# =====================================================================
+# 🖥️ BASIC SYSTEM INFORMATION
+# =====================================================================
 
-
-# ---------------------------------------------------
-# SYSTEM INFO
-# ---------------------------------------------------
-
-def system_info():
-    """Return complete NAS system info"""
-    return {
-        "hostname": platform.node(),
-        "os": platform.platform(),
-        "kernel": platform.release(),
-        "cpu": {
-            "model": _cpu_model(),
-            "cores": psutil.cpu_count(logical=False),
-            "threads": psutil.cpu_count(logical=True),
-        },
-        "memory": {
-            "total": psutil.virtual_memory().total,
-            "used": psutil.virtual_memory().used,
-            "free": psutil.virtual_memory().available,
-        },
-        "uptime": uptime(),
-        "time": datetime.now().isoformat(),
-    }
-
-
-def _cpu_model():
-    try:
-        if Path("/proc/cpuinfo").exists():
-            for line in open("/proc/cpuinfo"):
-                if "model name" in line.lower():
-                    return line.split(":")[1].strip()
-    except:
-        pass
-    return platform.processor()
-
-
-# ---------------------------------------------------
-# HOSTNAME
-# ---------------------------------------------------
-
-def get_hostname():
+async def get_hostname() -> str:
     return platform.node()
 
 
-def set_hostname(new_name: str):
-    if not new_name:
-        raise ValueError("Hostname cannot be empty")
+async def set_hostname(name: str) -> bool:
+    """
+    Set system hostname (Linux).
+    Requires root.
+    """
+    cmd = ["hostnamectl", "set-hostname", name]
+    ok, out, err = await safe_exec(cmd)
 
-    _run(["hostnamectl", "set-hostname", new_name])
-    return {"status": "ok", "hostname": new_name}
+    return ok
 
 
-# ---------------------------------------------------
-# TIMEZONE
-# ---------------------------------------------------
+# =====================================================================
+# 🌐 NETWORK INFO
+# =====================================================================
 
-def get_timezone():
+async def get_local_ip() -> str:
+    """Get LAN IP address."""
     try:
-        zone = _run(["timedatectl"])
-        for line in zone.splitlines():
-            if "Time zone:" in line:
-                return line.split(":")[1].strip()
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
     except:
-        pass
-    return "UTC"
+        return "127.0.0.1"
 
 
-def set_timezone(tz: str):
-    if not tz:
-        raise ValueError("Timezone cannot be empty")
+# =====================================================================
+# 🕒 TIME / TIMEZONE
+# =====================================================================
 
-    _run(["timedatectl", "set-timezone", tz])
-    return {"status": "ok", "timezone": tz}
+async def get_timezone() -> str:
+    ok, out, _ = await safe_exec(["timedatectl"])
+    if not ok:
+        return "Unknown"
 
+    for line in out.splitlines():
+        if "Time zone" in line:
+            return line.split(":", 1)[1].strip().split(" ")[0]
 
-# ---------------------------------------------------
-# SYSTEM POWER CONTROL
-# ---------------------------------------------------
-
-def reboot():
-    _run(["systemctl", "reboot"])
-    return {"status": "rebooting"}
-
-
-def shutdown():
-    _run(["systemctl", "poweroff"])
-    return {"status": "shutting_down"}
+    return "Unknown"
 
 
-# ---------------------------------------------------
-# UPTIME
-# ---------------------------------------------------
+async def set_timezone(tz: str) -> bool:
+    ok, _, _ = await safe_exec(["timedatectl", "set-timezone", tz])
+    return ok
 
-def uptime():
-    seconds = time.time() - psutil.boot_time()
-    return int(seconds)
+
+# =====================================================================
+# 📦 PACKAGE MANAGER (OS UPDATE STATUS)
+# =====================================================================
+
+async def get_update_status() -> dict:
+    """
+    Check update availability (Debian/Ubuntu systems).
+    """
+    ok, out, err = await safe_exec(["apt", "list", "--upgradeable"])
+    if not ok:
+        return {"supported": False, "updates": []}
+
+    updates = []
+    for line in out.splitlines():
+        if "upgradeable" in line:
+            pkg = line.split("/", 1)[0]
+            updates.append(pkg)
+
+    return {
+        "supported": True,
+        "count": len(updates),
+        "updates": updates
+    }
+
+
+# =====================================================================
+# 🧠 SYSTEM SPECS (CPU / RAM)
+# =====================================================================
+
+async def get_cpu_info() -> dict:
+    return {
+        "model": platform.processor(),
+        "cores": psutil.cpu_count(logical=False),
+        "threads": psutil.cpu_count(logical=True),
+        "freq": psutil.cpu_freq().current if psutil.cpu_freq() else None,
+        "load_avg": list(psutil.getloadavg()),
+    }
+
+
+async def get_ram_info() -> dict:
+    mem = psutil.virtual_memory()
+    return {
+        "total": mem.total,
+        "used": mem.used,
+        "percent": mem.percent,
+    }
+
+
+# =====================================================================
+# 🕒 UPTIME
+# =====================================================================
+
+async def get_uptime() -> str:
+    boot_ts = psutil.boot_time()
+    delta = time.time() - boot_ts
+    return str(datetime.utcfromtimestamp(delta).strftime("%H:%M:%S"))
+
+
+# =====================================================================
+# 🔧 SYSTEM ACTIONS
+# =====================================================================
+
+async def system_reboot() -> bool:
+    return (await safe_exec(["systemctl", "reboot"]))[0]
+
+
+async def system_shutdown() -> bool:
+    return (await safe_exec(["systemctl", "poweroff"]))[0]
+
+
+# =====================================================================
+# 📦 FULL SYSTEM SUMMARY (for dashboard)
+# =====================================================================
+
+async def system_summary() -> dict:
+    return {
+        "hostname": await get_hostname(),
+        "ip": await get_local_ip(),
+        "timezone": await get_timezone(),
+        "uptime": await get_uptime(),
+        "cpu": await get_cpu_info(),
+        "ram": await get_ram_info(),
+        "updates": await get_update_status(),
+        "kernel": platform.release(),
+        "platform": platform.system(),
+    }

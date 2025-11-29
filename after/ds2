@@ -1,0 +1,600 @@
+// lib/pages/dashboard_page.dart
+import 'dart:math';
+
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../providers/monitoring_provider.dart';
+import '../providers/storage_provider.dart';
+import '../providers/zfs_provider.dart';
+import '../providers/shares_provider.dart';
+import '../services/websocket_service.dart';
+import '../widgets/drawer.dart';
+import '../widgets/glass_card.dart';
+import '../widgets/metric_card.dart';
+
+class DashboardPage extends StatefulWidget {
+  const DashboardPage({super.key});
+
+  @override
+  State<DashboardPage> createState() => _DashboardPageState();
+}
+
+class _DashboardPageState extends State<DashboardPage>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animCtrl;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _animCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    )..forward();
+
+    final ws = context.read<WebSocketService>();
+    final monitor = context.read<MonitoringProvider>();
+    final storage = context.read<StorageProvider>();
+    final pools = context.read<ZfsProvider>();
+    final shares = context.read<SharesProvider>();
+
+    // initial load
+    Future.microtask(() async {
+      try {
+        await monitor.refresh();
+      } catch (_) {}
+      try {
+        await storage.loadSummary();
+      } catch (_) {}
+      try {
+        await storage.loadAlerts();
+      } catch (_) {}
+      try {
+        await pools.loadPools();
+        await pools.loadAllDatasets();
+      } catch (_) {}
+      try {
+        await shares.loadShares();
+      } catch (_) {}
+    });
+
+    // realtime updates
+    ws.stream.listen((msg) {
+      if (!mounted) return;
+      if (msg is Map) {
+        final module = msg['module'];
+        if (module == 'monitor') {
+          monitor.updateFromWs(msg);
+        } else if (module == 'storage') {
+          storage.loadSummary();
+          storage.loadAlerts();
+        } else if (module == 'zfs') {
+          pools.loadPools();
+        } else if (module == 'shares') {
+          shares.loadShares();
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _animCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final monitor = context.watch<MonitoringProvider>();
+    final storage = context.watch<StorageProvider>();
+    final pools = context.watch<ZfsProvider>();
+    final shares = context.watch<SharesProvider>();
+    final ws = context.watch<WebSocketService>();
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('MyNAS Dashboard'),
+        centerTitle: true,
+      ),
+      drawer: AppDrawer(
+        onSelect: (route) {
+          Navigator.pop(context);
+          Navigator.pushNamed(context, route);
+        },
+        currentRoute: ModalRoute.of(context)?.settings.name,
+        counts: {
+          '/pools': pools.pools.length,
+          '/storage': (storage.summary['disks'] is List)
+              ? (storage.summary['disks'] as List).length
+              : 0,
+          '/datasets': pools.datasets.length,
+          '/shares': shares.shares.length,
+        },
+        username: 'admin',
+        hostname: 'mynas',
+        version: '1.0.0',
+      ),
+      body: FadeTransition(
+        opacity: CurvedAnimation(parent: _animCtrl, curve: Curves.easeIn),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(18),
+          child: Column(
+            children: [
+              _buildTopRow(ws, monitor, storage),
+              const SizedBox(height: 20),
+              _storageAlerts(storage),
+              const SizedBox(height: 18),
+              LayoutBuilder(builder: (context, constraints) {
+                // Wrapper approach: left metric column + responsive columns
+                final maxW = constraints.maxWidth;
+                // left metric width: min(constraints.maxWidth, 420)
+                final leftWidth = min(maxW, 420.0).toDouble();
+
+                // compute remaining space; clamp to safe doubles
+                final remaining =
+                    (maxW - leftWidth).clamp(0.0, double.infinity);
+
+                final mainWidth =
+                    max(320.0, remaining * 0.65).clamp(320.0, 900.0).toDouble();
+
+                final sideWidth =
+                    max(320.0, remaining * 0.35).clamp(320.0, 520.0).toDouble();
+
+                final smallCardWidth = min(maxW, 520.0).toDouble();
+
+                // If narrow screen, stack vertically
+                final stacked = maxW < 900.0;
+
+                if (stacked) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      SizedBox(
+                          width: leftWidth,
+                          child: MetricCardGrid(monitor: monitor)),
+                      const SizedBox(height: 12),
+                      _buildStorageOverview(storage),
+                      const SizedBox(height: 12),
+                      _buildPoolsOverview(pools),
+                      const SizedBox(height: 12),
+                      _buildDatasetsOverview(pools),
+                      const SizedBox(height: 12),
+                      _buildDisksGrid(storage),
+                    ],
+                  );
+                }
+
+                // Desktop / wide layout: use Wrap for responsive arrangement
+                return Wrap(
+                  runSpacing: 16,
+                  spacing: 16,
+                  alignment: WrapAlignment.start,
+                  children: [
+                    SizedBox(
+                        width: leftWidth,
+                        child: MetricCardGrid(monitor: monitor)),
+                    SizedBox(
+                        width: mainWidth,
+                        child: _buildStorageOverview(storage)),
+                    SizedBox(
+                        width: sideWidth, child: _buildPoolsOverview(pools)),
+                    SizedBox(
+                        width: smallCardWidth,
+                        child: _buildDatasetsOverview(pools)),
+                    SizedBox(
+                        width: smallCardWidth, child: _buildDisksGrid(storage)),
+                  ],
+                );
+              }),
+              const SizedBox(height: 24),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // --------------------------
+  // TOP ROW: connection + refresh
+  // --------------------------
+  Widget _buildTopRow(WebSocketService ws, MonitoringProvider monitor,
+      StorageProvider storage) {
+    return Row(
+      children: [
+        Chip(
+          avatar: Icon(
+            ws.connected ? Icons.check_circle : Icons.error,
+            color: ws.connected ? Colors.green : Colors.red,
+          ),
+          label: Text(ws.connected ? 'Connected' : 'Disconnected'),
+          backgroundColor: ws.connected
+              ? const Color.fromRGBO(223, 240, 216, 1.0)
+              : const Color.fromRGBO(253, 236, 234, 1.0),
+        ),
+        const SizedBox(width: 12),
+        ElevatedButton.icon(
+          onPressed: () async {
+            try {
+              await monitor.refresh();
+            } catch (_) {}
+            try {
+              await storage.loadSummary();
+              await storage.loadAlerts();
+            } catch (_) {}
+          },
+          icon: const Icon(Icons.refresh),
+          label: const Text('Refresh'),
+        ),
+        const Spacer(),
+        Row(children: [
+          _tinyStat('CPU', '${monitor.cpu.toStringAsFixed(0)}%'),
+          const SizedBox(width: 8),
+          _tinyStat('RAM', '${monitor.ram.toStringAsFixed(0)}%'),
+          const SizedBox(width: 8),
+          _tinyStat('Disk', '${monitor.disk.toStringAsFixed(0)}%'),
+        ])
+      ],
+    );
+  }
+
+  Widget _tinyStat(String label, String val) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+        Text(val, style: const TextStyle(fontWeight: FontWeight.bold)),
+      ],
+    );
+  }
+
+  // --------------------------
+  // ALERTS
+  // --------------------------
+  Widget _storageAlerts(StorageProvider s) {
+    // ensure alerts exists and is a list
+    final alertsRaw = s.alerts;
+    final alerts =
+        (alertsRaw is List) ? alertsRaw.cast<dynamic>() : <dynamic>[];
+
+    if (alerts.isEmpty) return const SizedBox.shrink();
+
+    return GlassCard(
+      title: 'Storage Alerts',
+      icon: Icons.warning_amber_rounded,
+      titleColor: Colors.redAccent,
+      child: Column(
+        children: alerts.map((a) {
+          final type = a is Map ? (a['type'] ?? 'Alert') : 'Alert';
+          final msg = a is Map ? (a['message'] ?? a.toString()) : a.toString();
+          return ListTile(
+            leading: Icon(Icons.error_outline, color: Colors.redAccent),
+            title:
+                Text(type, style: const TextStyle(fontWeight: FontWeight.bold)),
+            subtitle: Text(msg),
+            dense: true,
+            visualDensity: VisualDensity.compact,
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  // --------------------------
+  // Storage Overview Card
+  // --------------------------
+  Widget _buildStorageOverview(StorageProvider s) {
+    final summary = (s.summary is Map) ? s.summary as Map<String, dynamic> : {};
+    final totalDisks =
+        (summary['disks'] is List) ? (summary['disks'] as List).length : 0;
+    final totalPools =
+        (summary['pools'] is List) ? (summary['pools'] as List).length : 0;
+    final totalDatasets = (summary['datasets'] is List)
+        ? (summary['datasets'] as List).length
+        : 0;
+    final totalCapacity = summary['total_capacity'] ?? '--';
+
+    return GlassCard(
+      title: 'Storage Overview',
+      icon: Icons.storage_rounded,
+      titleColor: Colors.white,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(children: [
+            _summaryStat('Disks', '$totalDisks'),
+            const SizedBox(width: 12),
+            _summaryStat('Pools', '$totalPools'),
+            const SizedBox(width: 12),
+            _summaryStat('Datasets', '$totalDatasets'),
+          ]),
+          const SizedBox(height: 12),
+          Text('Total Capacity', style: TextStyle(color: Colors.grey[600])),
+          const SizedBox(height: 6),
+          Text(totalCapacity.toString(),
+              style:
+                  const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 12),
+          ElevatedButton.icon(
+            onPressed: () => s.loadSummary(),
+            icon: const Icon(Icons.refresh),
+            label: const Text('Refresh Storage'),
+            style: ElevatedButton.styleFrom(
+                minimumSize: const Size.fromHeight(40)),
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget _summaryStat(String label, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+        const SizedBox(height: 6),
+        Text(value,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+      ],
+    );
+  }
+
+  // --------------------------
+  // Pools Overview (compact list with capacity bars)
+  // --------------------------
+  Widget _buildPoolsOverview(ZfsProvider zfs) {
+    final pools = zfs.pools;
+    if (pools.isEmpty) {
+      return GlassCard(
+        title: 'ZFS Pools',
+        icon: Icons.pool,
+        titleColor: Colors.white,
+        child: const Padding(
+          padding: EdgeInsets.all(12),
+          child: Text('No pools found', style: TextStyle(color: Colors.grey)),
+        ),
+      );
+    }
+
+    return GlassCard(
+      title: 'ZFS Pools',
+      icon: Icons.pool,
+      titleColor: Colors.white,
+      child: Column(
+        children: pools.map<Widget>((p) {
+          final usage = (p['capacity'] is num)
+              ? (p['capacity'] as num).toDouble()
+              : double.tryParse(p['capacity']?.toString() ?? '') ?? 0.0;
+          final health = (p['health'] ?? 'UNKNOWN').toString();
+          final color = health == 'ONLINE'
+              ? Colors.green
+              : (health == 'DEGRADED' ? Colors.orange : Colors.red);
+
+          return ListTile(
+            dense: true,
+            leading: CircleAvatar(
+                backgroundColor: color,
+                child: const Icon(Icons.layers, color: Colors.white, size: 18)),
+            title: Text(p['name'] ?? 'pool'),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 6),
+                LinearProgressIndicator(
+                  value: (usage / 100).clamp(0.0, 1.0),
+                  minHeight: 8,
+                  backgroundColor: Colors.grey.shade200,
+                ),
+                const SizedBox(height: 6),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Health: $health',
+                        style:
+                            const TextStyle(fontSize: 12, color: Colors.grey)),
+                    Text('${usage.round()}%',
+                        style: const TextStyle(fontWeight: FontWeight.bold)),
+                  ],
+                ),
+              ],
+            ),
+            onTap: () {
+              Navigator.pushNamed(context, '/pool', arguments: p['name']);
+            },
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  // --------------------------
+  // Datasets Overview (compact)
+  // --------------------------
+  Widget _buildDatasetsOverview(ZfsProvider zfs) {
+    final datasets = zfs.datasets;
+    return GlassCard(
+      title: 'Datasets',
+      icon: Icons.folder,
+      titleColor: Colors.white,
+      child: datasets.isEmpty
+          ? const Padding(
+              padding: EdgeInsets.all(12),
+              child: Text('No datasets', style: TextStyle(color: Colors.grey)),
+            )
+          : Column(
+              children: datasets.take(6).map<Widget>((d) {
+                final used = d['used'] ?? '-';
+                final avail = d['available'] ?? '-';
+                return ListTile(
+                  dense: true,
+                  leading: const Icon(Icons.folder_open),
+                  title: Text(d['name'] ?? 'dataset'),
+                  subtitle: Text('Used: $used • Free: $avail',
+                      style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                );
+              }).toList(),
+            ),
+    );
+  }
+
+  // --------------------------
+  // Disks Grid (cards)
+  // --------------------------
+  Widget _buildDisksGrid(StorageProvider s) {
+    final summary = (s.summary is Map) ? s.summary as Map<String, dynamic> : {};
+    final disks =
+        (summary['disks'] is List) ? (summary['disks'] as List) : <dynamic>[];
+
+    if (disks.isEmpty) {
+      return GlassCard(
+        title: 'Disks',
+        icon: Icons.storage_rounded,
+        titleColor: Colors.white,
+        child: const Padding(
+          padding: EdgeInsets.all(14),
+          child:
+              Text('No disks detected', style: TextStyle(color: Colors.grey)),
+        ),
+      );
+    }
+
+    final width = MediaQuery.of(context).size.width;
+    final crossAxisCount = width >= 1400 ? 3 : (width >= 900 ? 2 : 1);
+
+    return GlassCard(
+      title: 'Disks',
+      icon: Icons.storage_rounded,
+      titleColor: Colors.white,
+      child: GridView.count(
+        crossAxisCount: crossAxisCount,
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+        children: disks.map<Widget>((d) {
+          final isHdd = d is Map && d['rotational'] == true;
+          final size = d is Map
+              ? (d['size_human'] ??
+                  (d['size_bytes'] != null
+                      ? _humanSize(d['size_bytes'])
+                      : '--'))
+              : '--';
+          final model = (d is Map) ? (d['model'] ?? 'Unknown') : 'Unknown';
+          final dev = (d is Map) ? (d['devpath'] ?? '/dev/${d['name']}') : '--';
+          final tempRaw = (d is Map)
+              ? d['smart'] != null
+                  ? d['smart']['temperature']
+                  : null
+              : null;
+          final temp = (tempRaw is num)
+              ? tempRaw.toInt()
+              : (int.tryParse(tempRaw?.toString() ?? ''));
+
+          return AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color.fromRGBO(255, 255, 255, 0.03),
+              borderRadius: BorderRadius.circular(12),
+              border:
+                  Border.all(color: const Color.fromRGBO(255, 255, 255, 0.04)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(children: [
+                  Icon(isHdd ? Icons.sd_storage : Icons.memory,
+                      size: 28,
+                      color: isHdd ? Colors.blueGrey : Colors.deepPurple),
+                  const SizedBox(width: 10),
+                  Expanded(
+                      child: Text(dev,
+                          style: const TextStyle(fontWeight: FontWeight.bold))),
+                  Text(size,
+                      style: const TextStyle(fontWeight: FontWeight.bold)),
+                ]),
+                const SizedBox(height: 8),
+                Text(model,
+                    style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                const Spacer(),
+                Row(
+                  children: [
+                    if (temp != null) ...[
+                      Icon(Icons.thermostat, size: 16, color: _tempColor(temp)),
+                      const SizedBox(width: 6),
+                      Text('$temp°C', style: const TextStyle(fontSize: 12)),
+                    ],
+                    const Spacer(),
+                    Text(isHdd ? 'HDD' : 'SSD',
+                        style: const TextStyle(
+                            fontSize: 12, fontWeight: FontWeight.w600)),
+                  ],
+                ),
+              ],
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  // small helpers
+  Color _tempColor(int t) {
+    if (t < 40) return Colors.green;
+    if (t < 50) return Colors.orange;
+    return Colors.red;
+  }
+
+  static String _humanSize(num bytes) {
+    final units = ['B', 'K', 'M', 'G', 'T'];
+    double b = bytes.toDouble();
+    var i = 0;
+    while (b >= 1024 && i < units.length - 1) {
+      b /= 1024;
+      i++;
+    }
+    if (i == 0) return '${b.toInt()}${units[i]}';
+    return '${b.toStringAsFixed(1)}${units[i]}';
+  }
+}
+
+/// A compact metric card column with three key metrics
+class MetricCardGrid extends StatelessWidget {
+  final MonitoringProvider monitor;
+  const MetricCardGrid({super.key, required this.monitor});
+
+  @override
+  Widget build(BuildContext context) {
+    return GlassCard(
+      title: 'System Metrics',
+      icon: Icons.monitor,
+      titleColor: Colors.white,
+      child: Column(
+        children: [
+          Row(children: [
+            Expanded(child: MetricCard(label: 'CPU', value: monitor.cpu)),
+            const SizedBox(width: 8),
+            Expanded(child: MetricCard(label: 'RAM', value: monitor.ram)),
+          ]),
+          const SizedBox(height: 8),
+          Row(children: [
+            Expanded(child: MetricCard(label: 'Disk', value: monitor.disk)),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Network',
+                      style: TextStyle(fontSize: 12, color: Colors.grey)),
+                  const SizedBox(height: 6),
+                  Text(
+                      '${(monitor.netUp / 1024).toStringAsFixed(1)} KB/s ↑ • ${(monitor.netDown / 1024).toStringAsFixed(1)} KB/s ↓'),
+                ],
+              ),
+            ),
+          ]),
+        ],
+      ),
+    );
+  }
+}

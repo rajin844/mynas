@@ -5,7 +5,6 @@ Handles user management and persistence in config.json.
 """
 
 from typing import List, Dict, Any
-from backend.app.config_manager import cfg
 from backend.realtime.websocket_server import WSManagerProxy
 
 def _try_broadcast(message: dict):

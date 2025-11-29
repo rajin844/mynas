@@ -209,7 +209,7 @@ class AppDrawer extends StatelessWidget {
                           title: "System Settings",
                           route: '/system',
                           dense: true,
-                          selected: currentRoute == '/system',
+                          selected: currentRoute == '/settings',
                         ),
                       ],
                     ),

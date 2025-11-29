@@ -1,21 +1,20 @@
-# backend/api/smart.py
 from fastapi import APIRouter, HTTPException, Body
-from backend.app.smart import smart_health
-
+#from backend.storage.smart_manager import smart_scan_all
+from backend.storage import smart_manager
 router = APIRouter()
 
-@router.post("/info")
-def api_smart_info(payload: dict = Body(...)):
-    """
-    Payload:
-    { "device": "/dev/sda" }
-    """
-    device = payload.get("device")
-    if not device:
-        raise HTTPException(400, "device path required")
-
+@router.post("/scan")
+async def api_smart_scan():
     try:
-        data = smart_health(device)
-        return {"response": data, "error": None}
+        res = await smart_scan_all()
+        return {"response": res, "error": None}
     except Exception as e:
-        raise HTTPException(500, str(e))
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/scan/disk")
+async def api_scan_disk(payload: dict):
+    dev = payload.get("devpath")
+    if not dev:
+        raise HTTPException(400, "devpath required")
+    res = await smart_scan_disk(dev)
+    return {"response": res, "error": None}

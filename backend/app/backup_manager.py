@@ -16,7 +16,7 @@ import shutil
 import subprocess
 from pathlib import Path
 from typing import List, Optional
-from backend.app.config_manager import ConfigManager
+#from backend.app.config_manager import ConfigManager
 
 # -------------------------------------------------------------------
 # 📂 Paths
@@ -29,7 +29,7 @@ BACKUP_DIR = CONFIG_DIR / "backups"
 BACKUP_DIR.mkdir(parents=True, exist_ok=True)
 
 # Singleton ConfigManager instance
-cfg = ConfigManager()
+#cfg = ConfigManager()
 
 # -------------------------------------------------------------------
 # 📜 List Backups

@@ -5,6 +5,11 @@ Generates optimal RAIDZ vdev layout from disk list.
 """
 
 import math
+# backend/rpc_handlers/raidz.py
+from backend.storage.raidz_manager import build_raidz_layout
+
+async def rpc_preview(devices: list, level: str = "single"):
+    return build_raidz_layout(devices, level)
 
 def build_raidz(devices, raidz_level="single"):
     """
@@ -36,7 +41,11 @@ def build_raidz(devices, raidz_level="single"):
         "usable_capacity_ratio": (d - parity) / d
     }
 
+#def register_rpc(register):
+ #   register("raidz", {
+  #      "build": build_raidz,
+   # })
+
 def register_rpc(register):
-    register("raidz", {
-        "build": build_raidz,
-    })
+    register("raidz", {"preview": rpc_preview})
+

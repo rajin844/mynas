@@ -12,24 +12,48 @@ class MonitoringProvider extends ChangeNotifier {
 
   MonitoringProvider({ApiService? api}) : api = api ?? ApiService();
 
-  // REST manual refresh
+  // ---------------------------------------------------------------------------
+  // REST: Manual metrics refresh
+  // ---------------------------------------------------------------------------
   Future<void> refresh() async {
-    final metrics = await api.getMetrics(); // <-- no args required
-    cpu = (metrics['cpu'] ?? 0).toDouble();
-    ram = (metrics['memory'] ?? 0).toDouble();
-    disk = (metrics['disk'] ?? 0).toDouble();
-    netUp = (metrics['network']?['upload_bps'] ?? 0).toDouble();
-    netDown = (metrics['network']?['download_bps'] ?? 0).toDouble();
+    final metrics = await api.getMetrics();
+
+    cpu = _toDouble(metrics['cpu']);
+    ram = _toDouble(metrics['memory']);
+    disk = _toDouble(metrics['disk']);
+
+    final net = metrics['network'] ?? {};
+    netUp = _toDouble(net['upload_bps']);
+    netDown = _toDouble(net['download_bps']);
+
     notifyListeners();
   }
 
-  // WebSocket auto-update
-  void updateFromWs(Map data) {
-    cpu = (data['cpu'] ?? 0).toDouble();
-    ram = (data['memory'] ?? 0).toDouble();
-    disk = (data['disk'] ?? 0).toDouble();
-    netUp = (data['network']?['upload_bps'] ?? 0).toDouble();
-    netDown = (data['network']?['download_bps'] ?? 0).toDouble();
+  // ---------------------------------------------------------------------------
+  // WebSocket: Automatic realtime update
+  // ---------------------------------------------------------------------------
+  void updateFromWs(Map<String, dynamic> data) {
+    if (data.containsKey('cpu')) cpu = _toDouble(data['cpu']);
+    if (data.containsKey('memory')) ram = _toDouble(data['memory']);
+    if (data.containsKey('disk')) disk = _toDouble(data['disk']);
+
+    if (data.containsKey('network')) {
+      final net = data['network'] ?? {};
+      netUp = _toDouble(net['upload_bps']);
+      netDown = _toDouble(net['download_bps']);
+    }
+
     notifyListeners();
+  }
+
+  // ---------------------------------------------------------------------------
+  // Utility: Safe toDouble conversion
+  // ---------------------------------------------------------------------------
+  double _toDouble(dynamic v) {
+    if (v == null) return 0;
+    if (v is double) return v;
+    if (v is int) return v.toDouble();
+    if (v is String) return double.tryParse(v) ?? 0;
+    return 0;
   }
 }

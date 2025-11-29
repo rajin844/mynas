@@ -7,7 +7,7 @@ import subprocess
 import logging
 from typing import Dict, Any
 
-from backend.app.config_manager import cfg
+#from backend.app.config_manager import cfg
 try:
     from backend.realtime.websocket_server import WSManagerProxy
 except Exception:

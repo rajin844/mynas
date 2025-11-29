@@ -1,66 +1,85 @@
-# backend/api/system.py
+"""
+backend/api/system.py
+---------------------
+REST API for system settings & system info.
+Backed by system_manager.py (no ConfigManager).
+"""
+
 from fastapi import APIRouter, HTTPException, Body
 from backend.app.system_manager import (
-    system_info,
-    uptime,
+    system_summary,
     get_hostname,
     set_hostname,
     get_timezone,
     set_timezone,
-    reboot,
-    shutdown,
+    system_reboot,
+    system_shutdown,
 )
 
 router = APIRouter()
 
 
-@router.get("/info")
-def api_system_info():
-    return {"response": system_info(), "error": None}
+# ===========================================================
+# 🖥️ SYSTEM SUMMARY (Dashboard)
+# ===========================================================
+
+@router.post("/summary")
+async def api_system_summary():
+    try:
+        return {"response": await system_summary(), "error": None}
+    except Exception as e:
+        raise HTTPException(500, str(e))
 
 
-@router.get("/uptime")
-def api_uptime():
-    return {"response": uptime(), "error": None}
+# ===========================================================
+# 🏷️ HOSTNAME
+# ===========================================================
 
-
-@router.get("/hostname/get")
-def api_hostname_get():
-    return {"response": get_hostname(), "error": None}
+@router.post("/hostname/get")
+async def api_get_hostname():
+    return {"response": await get_hostname(), "error": None}
 
 
 @router.post("/hostname/set")
-def api_hostname_set(payload: dict = Body(...)):
-    try:
-        return {"response": set_hostname(payload.get("hostname")), "error": None}
-    except Exception as e:
-        raise HTTPException(500, str(e))
+async def api_set_hostname(payload: dict = Body(...)):
+    name = payload.get("hostname")
+    if not name:
+        raise HTTPException(400, "hostname is required")
+
+    ok = await set_hostname(name)
+    return {"response": {"updated": ok}, "error": None}
 
 
-@router.get("/timezone/get")
-def api_timezone_get():
-    return {"response": get_timezone(), "error": None}
+# ===========================================================
+# 🌐 TIMEZONE
+# ===========================================================
+
+@router.post("/timezone/get")
+async def api_get_timezone():
+    return {"response": await get_timezone(), "error": None}
 
 
 @router.post("/timezone/set")
-def api_timezone_set(payload: dict = Body(...)):
-    try:
-        return {"response": set_timezone(payload.get("timezone")), "error": None}
-    except Exception as e:
-        raise HTTPException(500, str(e))
+async def api_set_timezone(payload: dict = Body(...)):
+    tz = payload.get("timezone")
+    if not tz:
+        raise HTTPException(400, "timezone is required")
 
+    ok = await set_timezone(tz)
+    return {"response": {"updated": ok}, "error": None}
+
+
+# ===========================================================
+# 🔧 SYSTEM ACTIONS
+# ===========================================================
 
 @router.post("/reboot")
-def api_reboot():
-    try:
-        return {"response": reboot(), "error": None}
-    except Exception as e:
-        raise HTTPException(500, str(e))
+async def api_reboot():
+    ok = await system_reboot()
+    return {"response": {"rebooting": ok}, "error": None}
 
 
 @router.post("/shutdown")
-def api_shutdown():
-    try:
-        return {"response": shutdown(), "error": None}
-    except Exception as e:
-        raise HTTPException(500, str(e))
+async def api_shutdown():
+    ok = await system_shutdown()
+    return {"response": {"shutdown": ok}, "error": None}

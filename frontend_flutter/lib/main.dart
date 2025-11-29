@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_flutter/providers/dataset_provider.dart';
+import 'package:frontend_flutter/providers/raidz_provider.dart';
+import 'package:frontend_flutter/providers/smart_provider.dart';
 import 'package:frontend_flutter/providers/storage_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -41,7 +43,7 @@ class MyNASApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final api = ApiService();
-    final ws = WebSocketService(apiBasePort: 6789);
+    final ws = WebSocketService(wsPort: 6789);
     ws.connect(); // start websocket in background
 
     return MultiProvider(
@@ -57,6 +59,14 @@ class MyNASApp extends StatelessWidget {
 
         ChangeNotifierProvider(
             create: (c) => StorageProvider(
+                api: c.read<ApiService>(), ws: c.read<WebSocketService>())),
+
+        ChangeNotifierProvider(
+            create: (c) => RaidzProvider(
+                api: c.read<ApiService>(), ws: c.read<WebSocketService>())),
+
+        ChangeNotifierProvider(
+            create: (c) => SmartProvider(
                 api: c.read<ApiService>(), ws: c.read<WebSocketService>())),
 
         ChangeNotifierProvider(
@@ -76,8 +86,9 @@ class MyNASApp extends StatelessWidget {
         // ChangeNotifierProvider(create: (_) => StorageProvider(api: api, ws: ws)),
         //ChangeNotifierProvider(create: (_) => SharesProvider(api: api)),
         // ChangeNotifierProvider(create: (_) => MonitoringProvider(api: api)),
-        ChangeNotifierProvider(create: (_) => BackupProvider(api: api)),
-        ChangeNotifierProvider(create: (_) => NetworkProvider(api: api)),
+        ChangeNotifierProvider(create: (_) => BackupProvider(api: api, ws: ws)),
+        ChangeNotifierProvider(
+            create: (_) => NetworkProvider(api: api, ws: ws)),
         //ChangeNotifierProvider(create: (_) => AclProvider(api: api)),
         ChangeNotifierProvider(create: (_) => SettingsProvider(api: api)),
       ],

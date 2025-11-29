@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import '../services/websocket_service.dart';
@@ -5,103 +6,73 @@ import '../services/websocket_service.dart';
 class StorageProvider extends ChangeNotifier {
   final ApiService api;
   final WebSocketService ws;
-
+  List<dynamic> alerts = []; // <-- FIX ADDED
   List<dynamic> disks = [];
-  Map<String, dynamic>? summary;
-
-  bool loadingDisks = false;
-  bool loadingSummary = false;
+  Map<String, dynamic> summary = {};
+  bool loading = false;
+  StreamSubscription? _sub;
 
   StorageProvider({ApiService? api, WebSocketService? ws})
       : api = api ?? ApiService(),
         ws = ws ?? WebSocketService() {
-    // Listen for WS storage module events
-    this.ws.stream.listen(_handleWs);
+    _sub = this.ws.stream.listen((msg) {
+      try {
+        if (msg['module'] == 'storage' && msg['event'] == 'summary_updated') {
+          loadSummary();
+        }
+      } catch (_) {}
+    });
   }
 
-  // ------------------------------
-  // 🔄 Load Disks
-  // ------------------------------
   Future<void> loadDisks() async {
-    loadingDisks = true;
+    loading = true;
     notifyListeners();
-
     try {
       disks = await api.listDisks();
-    } catch (e) {
-      debugPrint("Error loading disks: $e");
+    } catch (_) {
+      disks = [];
     }
-
-    loadingDisks = false;
+    loading = false;
     notifyListeners();
   }
 
-  // ------------------------------
-  // 🔄 Detect / Refresh Disks
-  // ------------------------------
-  Future<void> detectDisks() async {
-    loadingDisks = true;
-    notifyListeners();
-
-    try {
-      await api.detectDisks(); // backend also updates config + WS broadcast
-      await loadDisks(); // refresh after detection
-    } catch (e) {
-      debugPrint("Disk detection error: $e");
-    }
-
-    loadingDisks = false;
-    notifyListeners();
-  }
-
-  // ------------------------------
-  // 🔁 SATA Rescan
-  // ------------------------------
-  Future<void> rescanSata() async {
-    try {
-      await api.rescanSata();
-      await loadDisks();
-    } catch (e) {
-      debugPrint("SATA rescan failed: $e");
-    }
-  }
-
-  // ------------------------------
-  // 📊 Storage Summary
-  // ------------------------------
   Future<void> loadSummary() async {
-    loadingSummary = true;
+    loading = true;
     notifyListeners();
-
     try {
       summary = await api.storageSummary();
-    } catch (e) {
-      debugPrint("Error loading storage summary: $e");
+    } catch (_) {
+      summary = {};
     }
-
-    loadingSummary = false;
+    loading = false;
     notifyListeners();
   }
 
-  // ------------------------------
-  // 🧭 WebSocket Handling
-  // ------------------------------
-  void _handleWs(dynamic msg) {
-    if (msg is! Map) return;
-
-    if (msg["module"] == "storage") {
-      String event = msg["event"] ?? "";
-
-      // Live updates
-      if (event == "disks_detected") {
-        loadDisks();
-        loadSummary();
-      }
+  Future<dynamic> createPool(String name, List<String> devices,
+      {String? raidz, bool dryRun = true, bool force = false}) async {
+    final res = await api.createPoolRest(name, devices,
+        raidz: raidz, dryRun: dryRun, force: force);
+    if (!dryRun) {
+      await loadSummary();
     }
-    //void _onWs(dynamic msg) {
-    // if (msg is Map && msg["module"] == "storage") {
-    //loadSummary();
-    // loadDisks();
-    // }
+    return res;
+  }
+
+  Future<dynamic> previewRaidz(List<String> devices, String mode) async {
+    return await api.raidzPreview(devices, mode);
+  }
+
+  Future<dynamic> smartInfo(String dev) async {
+    return await api.smartInfo(dev);
+  }
+
+  Future<dynamic> loadAlerts() async {
+    return await api.getStorageAlerts();
+  }
+
+  @override
+  void dispose() {
+    _sub?.cancel();
+    super.dispose();
   }
 }

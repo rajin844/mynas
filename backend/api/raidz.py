@@ -1,26 +1,17 @@
 # backend/api/raidz.py
 from fastapi import APIRouter, HTTPException, Body
-from backend.app.raidz import build_raidz_layout
+from backend.storage.raidz_manager import build_raidz_layout
 
 router = APIRouter()
 
-@router.post("/build")
-def api_build_raidz(payload: dict = Body(...)):
-    """
-    Payload:
-    {
-        "devices": ["/dev/sda", "/dev/sdb", "/dev/sdc"],
-        "level": "raidz1"
-    }
-    """
+@router.post("/preview")
+async def api_preview(payload: dict = Body(...)):
     devices = payload.get("devices")
-    level = payload.get("level", "raidz1")
-
-    if not devices or len(devices) < 2:
-        raise HTTPException(400, "At least 2 devices required")
-
+    level = payload.get("level", "single")
+    if not devices:
+        raise HTTPException(status_code=400, detail="devices required")
     try:
         layout = build_raidz_layout(devices, level)
         return {"response": layout, "error": None}
     except Exception as e:
-        raise HTTPException(500, str(e))
+        raise HTTPException(status_code=500, detail=str(e))

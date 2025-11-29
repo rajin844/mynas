@@ -1,7 +1,9 @@
+// /root/mynas/frontend_flutter/lib/pages/pools_page.dart
 import 'package:flutter/material.dart';
-import 'package:frontend_flutter/providers/storage_provider.dart';
 import 'package:provider/provider.dart';
+
 import '../providers/zfs_provider.dart';
+import '../providers/storage_provider.dart';
 
 class PoolsPage extends StatefulWidget {
   const PoolsPage({super.key});
@@ -14,279 +16,351 @@ class _PoolsPageState extends State<PoolsPage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
+    // load pools after first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      await context.read<ZfsProvider>().loadPools();
+      context.read<ZfsProvider>().loadPools();
     });
   }
 
   @override
   Widget build(BuildContext context) {
     final zfs = context.watch<ZfsProvider>();
+    final storage = context.watch<StorageProvider>();
 
     return Scaffold(
       appBar: AppBar(title: const Text("ZFS Pools")),
       floatingActionButton: FloatingActionButton(
-        //onPressed: () => _createPool(context),
-        //child: const Icon(Icons.add),
         onPressed: () => _openPoolWizard(context),
         child: const Icon(Icons.add),
+        tooltip: "Create Pool",
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: ListView.builder(
-          itemCount: zfs.pools.length,
-          itemBuilder: (context, i) {
-            final p = zfs.pools[i];
-            return Card(
-              child: ListTile(
-                leading: const Icon(Icons.storage),
-                title: Text(p["name"]),
-                subtitle: Text("Health: ${p["health"]} • Size: ${p["size"]}"),
-                trailing: Row(mainAxisSize: MainAxisSize.min, children: [
-                  IconButton(
-                      icon: const Icon(Icons.info_outline),
-                      onPressed: () => _status(context, p["name"])),
-                  IconButton(
-                      icon: const Icon(Icons.cleaning_services),
-                      onPressed: () =>
-                          context.read<ZfsProvider>().scrubPool(p["name"])),
-                  IconButton(
-                      icon: const Icon(Icons.delete, color: Colors.red),
-                      onPressed: () =>
-                          context.read<ZfsProvider>().destroyPool(p["name"])),
-                ]),
-              ),
-            );
-          },
+        child: zfs.loadingPools
+            ? const Center(child: CircularProgressIndicator())
+            : zfs.pools.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text("No pools available",
+                            style: TextStyle(fontSize: 16)),
+                        const SizedBox(height: 8),
+                        ElevatedButton(
+                          onPressed: () =>
+                              context.read<ZfsProvider>().loadPools(),
+                          child: const Text("Refresh"),
+                        ),
+                      ],
+                    ),
+                  )
+                : ListView.separated(
+                    itemCount: zfs.pools.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    itemBuilder: (context, i) {
+                      final p = zfs.pools[i] as Map<String, dynamic>;
+                      final name = p["name"] ?? "unknown";
+                      final health = (p["health"] ?? "UNKNOWN").toString();
+                      final capacity =
+                          _toDouble(p["capacity"]); // percent 0-100
+                      final vdev =
+                          p["vdev"] ?? p["vdev_layout"] ?? p["vdevs"] ?? "—";
+
+                      return Card(
+                        elevation: 2,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8)),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 8),
+                          child: Column(
+                            children: [
+                              Row(
+                                children: [
+                                  _healthBadge(health),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(name,
+                                            style: const TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w600)),
+                                        const SizedBox(height: 4),
+                                        Text("VDEV: ${_vdevSummary(vdev)}",
+                                            style:
+                                                const TextStyle(fontSize: 12)),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  IconButton(
+                                    tooltip: "Status",
+                                    icon: const Icon(Icons.info_outline),
+                                    onPressed: () => _showStatus(context, name),
+                                  ),
+                                  IconButton(
+                                    tooltip: "Scrub",
+                                    icon: const Icon(Icons.cleaning_services),
+                                    onPressed: () async {
+                                      final ok = await context
+                                          .read<ZfsProvider>()
+                                          .scrubPool(name);
+                                      if (!mounted) return;
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                            content: Text(ok
+                                                ? "Scrub started for $name"
+                                                : "Failed to start scrub")),
+                                      );
+                                    },
+                                  ),
+                                  IconButton(
+                                    tooltip: "Destroy",
+                                    icon: const Icon(Icons.delete,
+                                        color: Colors.red),
+                                    onPressed: () =>
+                                        _confirmDestroy(context, name),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              // capacity bar
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: LinearProgressIndicator(
+                                      value: (capacity / 100).clamp(0.0, 1.0),
+                                      minHeight: 8,
+                                      backgroundColor: Colors.grey.shade200,
+                                      valueColor: AlwaysStoppedAnimation(
+                                          _capacityColor(capacity)),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text("${capacity.toStringAsFixed(0)}%",
+                                      style: const TextStyle(fontSize: 12)),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              // optional details row
+                              Row(
+                                children: [
+                                  Text("Size: ${p["size"] ?? "-"}",
+                                      style: const TextStyle(fontSize: 12)),
+                                  const SizedBox(width: 12),
+                                  Text("Allocated: ${p["allocated"] ?? "-"}",
+                                      style: const TextStyle(fontSize: 12)),
+                                  const Spacer(),
+                                  Text("Type: ${p["type"] ?? "zfs"}",
+                                      style: const TextStyle(fontSize: 12)),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+      ),
+    );
+  }
+
+  // -------------------------
+  // Helpers
+  // -------------------------
+  double _toDouble(dynamic v) {
+    if (v == null) return 0.0;
+    if (v is double) return v;
+    if (v is int) return v.toDouble();
+    if (v is String) return double.tryParse(v) ?? 0.0;
+    return 0.0;
+  }
+
+  Color _capacityColor(double pct) {
+    if (pct < 60) return Colors.green;
+    if (pct < 85) return Colors.orange;
+    return Colors.red;
+  }
+
+  Widget _healthBadge(String health) {
+    final h = health.toLowerCase();
+    Color bg;
+    IconData icon;
+    String label = health.toUpperCase();
+
+    if (h.contains("online") || h.contains("healthy") || h.contains("ok")) {
+      bg = Colors.green.shade100;
+      icon = Icons.check_circle;
+    } else if (h.contains("degraded") || h.contains("warning")) {
+      bg = Colors.orange.shade100;
+      icon = Icons.warning;
+    } else {
+      bg = Colors.red.shade100;
+      icon = Icons.error;
+    }
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(6),
+          decoration:
+              BoxDecoration(color: bg, borderRadius: BorderRadius.circular(6)),
+          child: Row(children: [
+            Icon(icon, size: 16, color: Colors.black87),
+            const SizedBox(width: 6),
+            Text(label,
+                style:
+                    const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+          ]),
         ),
-      ),
+      ],
     );
   }
 
-  void _status(BuildContext ctx, String pool) async {
-    final provider = ctx.read<ZfsProvider>();
-    final status = await provider.poolStatus(pool);
-
-    showDialog(
-        context: ctx,
-        builder: (_) => AlertDialog(
-              title: Text("Pool Status: $pool"),
-              content: SingleChildScrollView(child: Text(status.toString())),
-              actions: [
-                TextButton(
-                    onPressed: () => Navigator.pop(ctx),
-                    child: const Text("Close"))
-              ],
-            ));
+  String _vdevSummary(dynamic vdev) {
+    if (vdev == null) return "—";
+    if (vdev is String) return vdev;
+    try {
+      return vdev.toString();
+    } catch (_) {
+      return "—";
+    }
   }
 
-  void _createPool(BuildContext context) {
-    final nameCtrl = TextEditingController();
-    final devicesCtrl = TextEditingController();
-    final raidzCtrl = TextEditingController(); // optional
-
-    bool dryRun = true;
-
+  // -------------------------
+  // Actions & Dialogs
+  // -------------------------
+  void _showStatus(BuildContext ctx, String pool) async {
+    final prov = ctx.read<ZfsProvider>();
+    final status = await prov.poolStatus(pool);
+    if (!mounted) return;
     showDialog(
-      context: context,
-      builder: (_) => StatefulBuilder(
-        builder: (ctx, setState) {
-          return AlertDialog(
-            title: const Text("Create Pool"),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: nameCtrl,
-                  decoration: const InputDecoration(labelText: "Pool Name"),
-                ),
-                TextField(
-                  controller: devicesCtrl,
-                  decoration: const InputDecoration(
-                      labelText: "Devices (/dev/sdb,/dev/sdc)"),
-                ),
-                TextField(
-                  controller: raidzCtrl,
-                  decoration:
-                      const InputDecoration(labelText: "RAID Level (optional)"),
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Checkbox(
-                        value: dryRun,
-                        onChanged: (v) => setState(() => dryRun = v!)),
-                    const Text("Dry Run (Preview Only)")
-                  ],
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                  onPressed: () => Navigator.pop(ctx),
-                  child: const Text("Cancel")),
-              ElevatedButton(
-                child: const Text("Preview"),
-                onPressed: () async {
-                  final prov = context.read<ZfsProvider>();
-                  final devices =
-                      devicesCtrl.text.split(",").map((e) => e.trim()).toList();
-
-                  final preview = await prov.previewPool(
-                    nameCtrl.text.trim(),
-                    devices,
-                    raidz: raidzCtrl.text.trim().isEmpty
-                        ? null
-                        : raidzCtrl.text.trim(),
-                  );
-
-                  Navigator.pop(ctx);
-                  _showDryRunPreview(context, preview, nameCtrl.text.trim(),
-                      devices, raidzCtrl.text.trim());
-                },
-              )
-            ],
-          );
-        },
-      ),
-    );
-  }
-
-  void _showDryRunPreview(
-    BuildContext context,
-    dynamic preview,
-    String pool,
-    List<String> devices,
-    String? raidz,
-  ) {
-    showDialog(
-      context: context,
+      context: ctx,
       builder: (_) => AlertDialog(
-        title: const Text("Pool Create Preview"),
-        content: SizedBox(
-          width: 450,
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text("Command:", style: TextStyle(fontWeight: FontWeight.bold)),
-                Text(preview["cmd"] ?? "N/A"),
-                const SizedBox(height: 12),
-                Text("Warnings:",
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                Text(preview["warnings"]?.join("\n") ?? "None"),
-                const SizedBox(height: 12),
-                Text("Errors:", style: TextStyle(fontWeight: FontWeight.bold)),
-                Text(preview["errors"]?.join("\n") ?? "None"),
-                const SizedBox(height: 12),
-                Text("Estimated Usable:",
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                Text("${preview["estimated_usable"] ?? 'N/A'} bytes"),
-                const SizedBox(height: 12),
-              ],
-            ),
-          ),
-        ),
+        title: Text("Pool Status: $pool"),
+        content: SingleChildScrollView(child: Text(status.toString())),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => Navigator.pop(ctx), child: const Text("Close")),
+        ],
+      ),
+    );
+  }
+
+  void _confirmDestroy(BuildContext ctx, String pool) {
+    showDialog(
+      context: ctx,
+      builder: (dialogCtx) => AlertDialog(
+        title: Text("Destroy Pool"),
+        content:
+            Text("Permanently destroy pool \"$pool\"? This cannot be undone."),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(dialogCtx),
               child: const Text("Cancel")),
           ElevatedButton(
-            onPressed: preview["errors"] != null && preview["errors"].isNotEmpty
-                ? null
-                : () async {
-                    final prov = context.read<ZfsProvider>();
-                    await prov.createPool(
-                      pool,
-                      devices,
-                      raidz: raidz!.isEmpty ? null : raidz,
-                    );
-                    Navigator.pop(context);
-                  },
-            child: const Text("Create (Real)"),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () async {
+              Navigator.pop(dialogCtx); // close confirm
+              final ok = await context.read<ZfsProvider>().destroyPool(pool);
+              if (!mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text(ok ? "Pool destroyed" : "Destroy failed")));
+              await context.read<ZfsProvider>().loadPools();
+            },
+            child: const Text("Destroy"),
           ),
         ],
       ),
     );
   }
 
+  // Full wizard / builder (TrueNAS-style simplified)
   void _openPoolWizard(BuildContext context) {
-    final zfs = context.read<ZfsProvider>();
-    final storage = context.read<StorageProvider>();
-
     final nameCtrl = TextEditingController();
-    List<String> selectedDisks = [];
+    final devices = <String>[];
     String raidLevel = "stripe";
+    bool dryRun = true;
+
+    // initial disks from StorageProvider
+    final storage = context.read<StorageProvider>();
+    // ensure we have the latest disks
+    storage.loadSummary();
 
     showDialog(
       context: context,
-      builder: (_) => StatefulBuilder(
-        builder: (ctx, setState) {
+      builder: (dialogCtx) {
+        return StatefulBuilder(builder: (ctx, setState) {
+          final availableDisks = storage.disks;
           return AlertDialog(
             title: const Text("Create ZFS Pool"),
             content: SizedBox(
-              width: 600,
+              width: 700,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // ---------------- POOL NAME ----------------
+                  // Pool name
                   TextField(
-                    controller: nameCtrl,
-                    decoration: const InputDecoration(labelText: "Pool Name"),
-                  ),
+                      controller: nameCtrl,
+                      decoration:
+                          const InputDecoration(labelText: "Pool name")),
+                  const SizedBox(height: 12),
 
-                  const SizedBox(height: 16),
-
-                  // ---------------- DISK PICKER ----------------
+                  // Disk picker
                   Row(
                     children: [
-                      const Text("Select Disks:",
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold)),
+                      const Text("Select disks",
+                          style: TextStyle(fontWeight: FontWeight.w600)),
                       const Spacer(),
                       TextButton(
-                        onPressed: () async => await storage.loadDisks(),
-                        child: const Text("Refresh"),
-                      )
+                          onPressed: () => storage.loadSummary(),
+                          child: const Text("Refresh")),
                     ],
                   ),
-
                   SizedBox(
                     height: 200,
-                    child: ListView.builder(
-                      itemCount: storage.disks.length,
-                      itemBuilder: (context, i) {
-                        final d = storage.disks[i];
-                        final dev = "/dev/${d['name']}";
+                    child: availableDisks.isEmpty
+                        ? const Center(child: Text("No disks detected"))
+                        : ListView.builder(
+                            itemCount: availableDisks.length,
+                            itemBuilder: (_, idx) {
+                              final d =
+                                  availableDisks[idx] as Map<String, dynamic>;
+                              final dev = d["devpath"] ?? "/dev/${d['name']}";
+                              final label =
+                                  "${dev} • ${d['size'] ?? ''} • ${d['model'] ?? ''}";
+                              final selected = devices.contains(dev);
 
-                        return CheckboxListTile(
-                          value: selectedDisks.contains(dev),
-                          title: Text("$dev (${d['size']})"),
-                          subtitle: Text(
-                              "${d['model'] ?? '-'} • ${d['vendor'] ?? '-'}"),
-                          onChanged: (v) {
-                            setState(() {
-                              if (v == true) {
-                                selectedDisks.add(dev);
-                              } else {
-                                selectedDisks.remove(dev);
-                              }
-                            });
-                          },
-                        );
-                      },
-                    ),
+                              return CheckboxListTile(
+                                title: Text(label),
+                                value: selected,
+                                onChanged: (v) {
+                                  setState(() {
+                                    if (v == true) {
+                                      devices.add(dev);
+                                    } else {
+                                      devices.remove(dev);
+                                    }
+                                  });
+                                },
+                              );
+                            },
+                          ),
                   ),
+                  const SizedBox(height: 12),
 
-                  const SizedBox(height: 20),
-
-                  // ---------------- RAIDZ BUILDER ----------------
-                  const Text("RAID Level:",
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
-
+                  // RAID level
+                  Row(children: const [
+                    Text("RAID level:",
+                        style: TextStyle(fontWeight: FontWeight.w600))
+                  ]),
+                  const SizedBox(height: 6),
                   DropdownButton<String>(
                     value: raidLevel,
                     items: const [
@@ -295,157 +369,178 @@ class _PoolsPageState extends State<PoolsPage> {
                       DropdownMenuItem(
                           value: "stripe", child: Text("Stripe (RAID 0)")),
                       DropdownMenuItem(
-                          value: "mirror", child: Text("Mirror RAID 1")),
+                          value: "mirror", child: Text("Mirror (RAID 1)")),
                       DropdownMenuItem(value: "raidz1", child: Text("RAIDZ1")),
                       DropdownMenuItem(value: "raidz2", child: Text("RAIDZ2")),
                       DropdownMenuItem(value: "raidz3", child: Text("RAIDZ3")),
                     ],
-                    onChanged: (v) => setState(() => raidLevel = v!),
+                    onChanged: (v) => setState(() => raidLevel = v ?? "stripe"),
                   ),
+                  const SizedBox(height: 8),
 
-                  const SizedBox(height: 15),
+                  // dry-run toggle
+                  Row(children: [
+                    Checkbox(
+                        value: dryRun,
+                        onChanged: (v) => setState(() => dryRun = v ?? true)),
+                    const Text("Dry-run (preview)"),
+                  ]),
 
-                  // RAID RULES / WARNINGS
-                  _raidWarnings(raidLevel, selectedDisks.length),
+                  const SizedBox(height: 6),
+                  // quick rule hint
+                  _raidRuleText(raidLevel, devices.length),
                 ],
               ),
             ),
             actions: [
               TextButton(
-                  onPressed: () => Navigator.pop(ctx),
+                  onPressed: () => Navigator.pop(dialogCtx),
                   child: const Text("Cancel")),
-
-              /// PREVIEW BUTTON
               ElevatedButton(
-                onPressed: selectedDisks.isEmpty || nameCtrl.text.isEmpty
+                onPressed: nameCtrl.text.trim().isEmpty || devices.isEmpty
                     ? null
                     : () async {
+                        // do preview first (dry-run)
+                        final zfs = context.read<ZfsProvider>();
                         final preview = await zfs.previewPool(
-                          nameCtrl.text.trim(),
-                          selectedDisks,
-                          raidz: raidLevel == "stripe" ? null : raidLevel,
-                        );
+                            nameCtrl.text.trim(), devices,
+                            raidz: raidLevel == "stripe" ? null : raidLevel);
 
-                        Navigator.pop(ctx);
-                        _showPreviewDialog(context, preview,
-                            nameCtrl.text.trim(), selectedDisks, raidLevel);
+                        if (!mounted) return;
+                        Navigator.pop(dialogCtx); // close wizard
+
+                        // show preview dialog
+                        await _showPreviewAndMaybeCreate(
+                            context,
+                            nameCtrl.text.trim(),
+                            devices,
+                            raidLevel,
+                            preview,
+                            dryRun);
                       },
                 child: const Text("Preview"),
               ),
             ],
           );
-        },
-      ),
+        });
+      },
     );
   }
 
-  Widget _raidWarnings(String raid, int count) {
-    String msg = "";
-    Color color = Colors.orange;
+  Future<void> _showPreviewAndMaybeCreate(
+      BuildContext context,
+      String pool,
+      List<String> devices,
+      String raidLevel,
+      dynamic preview,
+      bool dryRun) async {
+    // show preview
+    if (!mounted) return;
+    await showDialog(
+      context: context,
+      builder: (ctx) {
+        final warnings = (preview?["warnings"] ?? []) as List? ?? [];
+        final errors = (preview?["errors"] ?? []) as List? ?? [];
+        final cmd = preview?["cmd"] ?? preview?["command"] ?? "N/A";
+        final usable =
+            preview?["estimated_usable"] ?? preview?["estimated"] ?? "N/A";
+
+        return AlertDialog(
+          title: const Text("Preview"),
+          content: SizedBox(
+            width: 600,
+            child: SingleChildScrollView(
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text("Command:",
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    Text(cmd),
+                    const SizedBox(height: 12),
+                    const Text("Warnings:",
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    Text(warnings.isEmpty ? "None" : warnings.join("\n")),
+                    const SizedBox(height: 12),
+                    const Text("Errors:",
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    Text(errors.isEmpty ? "None" : errors.join("\n"),
+                        style: TextStyle(
+                            color: errors.isEmpty ? Colors.black : Colors.red)),
+                    const SizedBox(height: 12),
+                    const Text("Estimated usable:",
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    Text("$usable"),
+                  ]),
+            ),
+          ),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text("Close")),
+            ElevatedButton(
+              onPressed: errors.isNotEmpty
+                  ? null
+                  : () async {
+                      Navigator.pop(ctx);
+                      // create if not dry-run
+                      final prov = context.read<ZfsProvider>();
+                      final res = await prov.createPool(pool, devices,
+                          raidz: raidLevel == "stripe" ? null : raidLevel,
+                          dryRun: dryRun);
+                      if (!mounted) return;
+                      final msg = dryRun
+                          ? "Preview completed (dry-run)"
+                          : "Create pool request submitted";
+                      ScaffoldMessenger.of(context)
+                          .showSnackBar(SnackBar(content: Text(msg)));
+                      await prov.loadPools();
+                    },
+              child: Text(dryRun ? "Close (Dry Run)" : "Create Pool"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _raidRuleText(String raid, int count) {
+    String msg;
+    Color color = Colors.blue;
 
     switch (raid) {
       case "mirror":
-        if (count < 2) msg = "Mirror requires at least 2 disks";
+        msg = count < 2 ? "Mirror needs at least 2 disks" : "Mirror OK";
+        color = count < 2 ? Colors.orange : Colors.green;
         break;
-
       case "raidz1":
-        if (count < 3) msg = "RAIDZ1 requires 3 or more disks";
+        msg = count < 3 ? "RAIDZ1 needs 3+ disks" : "RAIDZ1 OK";
+        color = count < 3 ? Colors.orange : Colors.green;
         break;
-
       case "raidz2":
-        if (count < 4) msg = "RAIDZ2 requires 4 or more disks";
+        msg = count < 4 ? "RAIDZ2 needs 4+ disks" : "RAIDZ2 OK";
+        color = count < 4 ? Colors.orange : Colors.green;
         break;
-
       case "raidz3":
-        if (count < 5) msg = "RAIDZ3 requires 5 or more disks";
+        msg = count < 5 ? "RAIDZ3 needs 5+ disks" : "RAIDZ3 OK";
+        color = count < 5 ? Colors.orange : Colors.green;
         break;
-
+      case "single":
+        msg = count < 1 ? "Select a disk" : "Single disk";
+        color = count < 1 ? Colors.orange : Colors.blue;
+        break;
       default:
-        msg = "Stripe: No redundancy (1+ disks)";
-        color = Colors.blue;
+        msg = "Stripe (no redundancy)";
     }
 
-    return Text(msg,
-        style: TextStyle(
-          color: color,
-          fontWeight: FontWeight.w600,
-        ));
+    return Padding(
+      padding: const EdgeInsets.only(top: 6),
+      child: Text(msg,
+          style: TextStyle(color: color, fontWeight: FontWeight.w600)),
+    );
   }
-}
 
-void _showPreviewDialog(
-  BuildContext context,
-  dynamic preview,
-  String pool,
-  List<String> devices,
-  String? raidz,
-) {
-  showDialog(
-    context: context,
-    builder: (_) => AlertDialog(
-      title: const Text("Pool Create Preview (Dry Run)"),
-      content: SizedBox(
-        width: 500,
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // COMMAND
-              const Text("Command:",
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              Text(preview["cmd"] ?? "No command"),
-              const SizedBox(height: 12),
-
-              // WARNINGS
-              const Text("Warnings:",
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              Text(
-                (preview["warnings"] ?? []).isNotEmpty
-                    ? preview["warnings"].join("\n")
-                    : "None",
-              ),
-              const SizedBox(height: 12),
-
-              // ERRORS
-              const Text("Errors:",
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              Text(
-                (preview["errors"] ?? []).isNotEmpty
-                    ? preview["errors"].join("\n")
-                    : "None",
-                style: const TextStyle(color: Colors.red),
-              ),
-              const SizedBox(height: 12),
-
-              // ESTIMATED SIZE
-              const Text("Estimated usable space:",
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              Text("${preview["estimated_usable"] ?? 'N/A'} bytes"),
-            ],
-          ),
-        ),
-      ),
-      actions: [
-        TextButton(
-          child: const Text("Close"),
-          onPressed: () => Navigator.pop(context),
-        ),
-
-        // DISABLE if errors exist
-        ElevatedButton(
-          onPressed: (preview["errors"] ?? []).isNotEmpty
-              ? null
-              : () async {
-                  await context.read<ZfsProvider>().createPool(
-                        pool,
-                        devices,
-                        raidz: raidz!.isEmpty ? null : raidz,
-                      );
-                  Navigator.pop(context);
-                },
-          child: const Text("Create Pool"),
-        )
-      ],
-    ),
-  );
+  @override
+  void dispose() {
+    super.dispose();
+  }
 }

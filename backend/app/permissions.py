@@ -34,13 +34,13 @@ from typing import Any, Dict, List, Optional
 import pwd
 import grp
 
-from backend.app.config_manager import ConfigManager
+
 from backend.realtime.websocket_server import WSManagerProxy
 from backend.app import audit
 
 logger = logging.getLogger("mynas.permissions")
 
-cfg = ConfigManager()
+
 # cfg.list_acls() returns list of entries (older code used "user" key; we support both)
 
 # ---------------------
