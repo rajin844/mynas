@@ -9,9 +9,13 @@ class ZfsProvider extends ChangeNotifier {
   final WebSocketService ws;
   List<dynamic> pools = [];
   List<dynamic> datasets = [];
+  Map<String, dynamic> vdevTopology = {};
   bool loadingPools = false;
   bool loadingDatasets = false;
   StreamSubscription? _sub;
+  //List<Map<String, dynamic>> pools = [];
+  Map<String, dynamic> poolDetails = {};
+  Map<String, List<Map<String, dynamic>>> poolDatasets = {};
 
   ZfsProvider({ApiService? api, WebSocketService? ws})
       : api = api ?? ApiService(),
@@ -56,6 +60,63 @@ class ZfsProvider extends ChangeNotifier {
     }
     loadingDatasets = false;
     notifyListeners();
+  }
+
+  // ================================
+  // 💠 POOL DETAILS
+  // ================================
+  Future<Map<String, dynamic>> getPoolDetails(String name) async {
+    try {
+      final result = await api.callRpc("zfs", "poolDetails", {"pool": name});
+
+      final pool = result is Map ? result : {};
+
+      // Normalize
+      poolDetails = {
+        "name": pool["name"] ?? name,
+        "health": pool["health"] ?? pool["status"] ?? "UNKNOWN",
+        "size": pool["size"] ?? pool["capacity"] ?? pool["total"] ?? "0",
+        "alloc": pool["alloc"] ?? pool["used"] ?? "0",
+        "vdevs": List<Map<String, dynamic>>.from(
+          pool["vdevs"] ?? pool["topology"] ?? pool["devices"] ?? [],
+        ),
+      };
+
+      notifyListeners();
+      return poolDetails;
+    } catch (e) {
+      return {};
+    }
+  }
+
+  // ================================
+  // 💠 DATASETS FOR POOL
+  // ================================
+  Future<List<Map<String, dynamic>>> listDatasetsForPool(String pool) async {
+    try {
+      final res = await api.callRpc("zfs", "listDatasets", {"pool": pool});
+      final list = res is List ? res : [];
+      poolDatasets[pool] = List<Map<String, dynamic>>.from(list);
+      notifyListeners();
+      return poolDatasets[pool]!;
+    } catch (_) {
+      return [];
+    }
+  }
+
+  // ================================
+  // 💠 CREATE DATASET
+  // ================================
+  Future<Future<List<Map<String, dynamic>>>> createDataset(
+      String pool, String name,
+      {String? mountpoint}) async {
+    await api.callRpc("zfs", "createDataset", {
+      "pool": pool,
+      "name": name,
+      if (mountpoint != null) "mountpoint": mountpoint
+    });
+
+    return listDatasetsForPool(pool);
   }
 
   // Actions (RPC or REST depending on backend)
@@ -103,12 +164,60 @@ class ZfsProvider extends ChangeNotifier {
     }
   }
 
-  // dataset ops
-  Future<bool> createDataset(String pool, String name,
-      {String? mountpoint, required bool dryRun}) async {
+  // -----------------------------
+  // SCRUB CONTROL
+  // -----------------------------
+  Future<void> startScrub(String pool) async {
+    await api.callRpc("zfs", "startScrub", {"pool": pool});
+    await loadPools();
+  }
+
+  Future<void> stopScrub(String pool) async {
+    await api.callRpc("zfs", "stopScrub", {"pool": pool});
+    await loadPools();
+  }
+
+  Future<double?> getScrubProgress(String pool) async {
+    final res = await api.callRpc("zfs", "scrubProgress", {"pool": pool});
+    if (res is Map && res.containsKey("percent")) {
+      return (res["percent"] as num).toDouble();
+    }
+    if (res is num) return res.toDouble();
+    return 0;
+  }
+
+  // -----------------------------
+  // GET SCRUB STATUS
+  // -----------------------------
+  Future<Map<String, dynamic>> getScrubStatus(String pool) async {
+    final result = await api.callRpc("zfs", "scrubStatus", {"pool": pool});
+    return Map<String, dynamic>.from(result);
+  }
+
+  Future<List<Map<String, dynamic>>> getScrubHistory(String pool) async {
+    final res = await api.callRpc("zfs", "scrubHistory", {"pool": pool});
+    if (res is List) {
+      return List<Map<String, dynamic>>.from(res);
+    }
+    return [];
+  }
+
+  // dataset ops //required bool dryRun
+  Future<bool> createDatasets(
+    String pool,
+    String name, {
+    String? mountpoint,
+    required bool dryRun,
+  }) async {
     final res = await api.createDataset(pool, name, mountpoint: mountpoint);
     await loadAllDatasets();
     return true;
+  }
+
+  Future<void> loadTopology(String pool) async {
+    final res = await api.callRpc("zfs", "vdevtopology", {"pool": pool});
+    vdevTopology = res;
+    notifyListeners();
   }
 
   Future<bool> destroyDataset(String pool, String name) async {

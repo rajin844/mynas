@@ -1,0 +1,375 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'dart:math' as math;
+
+import '../providers/zfs_provider.dart';
+import '../providers/storage_provider.dart';
+
+class NPoolsPage extends StatefulWidget {
+  const NPoolsPage({super.key});
+
+  @override
+  State<NPoolsPage> createState() => _PoolsPageState();
+}
+
+class _PoolsPageState extends State<NPoolsPage>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    final zfs = context.read<ZfsProvider>();
+    final storage = context.read<StorageProvider>();
+
+    // load initial data
+    Future.microtask(() async {
+      await zfs.loadPools();
+      await storage.loadSummary();
+    });
+
+    _controller = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 600));
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Color healthColor(String health) {
+    switch ((health ?? '').toLowerCase()) {
+      case 'online':
+      case 'healthy':
+      case 'optimal':
+        return Colors.green;
+      case 'degraded':
+      case 'warn':
+        return Colors.orange;
+      case 'faulted':
+      case 'offline':
+      case 'dead':
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final zfs = context.watch<ZfsProvider>();
+    final storage = context.watch<StorageProvider>();
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Pools'),
+        actions: [
+          IconButton(
+            tooltip: "Refresh",
+            icon: const Icon(Icons.refresh),
+            onPressed: () async {
+              await zfs.loadPools();
+              await storage.loadSummary();
+            },
+          ),
+          IconButton(
+            tooltip: "Create Pool",
+            icon: const Icon(Icons.add_box_outlined),
+            onPressed: () {
+              Navigator.pushNamed(context, '/pools/create');
+            },
+          ),
+        ],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          children: [
+            // summary row
+            Row(
+              children: [
+                Expanded(
+                  child: _SummaryCard(storage: storage),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _HealthOverview(zfs: zfs),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // Pools grid
+            Expanded(
+              child: zfs.loadingPools
+                  ? const Center(child: CircularProgressIndicator())
+                  : RefreshIndicator(
+                      onRefresh: () async {
+                        await zfs.loadPools();
+                        await storage.loadSummary();
+                      },
+                      child: GridView.builder(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                          childAspectRatio: 1.15,
+                        ),
+                        itemCount: zfs.pools.length,
+                        itemBuilder: (context, i) {
+                          final pool = zfs.pools[i];
+                          return FadeTransition(
+                            opacity: CurvedAnimation(
+                                parent: _controller,
+                                curve: Interval(
+                                    (i / (zfs.pools.length + 1)), 1.0,
+                                    curve: Curves.easeOut)),
+                            child: PoolCard(pool: pool),
+                          );
+                        },
+                      ),
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Small summary card on top-left
+class _SummaryCard extends StatelessWidget {
+  final StorageProvider storage;
+  const _SummaryCard({required this.storage});
+
+  @override
+  Widget build(BuildContext context) {
+    final totalDisks = (storage.summary['disks'] as List?)?.length ?? 0;
+    final totalPools = (storage.summary['pools'] as List?)?.length ?? 0;
+    final totalDatasets = (storage.summary['datasets'] as List?)?.length ?? 0;
+
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          const Text('Storage Overview',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+          const SizedBox(height: 8),
+          Row(children: [
+            _smallStat('Disks', totalDisks.toString()),
+            const SizedBox(width: 12),
+            _smallStat('Pools', totalPools.toString()),
+            const SizedBox(width: 12),
+            _smallStat('Datasets', totalDatasets.toString()),
+          ]),
+          const SizedBox(height: 12),
+          Text('Last sync: just now',
+              style: Theme.of(context).textTheme.bodySmall),
+        ]),
+      ),
+    );
+  }
+
+  Widget _smallStat(String label, String value) {
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Text(label, style: const TextStyle(fontSize: 12, color: Colors.black54)),
+      const SizedBox(height: 6),
+      Text(value,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+    ]);
+  }
+}
+
+/// Top-right health overview card
+class _HealthOverview extends StatelessWidget {
+  final ZfsProvider zfs;
+  const _HealthOverview({required this.zfs});
+
+  @override
+  Widget build(BuildContext context) {
+    final healthy = (zfs.pools
+        .where((p) => (p['health'] ?? '').toString().toLowerCase() == 'online')
+        .length);
+    final total = zfs.pools.length;
+    final pct = total == 0 ? 0.0 : (healthy / total) * 100.0;
+
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          const Text('Pool Health',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+          const SizedBox(height: 8),
+          LinearProgressIndicator(value: pct / 100),
+          const SizedBox(height: 8),
+          Text('${healthy} of $total healthy • ${pct.toStringAsFixed(0)}%'),
+          const SizedBox(height: 6),
+          Text('Degraded / Offline pools shown in orange/red',
+              style: Theme.of(context).textTheme.bodySmall),
+        ]),
+      ),
+    );
+  }
+}
+
+/// The main Pool card shown in GridView
+class PoolCard extends StatelessWidget {
+  final Map pool;
+  const PoolCard({required this.pool, super.key});
+
+  Color _healthColor(String? health) {
+    final h = (health ?? '').toString().toLowerCase();
+    if (h.contains('online') || h.contains('healthy')) return Colors.green;
+    if (h.contains('degraded') || h.contains('warn')) return Colors.orange;
+    if (h.contains('fault') || h.contains('offline') || h.contains('dead'))
+      return Colors.red;
+    return Colors.grey;
+  }
+
+  String _shortDevices(List devs) {
+    if (devs.isEmpty) return '—';
+    if (devs.length == 1) return devs[0].toString();
+    return '${devs.length} devices';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final name = pool['name'] ?? 'unknown';
+    final health = pool['health'] ?? pool['status'] ?? 'unknown';
+    final usage =
+        (pool['usage_percent'] ?? pool['used_percent'] ?? pool['used_pct'] ?? 0)
+            .toDouble();
+    final devices = (pool['devices'] ?? pool['vdevs'] ?? []);
+
+    return Card(
+      elevation: 3,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      clipBehavior: Clip.hardEdge,
+      child: InkWell(
+        onTap: () =>
+            Navigator.pushNamed(context, '/pools/detail', arguments: pool),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child:
+              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Row(children: [
+              // health dot + name
+              Container(
+                width: 12,
+                height: 12,
+                decoration: BoxDecoration(
+                    color: _healthColor(health), shape: BoxShape.circle),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                  child: Text(name,
+                      style: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.w600))),
+              PopupMenuButton<String>(
+                onSelected: (v) async {
+                  if (v == 'scrub') {
+                    // call scrub RPC (implement in provider)
+                    await context.read<ZfsProvider>().scrubPool(name);
+                  } else if (v == 'export') {
+                    // destroy / export
+                    await context.read<ZfsProvider>().destroyPool(name);
+                  } else if (v == 'manage') {
+                    Navigator.pushNamed(context, '/pools/manage',
+                        arguments: pool);
+                  }
+                },
+                itemBuilder: (_) => [
+                  const PopupMenuItem(value: 'manage', child: Text('Manage')),
+                  const PopupMenuItem(
+                      value: 'scrub', child: Text('Start Scrub')),
+                  const PopupMenuItem(
+                      value: 'export', child: Text('Export Pool')),
+                ],
+              ),
+            ]),
+            const SizedBox(height: 10),
+
+            // capacity row
+            Row(children: [
+              Expanded(
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('${usage.toStringAsFixed(0)}% used',
+                          style: const TextStyle(fontWeight: FontWeight.w600)),
+                      const SizedBox(height: 6),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(6),
+                        child: LinearProgressIndicator(
+                          value: (usage / 100).clamp(0.0, 1.0),
+                          minHeight: 8,
+                        ),
+                      ),
+                    ]),
+              ),
+              const SizedBox(width: 10),
+
+              // device count + icon
+              Column(children: [
+                Icon(Icons.storage, size: 28),
+                const SizedBox(height: 4),
+                Text(_shortDevices(devices)),
+              ])
+            ]),
+
+            const SizedBox(height: 10),
+
+            // small stats row
+            Row(children: [
+              _miniStat('VDEVs',
+                  (pool['vdev_count'] ?? (devices?.length ?? 0)).toString()),
+              const SizedBox(width: 12),
+              _miniStat('Read', '${(pool['read_iops'] ?? 0)} iops'),
+              const SizedBox(width: 12),
+              _miniStat('Write', '${(pool['write_iops'] ?? 0)} iops'),
+            ]),
+
+            const Spacer(),
+
+            // actions
+            Row(children: [
+              ElevatedButton.icon(
+                onPressed: () => Navigator.pushNamed(context, '/pools/manage',
+                    arguments: pool),
+                icon: const Icon(Icons.settings),
+                label: const Text('Manage'),
+                style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 8)),
+              ),
+              const SizedBox(width: 8),
+              OutlinedButton(
+                onPressed: () async {
+                  // open dataset creation under this pool
+                  Navigator.pushNamed(context, '/datasets/create',
+                      arguments: pool);
+                },
+                child: const Text('Add Dataset'),
+              )
+            ])
+          ]),
+        ),
+      ),
+    );
+  }
+
+  Widget _miniStat(String label, String val) {
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Text(label, style: const TextStyle(fontSize: 11, color: Colors.black54)),
+      const SizedBox(height: 4),
+      Text(val, style: const TextStyle(fontWeight: FontWeight.w600)),
+    ]);
+  }
+}

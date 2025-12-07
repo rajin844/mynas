@@ -21,6 +21,9 @@ class SmartProvider extends ChangeNotifier {
     });
   }
 
+  // SMART data per pool
+  Map<String, List<Map<String, dynamic>>> poolSmart = {};
+
   Future<void> refresh() async {
     loading = true;
     notifyListeners();
@@ -37,5 +40,22 @@ class SmartProvider extends ChangeNotifier {
   void dispose() {
     _sub?.cancel();
     super.dispose();
+  }
+
+  // ============================
+  // SMART for a POOL
+  // ============================
+  Future<void> loadSmartForPool(String pool) async {
+    try {
+      final res = await api.callRpc("smart", "listPoolSmart", {"pool": pool});
+      if (res is List) {
+        poolSmart[pool] = List<Map<String, dynamic>>.from(res);
+      } else {
+        poolSmart[pool] = [];
+      }
+    } catch (_) {
+      poolSmart[pool] = [];
+    }
+    notifyListeners();
   }
 }

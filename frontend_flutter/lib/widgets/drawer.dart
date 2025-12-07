@@ -112,6 +112,15 @@ class AppDrawer extends StatelessWidget {
                           dense: true,
                           selected: currentRoute == '/storage',
                         ),
+                        // _tile(
+                        // context,
+                        //icon: Icons.sd_storage_outlined,
+                        //title: "Pools",
+                        //route: '/pools',
+                        //dense: true,
+                        //selected: currentRoute == '/pools',
+                        //iconColor: Colors.teal,
+                        //),
                         _tile(
                           context,
                           icon: Icons.sd_storage_outlined,
@@ -119,6 +128,15 @@ class AppDrawer extends StatelessWidget {
                           route: '/pools',
                           dense: true,
                           selected: currentRoute == '/pools',
+                          iconColor: Colors.teal,
+                        ),
+                        _tile(
+                          context,
+                          icon: Icons.sd_storage_outlined,
+                          title: "PoolDetailspage",
+                          route: '/pooldetailspage',
+                          dense: true,
+                          selected: currentRoute == '/pooldetailspage',
                           iconColor: Colors.teal,
                         ),
                         _tile(

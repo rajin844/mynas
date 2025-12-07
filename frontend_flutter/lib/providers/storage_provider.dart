@@ -40,7 +40,7 @@ class StorageProvider extends ChangeNotifier {
     loading = true;
     notifyListeners();
     try {
-      summary = await api.storageSummary();
+      summary = await api.storagesummary();
     } catch (_) {
       summary = {};
     }
@@ -64,6 +64,22 @@ class StorageProvider extends ChangeNotifier {
 
   Future<dynamic> smartInfo(String dev) async {
     return await api.smartInfo(dev);
+  }
+
+  /// Wipe a disk on backend. mode: 'quick' | 'zero' | 'random'
+  Future<Map<String, dynamic>> wipeDisk(String devpath, String mode) async {
+    // call RPC: storage.wipe_disk
+    try {
+      final resp = await api
+          .callRpc("storage", "wipedisk", {"device": devpath, "mode": mode});
+      // optionally refresh disks/summary
+      await loadDisks();
+      await loadSummary();
+      return Map<String, dynamic>.from(
+          resp ?? {"ok": false, "error": "no response"});
+    } catch (e) {
+      return {"ok": false, "error": e.toString()};
+    }
   }
 
   Future<dynamic> loadAlerts() async {

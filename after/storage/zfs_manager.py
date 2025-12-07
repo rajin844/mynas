@@ -92,4 +92,49 @@ async def import_pool(name: str) -> bool:
         logger.exception("import_pool failed: %s", e)
         return False
 
+      #r = await safe_exec(["zfs", "list", "-H", "-o", "name,mountpoint"], sudo=True)
+    #try:
+     #   if pool_name:
+      #      pool = await get_pool_by_name(pool_name)
+       #     if not pool:
+        #        return []
+         #   rows = await run_query("SELECT * FROM datasets WHERE pool_id = :pid ORDER BY name ASC", {"pid": pool["id"]})
+          #  if rows:
+           #     return [
+            #        {
+             #           "pool_name": pool_name,
+              #          "name": r["name"],
+               #         "mountpoint": r["mountpoint"],
+                #    }
+                 #   for r in rows
+                #]
+            #return rows
+        #else:
+         ##      "SELECT d.*, p.name as pool_name FROM datasets d JOIN pools p ON d.pool_id = p.id ORDER BY p.name, d.name",
+           #     {},
+            # )
+           # return rows
+    # except Exception as e:
+    #    logger.exception("list_datasets_db failed: %s", e)
+     #   return []
+    
+   # try:
+    #    if pool_name:
+     #       pool = await get_pool_by_name(pool_name)
+      #      if not pool:
+       #        return []
+        #    rows = await run_query("SELECT * FROM datasets WHERE pool_id = :pid ORDER BY name ASC", {"pid": pool["id"]})
+         #   for r in rows:
+          #      r["pool_name"] = pool_name
+            #return rows
+       # else:
+        #    rows = await run_query(
+         #       "SELECT d.*, p.name as pool_name FROM datasets d JOIN pools p ON d.pool_id = p.id ORDER BY p.name, d.name",
+          #      {},
+           # )
+            #return rows
+   # except Exception as e:
+    #    logger.exception("list_datasets_db failed: %s", e)
+     #   return []    
+
 

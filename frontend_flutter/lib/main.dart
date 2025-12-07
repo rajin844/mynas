@@ -1,4 +1,10 @@
 import 'package:flutter/material.dart';
+//import 'package:frontend_flutter/pages/pool_pagess';
+import 'package:frontend_flutter/pages/pool_details_page.dart';
+import 'package:frontend_flutter/pages/pools_page.dart';
+//import 'package:frontend_flutter/pages/pool_details_page';
+//import 'package:frontend_flutter/pages/pools_pages';
+import 'package:frontend_flutter/pages/zfs_manager_page.dart';
 import 'package:frontend_flutter/providers/dataset_provider.dart';
 import 'package:frontend_flutter/providers/raidz_provider.dart';
 import 'package:frontend_flutter/providers/smart_provider.dart';
@@ -18,7 +24,6 @@ import 'providers/settings_provider.dart';
 
 import 'pages/dashboard_page.dart';
 import 'pages/storage_page.dart';
-import 'pages/pools_page.dart';
 import 'pages/datasets_page.dart';
 import 'pages/shares_page.dart';
 import 'pages/acl_page.dart';
@@ -140,6 +145,8 @@ class MyNASApp extends StatelessWidget {
             "/pools": (ctx) => const PoolsPage(),
             "/datasets": (ctx) => const DatasetsPage(),
             "/shares": (ctx) => const SharesPage(),
+            "/zfsmanager": (ctx) => const ZfsManagerPage(),
+            "/pool": (ctx) => const PoolDetailsPage(), // earlier generated
             "/acl": (ctx) => const AclPage(),
             "/backup": (ctx) => const BackupPage(),
             "/network": (ctx) => const NetworkPage(),

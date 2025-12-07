@@ -53,7 +53,7 @@ class ApiService {
       List.from(await _post("/storage/listdisks", {}));
   Future<dynamic> detectDisks() async => await callRpc("storage", "detect", {});
 
-  Future<Map<String, dynamic>> storageSummary() async =>
+  Future<Map<String, dynamic>> storagesummary() async =>
       Map.from(await _post("/storage/summary", {}));
   Future<dynamic> diskUsage(String dev) async =>
       await callRpc("storage", "disk_usage", {"dev": dev});

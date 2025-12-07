@@ -1,0 +1,614 @@
+// lib/pages/pools_page.dart
+import 'dart:math';
+
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../providers/zfs_provider.dart';
+import '../providers/storage_provider.dart';
+
+class PoolsPage extends StatefulWidget {
+  const PoolsPage({super.key});
+
+  @override
+  State<PoolsPage> createState() => _PoolsPageState();
+}
+
+class _PoolsPageState extends State<PoolsPage> {
+  bool _creating = false;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      context.read<ZfsProvider>().loadPools();
+      context.read<StorageProvider>().loadSummary();
+    });
+  }
+
+  Future<void> _refresh() async {
+    await Future.wait([
+      context.read<ZfsProvider>().loadPools(),
+      context.read<StorageProvider>().loadSummary(),
+    ]);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final zfs = context.watch<ZfsProvider>();
+    final storage = context.watch<StorageProvider>();
+    final pools = zfs.pools;
+    final mq = MediaQuery.of(context);
+
+    final crossAxisCount = _calcCols(mq.size.width);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Pools'),
+        actions: [
+          IconButton(
+              tooltip: 'Refresh',
+              icon: const Icon(Icons.refresh),
+              onPressed: () => _refresh()),
+        ],
+      ),
+      body: RefreshIndicator(
+        onRefresh: _refresh,
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(children: [
+            _StorageSummary(storage),
+            const SizedBox(height: 12),
+            Expanded(
+              child: pools.isEmpty
+                  ? _EmptyPools(onCreate: _onCreatePool)
+                  : GridView.builder(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: crossAxisCount,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                        childAspectRatio: 1.05,
+                      ),
+                      itemCount: pools.length,
+                      itemBuilder: (context, idx) {
+                        final p = pools[idx];
+                        return PoolCard(
+                          pool: p,
+                          onRefresh: () =>
+                              context.read<ZfsProvider>().loadPools(),
+                          onDestroy: (name) => _confirmDestroy(context, name),
+                          onOpen: (name) => Navigator.pushNamed(
+                              context, '/pool',
+                              arguments: {'name': name}),
+                        );
+                      },
+                    ),
+            ),
+          ]),
+        ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _onCreatePool,
+        icon: const Icon(Icons.add),
+        label: const Text('Create Pool'),
+      ),
+      drawer: Drawer(
+        child: ListView(
+          children: [
+            const DrawerHeader(child: Text('MyNAS')),
+            ListTile(
+              leading: const Icon(Icons.dashboard),
+              title: const Text('Dashboard'),
+              onTap: () => Navigator.pushNamed(context, '/'),
+            ),
+            ListTile(
+                leading: const Icon(Icons.storage_rounded),
+                title: const Text('Storage'),
+                onTap: () => Navigator.pushNamed(context, '/storage')),
+            ListTile(
+                leading: const Icon(Icons.lock),
+                title: const Text('ACL'),
+                onTap: () => Navigator.pushNamed(context, '/acl')),
+          ],
+        ),
+      ),
+    );
+  }
+
+  int _calcCols(double width) {
+    if (width >= 1400) return 4;
+    if (width >= 1100) return 3;
+    if (width >= 700) return 2;
+    return 1;
+  }
+
+  Future<void> _onCreatePool() async {
+    // Keep this small — call your existing create pool flow / dialog
+    final res = await showDialog<Map<String, dynamic>>(
+        context: context, builder: (_) => const _CreatePoolDialog());
+    if (res == null) return;
+    final name = res['name'] as String;
+    final devices = List<String>.from(res['devices'] as List);
+    final raidz = res['raidz'] as String?;
+    final dryRun = res['dryRun'] as bool? ?? true;
+
+    try {
+      setState(() => _creating = true);
+      final preview = await context
+          .read<StorageProvider>()
+          .createPool(name, devices, raidz: raidz, dryRun: dryRun);
+      if (dryRun) {
+        final confirmed = await showDialog<bool>(
+            context: context,
+            builder: (_) => AlertDialog(
+                  title: const Text('Dry-run preview'),
+                  content:
+                      SingleChildScrollView(child: Text(preview.toString())),
+                  actions: [
+                    TextButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        child: const Text('Cancel')),
+                    ElevatedButton(
+                        onPressed: () => Navigator.pop(context, true),
+                        child: const Text('Create')),
+                  ],
+                ));
+        if (confirmed == true) {
+          await context
+              .read<StorageProvider>()
+              .createPool(name, devices, raidz: raidz, dryRun: false);
+          await context.read<ZfsProvider>().loadPools();
+        }
+      } else {
+        await context.read<ZfsProvider>().loadPools();
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Create pool failed: $e')));
+    } finally {
+      setState(() => _creating = false);
+    }
+  }
+
+  Future<void> _confirmDestroy(BuildContext ctx, String poolName) async {
+    final ok = await showDialog<bool>(
+        context: ctx,
+        builder: (_) => AlertDialog(
+              title: const Text('Destroy pool'),
+              content: Text('Destroy pool "$poolName"? This will remove data.'),
+              actions: [
+                TextButton(
+                    onPressed: () => Navigator.pop(ctx, false),
+                    child: const Text('Cancel')),
+                ElevatedButton(
+                    onPressed: () => Navigator.pop(ctx, true),
+                    child: const Text('Destroy')),
+              ],
+            ));
+    if (ok != true) return;
+    try {
+      await context.read<ZfsProvider>().destroyPool(poolName);
+      await context.read<ZfsProvider>().loadPools();
+    } catch (e) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Destroy failed: $e')));
+    }
+  }
+}
+
+/// Summary row above the grid
+class _StorageSummary extends StatelessWidget {
+  final StorageProvider storage;
+  const _StorageSummary(this.storage, {super.key});
+  @override
+  Widget build(BuildContext context) {
+    final summary = storage.summary ?? {};
+    final totalPools = (summary['pools'] as List?)?.length ?? 0;
+    final totalDisks = (summary['disks'] as List?)?.length ?? 0;
+    final totalDatasets = (summary['datasets'] as List?)?.length ?? 0;
+    return Row(children: [
+      _summaryChip('Pools', totalPools.toString(), icon: Icons.storage),
+      const SizedBox(width: 8),
+      _summaryChip('Disks', totalDisks.toString(), icon: Icons.dns),
+      const SizedBox(width: 8),
+      _summaryChip('Datasets', totalDatasets.toString(), icon: Icons.folder),
+      const Spacer(),
+      ElevatedButton.icon(
+          onPressed: () => storage.loadSummary(),
+          icon: const Icon(Icons.sync),
+          label: const Text('Refresh Storage'))
+    ]);
+  }
+
+  Widget _summaryChip(String label, String value, {required IconData icon}) {
+    return Chip(
+      avatar: CircleAvatar(child: Icon(icon, size: 18)),
+      label: Column(mainAxisSize: MainAxisSize.min, children: [
+        Text(label, style: const TextStyle(fontSize: 12)),
+        Text(value, style: const TextStyle(fontWeight: FontWeight.bold))
+      ]),
+    );
+  }
+}
+
+/// Empty state widget
+class _EmptyPools extends StatelessWidget {
+  final VoidCallback onCreate;
+  const _EmptyPools({super.key, required this.onCreate});
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Card(
+        elevation: 2,
+        child: Padding(
+          padding: const EdgeInsets.all(28),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            const Icon(Icons.storage, size: 48),
+            const SizedBox(height: 12),
+            const Text('No pools found', style: TextStyle(fontSize: 18)),
+            const SizedBox(height: 8),
+            const Text(
+                'Create a pool to get started or import an existing pool.'),
+            const SizedBox(height: 12),
+            ElevatedButton.icon(
+                onPressed: onCreate,
+                icon: const Icon(Icons.add),
+                label: const Text('Create Pool')),
+            const SizedBox(height: 6),
+            OutlinedButton.icon(
+                onPressed: () {},
+                icon: const Icon(Icons.download),
+                label: const Text('Import Pool')),
+          ]),
+        ),
+      ),
+    );
+  }
+}
+
+/// Pool card widget
+class PoolCard extends StatelessWidget {
+  final Map pool;
+  final Future<void> Function() onRefresh;
+  final void Function(String poolName) onDestroy;
+  final void Function(String poolName) onOpen;
+
+  const PoolCard(
+      {super.key,
+      required this.pool,
+      required this.onRefresh,
+      required this.onDestroy,
+      required this.onOpen});
+
+  String get name => pool['name'] ?? pool['pool_name'] ?? 'unknown';
+  String get health =>
+      (pool['health'] ?? pool['status'] ?? 'UNKNOWN').toString();
+  double usagePercent() {
+    try {
+      final cap =
+          _toDouble(pool['size'] ?? pool['capacity'] ?? pool['total'] ?? 0);
+      final used =
+          _toDouble(pool['alloc'] ?? pool['allocated'] ?? pool['used'] ?? 0);
+      if (cap <= 0) return 0.0;
+      return (used / cap) * 100.0;
+    } catch (e) {
+      return 0.0;
+    }
+  }
+
+  double _toDouble(dynamic v) {
+    if (v == null) return 0.0;
+    if (v is num) return v.toDouble();
+    final s = v.toString().replaceAll(RegExp(r'[^0-9.]'), '');
+    return double.tryParse(s) ?? 0.0;
+  }
+
+  Color _healthColor(BuildContext context) {
+    final h = health.toUpperCase();
+    if (h.contains('ONLINE') || h.contains('HEALTHY') || h.contains('OK'))
+      return Colors.green;
+    if (h.contains('DEGRADED') || h.contains('WARN')) return Colors.orange;
+    return Theme.of(context).colorScheme.error;
+  }
+
+  List<Map<String, dynamic>> _vdevs() {
+    final raw = pool['vdevs'] ??
+        pool['vdev_list'] ??
+        pool['devices'] ??
+        pool['devices_json'];
+    if (raw is List)
+      return List<Map<String, dynamic>>.from(
+          raw.map((e) => e is Map ? e : {'name': e}));
+    if (raw is String) {
+      try {
+        // fallback: comma separated
+        return raw.split(',').map((s) => {'name': s.trim()}).toList();
+      } catch (e) {
+        return [];
+      }
+    }
+    return [];
+  }
+
+  // Attempt to get scrub progress (may be provided by pool object)
+  double scrubProgress() {
+    final p = pool['scrub_progress'] ?? pool['scrub_pct'] ?? pool['scrub'] ?? 0;
+    if (p is num) return (p.toDouble() / 100.0).clamp(0.0, 1.0);
+    if (p is String) {
+      final val = double.tryParse(p.replaceAll('%', '')) ?? 0.0;
+      return (val / 100.0).clamp(0.0, 1.0);
+    }
+    return 0.0;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final usage = usagePercent();
+    final vdevs = _vdevs();
+
+    return Card(
+      elevation: 3,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: InkWell(
+        onTap: () => onOpen(name),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child:
+              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Row(children: [
+              Expanded(
+                  child: Text(name,
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.w600))),
+              HealthBadge(text: health, color: _healthColor(context)),
+              const SizedBox(width: 6),
+              PopupMenuButton<String>(
+                onSelected: (v) async {
+                  if (v == 'destroy') onDestroy(name);
+                  if (v == 'properties') onOpen(name);
+                  if (v == 'refresh') await onRefresh();
+                  if (v == 'scrub_start')
+                    context.read<ZfsProvider>().startScrub(name);
+                  if (v == 'scrub_stop')
+                    context.read<ZfsProvider>().stopScrub(name);
+                },
+                itemBuilder: (_) => [
+                  const PopupMenuItem(
+                      value: 'properties', child: Text('Properties')),
+                  const PopupMenuItem(value: 'refresh', child: Text('Refresh')),
+                  const PopupMenuDivider(),
+                  const PopupMenuItem(
+                      value: 'scrub_start', child: Text('Start Scrub')),
+                  const PopupMenuItem(
+                      value: 'scrub_stop', child: Text('Stop Scrub')),
+                  const PopupMenuDivider(),
+                  const PopupMenuItem(
+                      value: 'destroy',
+                      child:
+                          Text('Destroy', style: TextStyle(color: Colors.red))),
+                ],
+              )
+            ]),
+            const SizedBox(height: 10),
+            Row(children: [
+              Expanded(
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('${usage.toStringAsFixed(1)}% used',
+                          style: const TextStyle(fontSize: 12)),
+                      const SizedBox(height: 6),
+                      LinearProgressIndicator(
+                          value: (usage.clamp(0, 100) / 100.0), minHeight: 8),
+                    ]),
+              ),
+              const SizedBox(width: 12),
+              SizedBox(
+                width: 88,
+                child: Column(children: [
+                  Icon(Icons.storage, size: 28, color: _healthColor(context)),
+                  const SizedBox(height: 6),
+                  Text(pool['type']?.toString() ?? 'zfs',
+                      style: const TextStyle(fontSize: 12)),
+                ]),
+              )
+            ]),
+            const SizedBox(height: 10),
+            // VDEV summary row
+            Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: vdevs.take(6).map((v) {
+                  final t = (v['type'] ?? v['name'] ?? 'vdev').toString();
+                  final disks =
+                      (v['disks'] ?? v['devices'] ?? v['members']) as dynamic;
+                  final count = (disks is List)
+                      ? disks.length
+                      : (disks is String ? disks.split(',').length : 1);
+                  return VdevChip(type: t, count: count);
+                }).toList()),
+            const SizedBox(height: 10),
+            // scrub progress inline
+            if (scrubProgress() > 0)
+              Column(children: [
+                Row(children: [
+                  const Text('Scrub progress', style: TextStyle(fontSize: 12)),
+                  const Spacer(),
+                  Text('${(scrubProgress() * 100).toStringAsFixed(1)}%')
+                ]),
+                const SizedBox(height: 6),
+                LinearProgressIndicator(value: scrubProgress(), minHeight: 8),
+              ]),
+            const Spacer(),
+            Row(children: [
+              Text(pool['created_at']?.toString() ?? '',
+                  style: const TextStyle(fontSize: 11, color: Colors.grey)),
+              const Spacer(),
+              IconButton(
+                tooltip: 'Quick scrub',
+                onPressed: () => context.read<ZfsProvider>().startScrub(name),
+                icon: const Icon(Icons.play_arrow),
+              ),
+              IconButton(
+                tooltip: 'Stop scrub',
+                onPressed: () => context.read<ZfsProvider>().stopScrub(name),
+                icon: const Icon(Icons.stop),
+              ),
+            ])
+          ]),
+        ),
+      ),
+    );
+  }
+}
+
+/// Simple badge widget for pool health
+class HealthBadge extends StatelessWidget {
+  final String text;
+  final Color color;
+  const HealthBadge({super.key, required this.text, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      decoration: BoxDecoration(
+          color: color.withOpacity(0.12),
+          borderRadius: BorderRadius.circular(8)),
+      child: Row(children: [
+        Icon(Icons.circle, size: 10, color: color),
+        const SizedBox(width: 6),
+        Text(text, style: const TextStyle(fontSize: 12))
+      ]),
+    );
+  }
+}
+
+/// Tiny VDEV chip that shows type & count
+class VdevChip extends StatelessWidget {
+  final String type;
+  final int count;
+  const VdevChip({super.key, required this.type, required this.count});
+
+  @override
+  Widget build(BuildContext context) {
+    final label = '${type.toUpperCase()} • $count';
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      decoration: BoxDecoration(
+          color: Colors.grey.shade100, borderRadius: BorderRadius.circular(8)),
+      child: Text(label, style: const TextStyle(fontSize: 12)),
+    );
+  }
+}
+
+/// Create Pool dialog — small pickers (uses StorageProvider.loadDisks)
+class _CreatePoolDialog extends StatefulWidget {
+  const _CreatePoolDialog({super.key});
+  @override
+  State<_CreatePoolDialog> createState() => _CreatePoolDialogState();
+}
+
+class _CreatePoolDialogState extends State<_CreatePoolDialog> {
+  final nameCtrl = TextEditingController();
+  String raidz = 'raidz1';
+  bool dryRun = true;
+  final List<String> selected = [];
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() => context.read<StorageProvider>().loadDisks());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final store = context.watch<StorageProvider>();
+    final disks = store.disks ?? [];
+    return AlertDialog(
+      title: const Text('Create Pool'),
+      content: SingleChildScrollView(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          TextField(
+              controller: nameCtrl,
+              decoration: const InputDecoration(labelText: 'Pool Name')),
+          const SizedBox(height: 10),
+          Align(
+              alignment: Alignment.centerLeft,
+              child: const Text('Select disks',
+                  style: TextStyle(fontWeight: FontWeight.w600))),
+          const SizedBox(height: 8),
+          SizedBox(
+            height: 160,
+            child: disks.isEmpty
+                ? const Center(child: Text('No disks available'))
+                : ListView.builder(
+                    itemCount: disks.length,
+                    itemBuilder: (ctx, i) {
+                      final d = disks[i];
+                      final id = d['devpath'] ?? d['name'] ?? d.toString();
+                      final selectedFlag = selected.contains(id);
+                      return CheckboxListTile(
+                        value: selectedFlag,
+                        title: Text(d['name'] ?? id),
+                        subtitle:
+                            Text('${d['model'] ?? ''} • ${d['size'] ?? ''}'),
+                        onChanged: (v) {
+                          setState(() {
+                            if (v == true) {
+                              selected.add(id);
+                            } else {
+                              selected.remove(id);
+                            }
+                          });
+                        },
+                      );
+                    },
+                  ),
+          ),
+          const SizedBox(height: 10),
+          Row(children: [
+            const Text('RAIDZ level:'),
+            const SizedBox(width: 8),
+            DropdownButton<String>(
+                value: raidz,
+                items: const [
+                  DropdownMenuItem(value: 'single', child: Text('Single')),
+                  DropdownMenuItem(value: 'mirror', child: Text('Mirror')),
+                  DropdownMenuItem(value: 'raidz1', child: Text('RAIDZ1')),
+                  DropdownMenuItem(value: 'raidz2', child: Text('RAIDZ2')),
+                ],
+                onChanged: (v) => setState(() => raidz = v ?? 'raidz1'))
+          ]),
+          const SizedBox(height: 8),
+          Row(children: [
+            Checkbox(
+                value: dryRun,
+                onChanged: (v) => setState(() => dryRun = v ?? true)),
+            const SizedBox(width: 6),
+            const Flexible(
+                child: Text('Dry-run (preview layout before creating)')),
+          ]),
+        ]),
+      ),
+      actions: [
+        TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel')),
+        ElevatedButton(
+            onPressed: selected.isEmpty || nameCtrl.text.trim().isEmpty
+                ? null
+                : () {
+                    Navigator.pop(context, {
+                      "name": nameCtrl.text.trim(),
+                      "devices": selected,
+                      "raidz": raidz,
+                      "dryRun": dryRun
+                    });
+                  },
+            child: const Text('Preview')),
+      ],
+    );
+  }
+}

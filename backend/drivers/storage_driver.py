@@ -1,42 +1,95 @@
-# backend/storage/storage_driver.py
+# backend/drivers/storage_driver.py
 """
-Abstract StorageDriver interface + factory.
+Storage driver interface and factory.
 
-Other modules should import get_storage_driver() to get the concrete driver.
+Provides a single entrypoint: get_storage_driver()
+Default driver: MySQLStorageDriver (backend.drivers.storage_driver_mysql)
+You can swap to another driver by setting STORAGE_DRIVER env var to the full module path.
 """
 
-from typing import Protocol, List, Dict, Any, Optional, Iterable
+from typing import Protocol, Any, Dict, List, Optional
+import os
+import importlib
+import logging
+
+logger = logging.getLogger("mynas.storage_driver")
 
 
-class StorageDriver(Protocol):
-    async def create_pool_record(self, name: str, pool_type: Optional[str] = None, meta: Optional[Dict] = None) -> Any: ...
-    async def list_pools_db(self) -> List[Dict[str, Any]]: ...
-    async def get_pool_by_name(self, name: str) -> Optional[Any]: ...
-    async def update_pool_status(self, name: str, status: str): ...
-    async def delete_pool(self, name: str): ...
+class StorageDriverProtocol(Protocol):
+    """
+    Minimal interface used by storage_manager / zfs_manager / smart_manager.
+    Implement async methods below in each driver.
+    """
 
-    async def add_vdev(self, pool_id: int, vdev_type: str, role: Optional[str] = None, meta: Optional[Dict] = None) -> Any: ...
-    async def add_vdev_disk(self, vdev_id: int, disk_name: str) -> Any: ...
+    async def list_disks_db(self) -> List[Dict[str, Any]]:
+        """Return list of disks from DB (if stored)."""
 
-    async def upsert_disk(self, disk_obj: Dict[str, Any]) -> Any: ...
-    async def bulk_upsert_disks(self, disks: Iterable[Dict[str, Any]]) -> Any: ...
-    async def list_disks_db(self) -> List[Dict[str, Any]]: ...
+    async def save_disk_record(self, disk: Dict[str, Any]) -> Any:
+        """Insert/Update disk record"""
 
-    async def create_dataset_record(self, pool: str, name: str, mountpoint: Optional[str] = None, options: Optional[Dict] = None) -> Any: ...
-    async def list_datasets_db(self, pool: Optional[str] = None) -> List[Dict[str, Any]]: ...
+    async def list_pools_db(self) -> List[Dict[str, Any]]:
+        """Return pools from DB"""
 
-    async def add_share_record(self, name: str, path: str, protocol: str, options: Optional[Dict] = None) -> Any: ...
-    async def list_shares_db(self) -> List[Dict[str, Any]]: ...
+    async def create_pool_record(self, pool: Dict[str, Any]) -> Any:
+        """Insert pool record"""
 
-    async def add_acl_record(self, path: str, user: str, permissions: str) -> Any: ...
-    async def list_acls_db(self, path: Optional[str] = None) -> List[Dict[str, Any]]: ...
+    async def remove_pool_record(self, pool_name: str) -> Any:
+        """Remove pool record"""
 
-    async def push_alert(self, level: str, source: str, message: str) -> Any: ...
-    async def add_smart_history(self, disk_name: str, raw: Dict[str, Any], status: Optional[str] = None, temp_c: Optional[float] = None) -> Any: ...
+    async def list_datasets_db(self, pool: Optional[str] = None) -> List[Dict[str, Any]]:
+        """Return datasets (optionally for pool)"""
+
+    async def create_dataset_record(self, pool: str, name: str, mountpoint: Optional[str] = None) -> Any:
+        """Create dataset DB record"""
+
+    async def delete_dataset_record(self, pool: str, name: str) -> Any:
+        """Delete dataset DB record"""
+
+    async def add_smart_history(self, disk_name: str, raw: Dict[str, Any], status: str, temp_c: Optional[float]) -> Any:
+        """Add a SMART history row"""
+
+    async def push_alert(self, level: str, source: str, message: str) -> Any:
+        """Push an alert to alerts table"""
+
+    # any other helpers as needed
 
 
-# Factory helper to avoid circular imports
-def get_storage_driver():
-    # Lazy import so we don't force DB driver during tests
-    from backend.drivers.storage_driver_mysql import StorageDriverMySQL
-    return StorageDriverMySQL()
+_default_driver = "backend.drivers.storage_driver_mysql"
+
+
+def _import_driver(module_path: str):
+    module = importlib.import_module(module_path)
+    # Expect module to export `MySQLStorageDriver` or `StorageDriver`
+    if hasattr(module, "StorageDriver"):
+        return module.StorageDriver
+    if hasattr(module, "MySQLStorageDriver"):
+        return module.MySQLStorageDriver
+    raise ImportError(f"No StorageDriver class found in {module_path}")
+
+
+def get_storage_driver() -> StorageDriverProtocol:
+    """
+    Instantiate storage driver according to ENV var or default.
+    This returns a singleton instance (module-level).
+    """
+    global _driver_instance
+    try:
+        _driver_instance  # type: ignore
+    except NameError:
+        _driver_instance = None  # type: ignore
+
+    if _driver_instance is not None:
+        return _driver_instance  # type: ignore
+
+    module_path = os.environ.get("STORAGE_DRIVER", _default_driver)
+    try:
+        DriverClass = _import_driver(module_path)
+        _driver_instance = DriverClass()  # type: ignore
+        logger.info(f"Storage driver loaded: {module_path}")
+        return _driver_instance  # type: ignore
+    except Exception as e:
+        logger.exception("Failed to load storage driver %s: %s", module_path, e)
+        # fallback to default
+        DriverClass = _import_driver(_default_driver)
+        _driver_instance = DriverClass()  # type: ignore
+        return _driver_instance  # type: ignore

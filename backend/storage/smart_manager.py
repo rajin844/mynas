@@ -2,16 +2,6 @@
 import logging
 from typing import Dict, Any, List
 from backend.app.safe_exec import safe_exec
-from backend.drivers.storage_driver_mysql import (
-    list_disks_db,
-    get_disk_by_devpath,
-    get_disk_by_name,
-    list_datasets_db,
-    create_pool_record,
-    add_pool_device,
-    create_dataset_record,
-    remove_pool_record,
-)
 from backend.realtime.websocket_server import WSManagerProxy
 
 logger = logging.getLogger("mynas.smart_manager")

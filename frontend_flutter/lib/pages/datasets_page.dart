@@ -78,7 +78,7 @@ class _DatasetsPageState extends State<DatasetsPage> {
                     child: const Text("Cancel")),
                 ElevatedButton(
                     onPressed: () {
-                      ctx.read<ZfsProvider>().createDataset(
+                      ctx.read<ZfsProvider>().createDatasets(
                             poolCtrl.text.trim(),
                             nameCtrl.text.trim(),
                             mountpoint: mountCtrl.text.trim().isEmpty

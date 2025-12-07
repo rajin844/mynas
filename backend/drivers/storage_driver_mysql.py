@@ -1,325 +1,164 @@
-# backend/storage/storage_driver_mysql.py
+# backend/drivers/storage_driver_mysql.py
 """
-MySQL-backed Storage Driver for MyNAS
-Uses backend.app.db.run_query / fetch_one
+MySQL-backed Storage Driver.
 
-Provides:
- - Disks: list, get, add_or_update, remove, sync
- - Pools: list, get_by_name, create, remove
- - Pool devices (vdevs): add, list
- - Datasets: list, get, create, remove
-
-All functions are async and return JSON-serializable dicts/lists.
+Implements the StorageDriverProtocol using backend.app.db (async aiomysql pool).
+This file assumes backend/app/db.py exposes run_query, run_execute, run_insert.
 """
 
-from typing import List, Dict, Any, Optional
-import json
 import logging
+from typing import Any, Dict, List, Optional
+from backend.drivers import db
 
-from backend.drivers.db import run_query, fetch_one
-
-logger = logging.getLogger("mynas.storage.driver")
+logger = logging.getLogger("mynas.storage_driver_mysql")
 
 
-# -------------------------
-# Disks
-# -------------------------
-async def list_disks_db() -> List[Dict[str, Any]]:
-    """Return all disks from DB."""
-    try:
-        rows = await run_query(
-           # "SELECT id, name, devpath, model, vendor, size_bytes, rotational, mountpoint, last_seen FROM disks ORDER BY name",
-            "SELECT id, name, devpath, model, vendor, size_bytes, rotational, mountpoint, last_seen FROM disks ORDER BY name",
-            {},
-            fetch=True,
-        )
+class StorageDriver:
+    """
+    MySQL-backed storage driver.
+
+    Tables assumed (create via migrations):
+      - disks (id, name, devpath, model, vendor, size_bytes, rotational, mountpoint, created_at)
+      - pools (id, name, type, devices_json, properties_json, created_at)
+      - datasets (id, pool, name, mountpoint, properties_json, created_at)
+      - smart_history (id, disk_name, raw_json, status, temp_c, ts)
+      - alerts (id, level, source, message, ts)
+    """
+
+    def __init__(self):
+        # no stateful connection; db module manages the pool
+        pass
+
+    # ------------------------
+    # Disks
+    # ------------------------
+    async def list_disks_db(self) -> List[Dict[str, Any]]:
+        rows = await db.run_query("SELECT * FROM disks ORDER BY name ASC")
         return rows
-    except Exception as e:
-        logger.exception("list_disks_db failed: %s", e)
-        return []
 
+    
+    async def save_disk(self, disk: Dict[str, Any]):
+        q = "INSERT INTO disks (name, devpath, size_bytes, model, vendor, rotational) VALUES (%s,%s,%s,%s,%s,%s)"
+        await run_query(q, (disk.get("name"), disk.get("devpath"), disk.get("size_bytes"), disk.get("model"), disk.get("vendor"), disk.get("rotational")), fetch="none")
+        return True
 
-async def get_disk_by_devpath(devpath: str) -> Optional[Dict[str, Any]]:
-    """Return single disk by devpath."""
-    try:
-        return await fetch_one("SELECT * FROM disks WHERE devpath = :dev LIMIT 1", {"dev": devpath})
-    except Exception as e:
-        logger.exception("get_disk_by_devpath failed: %s", e)
-        return None
+    async def save_disk_record(self, disk: Dict[str, Any]) -> int:
+        """
+        Upsert disk record by name or devpath.
+        disk: {name, devpath, size_bytes, model, vendor, rotational, mountpoint}
+        """
+        # Try update first
+        params = {
+            "name": disk.get("name"),
+            "devpath": disk.get("devpath"),
+            "model": disk.get("model"),
+            "vendor": disk.get("vendor"),
+            "size_bytes": disk.get("size_bytes") or disk.get("size"),
+            "rotational": 1 if disk.get("rotational") else 0,
+            "mountpoint": disk.get("mountpoint"),
+        }
 
+        # update if exists
+        q_update = """
+        UPDATE disks SET
+          devpath=%(devpath)s, model=%(model)s, vendor=%(vendor)s,
+          size_bytes=%(size_bytes)s, rotational=%(rotational)s, mountpoint=%(mountpoint)s
+        WHERE name=%(name)s
+        """
+        updated = await db.run_execute(q_update, params)
+        if updated and updated > 0:
+            return updated
 
-async def get_disk_by_name(name: str) -> Optional[Dict[str, Any]]:
-    """Return single disk by name (e.g. sda)."""
-    try:
-        return await fetch_one("SELECT * FROM disks WHERE name = :name LIMIT 1", {"name": name})
-    except Exception as e:
-        logger.exception("get_disk_by_name failed: %s", e)
-        return None
+        # insert
+        q_insert = """
+        INSERT INTO disks (name, devpath, model, vendor, size_bytes, rotational, mountpoint)
+        VALUES (%(name)s, %(devpath)s, %(model)s, %(vendor)s, %(size_bytes)s, %(rotational)s, %(mountpoint)s)
+        """
+        lastid = await db.run_insert(q_insert, params)
+        return lastid
 
+    # ------------------------
+    # Pools
+    # ------------------------
+    async def list_pools_db(self) -> List[Dict[str, Any]]:
+        rows = await db.run_query("SELECT * FROM pools ORDER BY name")
+        # parse JSON fields if needed by caller (they expect dicts)
+        for r in rows:
+            if "devices_json" in r and r["devices_json"]:
+                try:
+                    import json
+                    r["devices"] = json.loads(r["devices_json"])
+                except Exception:
+                    r["devices"] = []
+        return rows
 
-async def add_or_update_disk(rec: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Insert or update a disk record.
-    rec keys expected: name, devpath, model, vendor, size_bytes, rotational, mountpoint(optional)
-    Returns the DB record for the disk.
-    """
-    try:
-        name = rec.get("name")
-        devpath = rec.get("devpath")
-        model = rec.get("model") or None
-        vendor = rec.get("vendor") or None
-        size_bytes = int(rec.get("size_bytes") or 0)
-        rotational = 1 if rec.get("rotational") else 0
-        mountpoint = rec.get("mountpoint")
+    async def create_pool_record(self, pool: Dict[str, Any]) -> int:
+        """
+        pool: {name, type, devices: [...], properties: {...}}
+        """
+        import json
+        params = {
+            "name": pool.get("name"),
+            "type": pool.get("type", "zfs"),
+            "devices_json": json.dumps(pool.get("devices", [])),
+            "properties_json": json.dumps(pool.get("properties", {})),
+        }
+        # upsert logic: delete existing then insert (simple)
+        await db.run_execute("DELETE FROM pools WHERE name=%(name)s", {"name": params["name"]})
+        q = """
+        INSERT INTO pools (name, type, devices_json, properties_json)
+        VALUES (%(name)s, %(type)s, %(devices_json)s, %(properties_json)s)
+        """
+        return await db.run_insert(q, params)
 
-        if not name or not devpath:
-            logger.warning("add_or_update_disk missing name/devpath: %s", rec)
-            return {}
+    async def remove_pool_record(self, pool_name: str) -> int:
+        return await db.run_execute("DELETE FROM pools WHERE name=%(name)s", {"name": pool_name})
 
-        # Check existing by devpath first, then name
-        existing = await get_disk_by_devpath(devpath)
-        if not existing:
-            existing = await get_disk_by_name(name)
+    # ------------------------
+    # Datasets
+    # ------------------------
+    async def list_datasets_db(self, pool: Optional[str] = None) -> List[Dict[str, Any]]:
+        if pool:
+            return await db.run_query("SELECT * FROM datasets WHERE pool=%(pool)s ORDER BY name", {"pool": pool})
+        return await db.run_query("SELECT * FROM datasets ORDER BY pool, name")
 
-        if existing:
-            # update
-            await run_query(
-                """
-                UPDATE disks
-                SET name = :name,
-                    devpath = :dev,
-                    model = :model,
-                    vendor = :vendor,
-                    size_bytes = :size,
-                    rotational = :rot,
-                    mountpoint = :mnt,
-                    last_seen = NOW()
-                WHERE id = :id
-                """,
-                {
-                    "name": name,
-                    "dev": devpath,
-                    "model": model,
-                    "vendor": vendor,
-                    "size": size_bytes,
-                    "rot": rotational,
-                    "mnt": mountpoint,
-                    "id": existing["id"],
-                },
-                fetch=False,
-            )
-            return await fetch_one("SELECT * FROM disks WHERE id = :id", {"id": existing["id"]})
-        else:
-            # insert
-            await run_query(
-                """
-                INSERT INTO disks (name, devpath, model, vendor, size_bytes, rotational, mountpoint, last_seen)
-                VALUES (:name, :dev, :model, :vendor, :size, :rot, :mnt, NOW())
-                """,
-                {
-                    "name": name,
-                    "dev": devpath,
-                    "model": model,
-                    "vendor": vendor,
-                    "size": size_bytes,
-                    "rot": rotational,
-                    "mnt": mountpoint,
-                },
-                fetch=False,
-            )
-            return await get_disk_by_devpath(devpath)
+    async def create_dataset_record(self, pool: str, name: str, mountpoint: Optional[str] = None) -> int:
+        params = {"pool": pool, "name": name, "mountpoint": mountpoint}
+        # delete if exists
+        await db.run_execute("DELETE FROM datasets WHERE pool=%(pool)s AND name=%(name)s", params)
+        q = "INSERT INTO datasets (pool, name, mountpoint) VALUES (%(pool)s, %(name)s, %(mountpoint)s)"
+        return await db.run_insert(q, params)
 
-    except Exception as e:
-        logger.exception("add_or_update_disk failed: %s | rec=%s", e, rec)
-        return {}
+    async def delete_dataset_record(self, pool: str, name: str) -> int:
+        return await db.run_execute("DELETE FROM datasets WHERE pool=%(pool)s AND name=%(name)s", {"pool": pool, "name": name})
 
+    # ------------------------
+    # SMART / Alerts
+    # ------------------------
+    async def add_smart_history(self, disk_name: str, raw: Dict[str, Any], status: str, temp_c: Optional[float]) -> int:
+        import json, time
+        params = {
+            "disk_name": disk_name,
+            "raw_json": json.dumps(raw),
+            "status": status,
+            "temp_c": temp_c,
+            "ts": int(time.time())
+        }
+        q = """
+        INSERT INTO smart_history (disk_name, raw_json, status, temp_c, ts)
+        VALUES (%(disk_name)s, %(raw_json)s, %(status)s, %(temp_c)s, FROM_UNIXTIME(%(ts)s))
+        """
+        return await db.run_insert(q, params)
 
-async def remove_disk(name_or_devpath: str) -> bool:
-    """Remove disk by name or devpath. Returns True if any row affected."""
-    try:
-        # try by devpath
-        res = await run_query("DELETE FROM disks WHERE devpath = :v OR name = :v", {"v": name_or_devpath}, fetch=False)
-        return bool(res and res.get("rows_affected"))
-    except Exception as e:
-        logger.exception("remove_disk failed: %s", e)
-        return False
+    async def push_alert(self, level: str, source: str, message: str) -> int:
+        import time
+        params = {"level": level, "source": source, "message": message, "ts": int(time.time())}
+        q = "INSERT INTO alerts (level, source, message, ts) VALUES (%(level)s, %(source)s, %(message)s, FROM_UNIXTIME(%(ts)s))"
+        return await db.run_insert(q, params)
 
-
-async def remove_pool(name: str) -> Dict[str, Any]:
-    pool = await get_pool_by_name(name)
-    if not pool:
-        return {"deleted": False}
-    await run_query("DELETE FROM pools WHERE id=:id", {"id": pool["id"]}, fetch=False)
-    return {"deleted": True}
-
-async def sync_disks_db(disks: List[Dict[str, Any]]) -> None:
-    """
-    Replace disk table with provided list.
-    Each disk should be a dict containing name, devpath, model, vendor, size_bytes, rotational, mountpoint(optional)
-    """
-    try:
-        # Simple approach: truncate then insert (safe for discovered disks)
-        await run_query("DELETE FROM disks", {}, fetch=False)
-        for d in disks:
-            await add_or_update_disk(d)
-    except Exception as e:
-        logger.exception("sync_disks_db failed: %s", e)
-        raise
-
-
-# -------------------------
-# Pools
-# -------------------------
-async def list_pools_db() -> List[Dict[str, Any]]:
-    pools = await run_query("SELECT * FROM pools ORDER BY id DESC", {})
-    out = []
-    for p in pools:
-        devs = await run_query("SELECT devpath, role, vdev_index FROM pool_devices WHERE pool_id=:pid", {"pid": p["id"]})
-        out.append({**p, "devices": [d for d in devs]})
-    return out
-
-async def get_pool_by_name(name: str) -> Optional[Dict[str, Any]]:
-    try:
-        return await fetch_one("SELECT * FROM pools WHERE name = :name LIMIT 1", {"name": name})
-    except Exception as e:
-        logger.exception("get_pool_by_name failed: %s", e)
-        return None
-
-
-async def create_pool_record(name: str, type_: str = "zfs", properties: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-    """
-    Create pool metadata DB record. Returns created pool row.
-    """
-    try:
-        props_json = json.dumps(properties or {})
-        await run_query(
-            "INSERT INTO pools (name, type, properties, health, created_at) VALUES (:name, :type, :props, :health, NOW())",
-            {"name": name, "type": type_, "props": props_json, "health": "ONLINE"},
-            fetch=False,
-        )
-        return await get_pool_by_name(name)
-    except Exception as e:
-        logger.exception("create_pool_record failed: %s", e)
-        return {}
-
-
-async def remove_pool_record(name: str) -> bool:
-    """Delete pool and its devices via FK cascade. Returns True if deleted."""
-    try:
-        pool = await get_pool_by_name(name)
-        if not pool:
-            return False
-        res = await run_query("DELETE FROM pools WHERE id = :id", {"id": pool["id"]}, fetch=False)
-        return bool(res and res.get("rows_affected"))
-    except Exception as e:
-        logger.exception("remove_pool_record failed: %s", e)
-        return False
-
-
-# -------------------------
-# Pool devices (vdevs)
-# -------------------------
-async def add_pool_device(pool_id: int, devpath: str, role: str = "data", vdev_index: int = 0) -> None:
-    try:
-        await run_query(
-            "INSERT INTO pool_devices (pool_id, devpath, role, vdev_index) VALUES (:pid, :dev, :role, :vidx)",
-            {"pid": pool_id, "dev": devpath, "role": role, "vidx": vdev_index},
-            fetch=False,
-        )
-    except Exception as e:
-        logger.exception("add_pool_device failed: %s", e)
-        raise
-
-
-async def list_pool_devices(pool_id: int) -> List[Dict[str, Any]]:
-    try:
-        return await run_query(
-            "SELECT id, devpath, role, vdev_index FROM pool_devices WHERE pool_id = :pid ORDER BY vdev_index ASC",
-            {"pid": pool_id},
-        )
-    except Exception as e:
-        logger.exception("list_pool_devices failed: %s", e)
-        return []
-
-
-async def remove_pool_device(pool_id: int, devpath: str) -> bool:
-    try:
-        res = await run_query(
-            "DELETE FROM pool_devices WHERE pool_id = :pid AND devpath = :dev",
-            {"pid": pool_id, "dev": devpath},
-            fetch=False,
-        )
-        return bool(res and res.get("rows_affected"))
-    except Exception as e:
-        logger.exception("remove_pool_device failed: %s", e)
-        return False
-
-
-# -------------------------
-# Datasets
-# -------------------------
-async def list_datasets_db(pool_name: Optional[str] = None) -> List[Dict[str, Any]]:
-    try:
-        if pool_name:
-            pool = await get_pool_by_name(pool_name)
-            if not pool:
-                return []
-            rows = await run_query("SELECT * FROM datasets WHERE pool_id = :pid ORDER BY name ASC", {"pid": pool["id"]})
-            for r in rows:
-                r["pool_name"] = pool_name
-            return rows
-        else:
-            rows = await run_query(
-                "SELECT d.*, p.name as pool_name FROM datasets d JOIN pools p ON d.pool_id = p.id ORDER BY p.name, d.name",
-                {},
-            )
-            return rows
-    except Exception as e:
-        logger.exception("list_datasets_db failed: %s", e)
-        return []
-
-
-async def get_dataset_db(pool_name: str, ds_name: str) -> Optional[Dict[str, Any]]:
-    try:
-        pool = await get_pool_by_name(pool_name)
-        if not pool:
-            return None
-        return await fetch_one("SELECT * FROM datasets WHERE pool_id = :pid AND name = :name LIMIT 1", {"pid": pool["id"], "name": ds_name})
-    except Exception as e:
-        logger.exception("get_dataset_db failed: %s", e)
-        return None
-
-
-async def create_dataset_record(pool_name: str, name: str, mountpoint: Optional[str] = None, properties: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-    try:
-        pool = await get_pool_by_name(pool_name)
-        if not pool:
-            raise RuntimeError("Pool not found")
-        props = json.dumps(properties or {})
-        await run_query(
-            "INSERT INTO datasets (pool_id, name, mountpoint, properties, created_at) VALUES (:pid, :name, :mount, :props, NOW())",
-            {"pid": pool["id"], "name": name, "mount": mountpoint, "props": props},
-            fetch=False,
-        )
-        return await get_dataset_db(pool_name, name)
-    except Exception as e:
-        logger.exception("create_dataset_record failed: %s", e)
-        return {}
-
-
-async def remove_dataset_record(pool_name: str, name: str) -> bool:
-    try:
-        pool = await get_pool_by_name(pool_name)
-        if not pool:
-            return False
-        res = await run_query(
-            "DELETE FROM datasets WHERE pool_id = :pid AND name = :name",
-            {"pid": pool["id"], "name": name},
-            fetch=False,
-        )
-        return bool(res and res.get("rows_affected"))
-    except Exception as e:
-        logger.exception("remove_dataset_record failed: %s", e)
-        return False
-
-
+    # ------------------------
+    # Misc helpers
+    # ------------------------
+    async def get_pool_by_name(self, name: str) -> Optional[Dict[str, Any]]:
+        r = await db.run_query("SELECT * FROM pools WHERE name=%(name)s", {"name": name})
+        return r[0] if r else None
